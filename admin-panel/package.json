@@ -1,0 +1,13 @@
+{
+  "name": "admin-panel",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "http-server . -p 3001",
+    "start": "npm run dev",
+    "build": "echo \"No build step required for admin-panel\""
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

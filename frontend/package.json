@@ -1,0 +1,13 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "http-server . -p 3000",
+    "start": "npm run dev",
+    "build": "echo \"No build step required for frontend\""
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
