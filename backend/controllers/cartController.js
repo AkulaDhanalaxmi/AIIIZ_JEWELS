@@ -2,7 +2,7 @@ const Cart = require('../models/Cart');
 
 // GET /api/cart
 exports.getCart = async (req, res) => {
-  let cart = await Cart.findOne({ user: req.user._id }).populate('items.product');
+  let cart = await Cart.findOne({ user: req.user._id }).populate('items.product', 'name price mrp stock images');
   if (!cart) cart = await Cart.create({ user: req.user._id, items: [] });
   res.json({ cart });
 };
@@ -18,7 +18,7 @@ exports.addItem = async (req, res) => {
   else cart.items.push({ product: productId, qty: Number(qty) });
 
   await cart.save();
-  await cart.populate('items.product');
+  await cart.populate('items.product', 'name price mrp stock images');
   res.json({ cart });
 };
 
@@ -35,7 +35,7 @@ exports.updateItem = async (req, res) => {
     if (item) item.qty = qty;
   }
   await cart.save();
-  await cart.populate('items.product');
+  await cart.populate('items.product', 'name price mrp stock images');
   res.json({ cart });
 };
 

@@ -1353,7 +1353,7 @@
   <!-- ============ CHECKOUT (address) ============ -->
   <div class="screen" id="screen-checkout">
     <div class="header">
-      <span class="back" onclick="nav('cart')">‹</span>
+      <span class="back" onclick="goBack()">‹</span>
       <h1>Checkout</h1>
     </div>
 
@@ -1763,6 +1763,7 @@ const DEMO_PRODUCTS = [
 let CATEGORIES = DEMO_CATEGORIES;
 let PRODUCTS = DEMO_PRODUCTS;
 let usingLiveBackend = false;
+let DELIVERY_SETTINGS = null;
 let homeBannerSetting = { image:'', buttonText:'Explore Collection', targetType:'all', targetCategory:'all', targetUrl:'' };
 const DEMO_REVIEWS = {};
 
@@ -1858,6 +1859,75 @@ async function fetchCatalog(){
   }
 }
 
+const DEFAULT_DELIVERY_SETTINGS = {
+  storeInfo: { name:'Aiiz Store', address:'', pincode:'', city:'', state:'', phone:'' },
+  shipping: { samePIN: 30, sameDistrict: 50, sameState: 70, differentState: 120, freeAbove: 999 },
+  deliveryDays: {
+    samePIN: { min: 1, max: 2 },
+    sameDistrict: { min: 2, max: 3 },
+    sameState: { min: 3, max: 5 },
+    differentState: { min: 5, max: 7 },
+  },
+  deliveryAvailability: { nationwide: true, blockedPincodes: [], blockedStates: [] },
+};
+
+function parseAddressExtras(address){
+  const parsed = Object.assign({}, address || {});
+  const line = String(parsed.line || '').trim();
+  if(!line) return parsed;
+
+  const knownStates = [
+    'telangana','andhra pradesh','andhra','karnataka','maharashtra','chhattisgarh',
+    'tamil nadu','kerala','odisha','bihar','uttar pradesh','delhi','haryana','punjab',
+    'rajasthan','goa','gujarat','jharkhand','assam','west bengal','mizoram','tripura',
+    'nagaland','manipur','meghalaya','sikkim','uttarakhand','himachal pradesh','jammu and kashmir','ladakh','arunachal pradesh'
+  ];
+  const lowerLine = line.toLowerCase();
+  const parts = line.split(',').map(p=>p.trim()).filter(Boolean);
+  const lastPart = parts[parts.length-1] || '';
+
+  if(!parsed.pincode){
+    const pinMatch = lastPart.match(/\b(\d{6})\b/);
+    if(pinMatch) parsed.pincode = pinMatch[1];
+  }
+
+  if(!parsed.state){
+    const found = knownStates.find(s => lowerLine.includes(s));
+    if(found) parsed.state = found;
+  }
+
+  if(!parsed.city && parts.length >= 2){
+    const candidate = parts[parts.length-2];
+    if(candidate && !/\d{6}/.test(candidate)) parsed.city = candidate;
+  }
+
+  return parsed;
+}
+
+function formatDeliveryRange(range){
+  if (!range) return '';
+  if (range.min === range.max) return `${range.min} day`;
+  return `${range.min}–${range.max} days`;
+}
+
+async function loadDeliverySettings(){
+  DELIVERY_SETTINGS = DEFAULT_DELIVERY_SETTINGS;
+  if(!usingLiveBackend) return;
+  try{
+    const res = await fetch(`${API_BASE}/settings/delivery_settings`);
+    const data = await res.json();
+    const value = data.setting || {};
+    DELIVERY_SETTINGS = {
+      storeInfo: Object.assign({}, DEFAULT_DELIVERY_SETTINGS.storeInfo, value.storeInfo || {}),
+      shipping: Object.assign({}, DEFAULT_DELIVERY_SETTINGS.shipping, value.shipping || {}),
+      deliveryDays: Object.assign({}, DEFAULT_DELIVERY_SETTINGS.deliveryDays, value.deliveryDays || {}),
+      deliveryAvailability: Object.assign({}, DEFAULT_DELIVERY_SETTINGS.deliveryAvailability, value.deliveryAvailability || {}),
+    };
+  }catch(e){
+    DELIVERY_SETTINGS = DEFAULT_DELIVERY_SETTINGS;
+  }
+}
+
 /* ===================== PERSISTENCE ===================== */
 async function loadState(){
   try{ const r = await localStore.get('aiiz-state'); if(r) state = Object.assign(state, JSON.parse(r.value)); }catch(e){}
@@ -1865,8 +1935,7 @@ async function loadState(){
     state.addresses = [];
     state.selectedAddrId = null;
   }
-  await fetchCatalog();
-  await loadHomeBannerSetting();
+  await Promise.all([fetchCatalog(), loadDeliverySettings(), loadHomeBannerSetting()]);
   renderAll();
   if(state.token){
     const ok = await apiMe();
@@ -1991,8 +2060,24 @@ async function submitAuth(){
   }
 }
 function onAuthSuccess(data, welcomeMsg){
+  const previousUserEmail = state.user?.email;
   state.token = data.token;
   state.user = data.user;
+
+  // Clear stale user-specific state when a different user logs in.
+  // This avoids guest/local data leaking into a newly logged-in account.
+  if(!previousUserEmail){
+    state.addresses = [];
+    state.selectedAddrId = null;
+    state.orders = [];
+  } else if(previousUserEmail !== state.user.email){
+    state.cart = {};
+    state.wishlist = [];
+    state.orders = [];
+    state.addresses = [];
+    state.selectedAddrId = null;
+  }
+
   saveState();
   toast(welcomeMsg);
   document.getElementById('authEmail').value='';
@@ -2002,12 +2087,18 @@ function onAuthSuccess(data, welcomeMsg){
   if(action){
     action();
   } else {
-    fetchCatalog().then(()=>{ renderAll(); nav('home'); }).catch(()=>{ nav('home'); });
+    renderAll();
+    nav('home');
   }
 }
 function logout(){
   state.token = null;
   state.user = null;
+  state.cart = {};
+  state.wishlist = [];
+  state.orders = [];
+  state.addresses = [];
+  state.selectedAddrId = null;
   saveState();
   toast('You have been logged out');
   nav('landing');
@@ -2532,21 +2623,52 @@ function detectDeliveryGroup(address){
   return 'rest';
 }
 function getShippingDetails(address, subtotal){
-  const group = detectDeliveryGroup(address);
-  const shippingRates = { sameCity:39, sameState:59, nearby:79, rest:99 };
-  const deliveryRanges = {
-    sameCity:{min:1,max:2},
-    sameState:{min:2,max:4},
-    nearby:{min:3,max:5},
-    rest:{min:5,max:7},
-  };
-  const shipping = subtotal>0 ? (subtotal>=999 ? 0 : shippingRates[group]) : 0;
-  const range = deliveryRanges[group] || deliveryRanges.rest;
-  return {group, shipping, range, text: getDeliveryText(range)};
+  const settings = DELIVERY_SETTINGS || DEFAULT_DELIVERY_SETTINGS;
+  const parsed = parseAddressExtras(address || {});
+  const availability = settings.deliveryAvailability || DEFAULT_DELIVERY_SETTINGS.deliveryAvailability;
+
+  if (availability.nationwide === false) {
+    const pin = String(parsed.pincode || '').trim();
+    const state = String(parsed.state || '').trim().toLowerCase();
+    const blockedPincodes = (availability.blockedPincodes || []).map(p => String(p || '').trim());
+    const blockedStates = (availability.blockedStates || []).map(s => String(s || '').trim().toLowerCase());
+    if (pin && blockedPincodes.includes(pin)) {
+      return { blocked:true, shipping:0, range:null, text:'Delivery not available for this location' };
+    }
+    if (state && blockedStates.includes(state)) {
+      return { blocked:true, shipping:0, range:null, text:'Delivery not available for this location' };
+    }
+  }
+
+  const storeInfo = settings.storeInfo || DEFAULT_DELIVERY_SETTINGS.storeInfo;
+  const storePin = String(storeInfo.pincode || '').trim();
+  const storeCity = String(storeInfo.city || '').trim().toLowerCase();
+  const storeState = String(storeInfo.state || '').trim().toLowerCase();
+  const addrPin = String(parsed.pincode || '').trim();
+  const addrCity = String(parsed.city || '').trim().toLowerCase();
+  const addrState = String(parsed.state || '').trim().toLowerCase();
+
+  let group = 'differentState';
+  if (addrPin && storePin && addrPin === storePin) {
+    group = 'samePIN';
+  } else if (addrCity && storeCity && addrCity === storeCity) {
+    group = 'sameDistrict';
+  } else if (addrState && storeState && addrState === storeState) {
+    group = 'sameState';
+  }
+
+  const rates = settings.shipping || DEFAULT_DELIVERY_SETTINGS.shipping;
+  const ranges = settings.deliveryDays || DEFAULT_DELIVERY_SETTINGS.deliveryDays;
+  const freeAbove = Number(rates.freeAbove ?? DEFAULT_DELIVERY_SETTINGS.shipping.freeAbove);
+  const shipping = subtotal > 0 ? (subtotal >= freeAbove ? 0 : Number(rates[group] ?? rates.differentState)) : 0;
+  const range = ranges[group] || ranges.differentState;
+  const text = range ? `Estimated delivery ${formatDeliveryRange(range)}` : '';
+  return { group, shipping, range, text, blocked:false };
 }
 function cartTotals(items, address){
   const subtotal = items.reduce((s,i)=>s+i.price*i.qty,0);
-  const shippingInfo = address ? getShippingDetails(address, subtotal) : null;
+  const parsed = address ? parseAddressExtras(address) : null;
+  const shippingInfo = parsed ? getShippingDetails(parsed, subtotal) : null;
   const shipping = shippingInfo ? shippingInfo.shipping : 0;
   const gst = Math.round(subtotal*0.03);
   const total = subtotal+shipping+gst;
@@ -2609,16 +2731,47 @@ function renderCheckout(){
     }
   }
   const t = cartTotals(items, selectedAddr);
-  el.innerHTML = state.addresses.map(a=>{
-    const isSelected = state.selectedAddrId===a.id;
-    return `\n    <div class="address-card" onclick="selectAddress('${a.id}')">\n      <div class="address-top">\n        <div class="home">\n          <svg viewBox="0 0 24 24" fill="none" stroke="#101A3D" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>\n          Home\n        </div>\n        <div class="edit-link" onclick="event.stopPropagation(); editAddress('${a.id}')">\n          Edit\n          <svg viewBox="0 0 24 24" fill="none" stroke="#C9922B" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>\n        </div>\n      </div>\n      <div class="addr-name">${a.name}</div>\n      <div class="addr-phone">\n        <svg viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014 2h3a2 2 0 012 1.7c.1.9.3 1.8.6 2.7a2 2 0 01-.4 2.1L8 9.9a16 16 0 006 6l1.5-1.2a2 2 0 012.1-.4c.9.3 1.8.5 2.7.6a2 2 0 011.7 2z"/></svg>\n        ${a.phone}\n      </div>\n      <div class="addr-line">\n        <svg viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>\n        ${a.line}\n      </div>\n      ${isSelected ? `<div class="selected-pill"><svg viewBox="0 0 24 24" fill="none" stroke="#5C531F" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Selected</div>` : ''}\n    </div>`;
-  }).join('');
+  if (state.addresses.length === 0) {
+    el.innerHTML = `
+      <div class="empty-state" style="padding:18px 16px; border:1px dashed #D7C49F; border-radius:18px; background:#FFF9F0; margin-bottom:18px; text-align:center; color:#5A4A28;">
+        <div style="font-weight:700; margin-bottom:8px;">No delivery address added yet</div>
+        <div style="font-size:13px; margin-bottom:16px;">Add an address now to calculate delivery and continue to payment.</div>
+        <button class="btn btn-solid btn-full" style="max-width:260px; margin:0 auto;" onclick="showAddrForm()">Add Delivery Address</button>
+      </div>`;
+  } else {
+    el.innerHTML = state.addresses.map(a=>{
+      const isSelected = state.selectedAddrId===a.id;
+      return `
+      <div class="address-card" onclick="selectAddress('${a.id}')">
+        <div class="address-top">
+          <div class="home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#101A3D" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
+            Home
+          </div>
+          <div class="edit-link" onclick="event.stopPropagation(); editAddress('${a.id}')">
+            Edit
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C9922B" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>
+          </div>
+        </div>
+        <div class="addr-name">${a.name}</div>
+        <div class="addr-phone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014 2h3a2 2 0 012 1.7c.1.9.3 1.8.6 2.7a2 2 0 01-.4 2.1L8 9.9a16 16 0 006 6l1.5-1.2a2 2 0 012.1-.4c.9.3 1.8.5 2.7.6a2 2 0 011.7 2z"/></svg>
+          ${a.phone}
+        </div>
+        <div class="addr-line">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          ${a.line}
+        </div>
+        ${isSelected ? '<div class="selected-pill"><svg viewBox="0 0 24 24" fill="none" stroke="#5C531F" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Selected</div>' : ''}
+      </div>`;
+    }).join('');
+  }
   document.getElementById('addrForm').style.display='none';
   const product = items[0] || {};
   const productImage = product.images && product.images[0];
   document.getElementById('checkoutSummary').innerHTML = `
       <div class="product-row">
-        <div class="product-thumb">${productImage ? `<img src="${productImage}"/>` : '<svg viewBox="0 0 24 24" fill="none" stroke="#B08B3A" stroke-width="1.5"><circle cx="12" cy="9" r="4"/><path d="M9 13l-2 8h10l-2-8"/></svg>'}</div>
+        <div class="product-thumb">${productImage ? '<img src="' + productImage + '"/>' : '<svg viewBox="0 0 24 24" fill="none" stroke="#B08B3A" stroke-width="1.5"><circle cx="12" cy="9" r="4"/><path d="M9 13l-2 8h10l-2-8"/></svg>'}</div>
         <div class="product-info">
           <div class="name">${product.name || 'Order item'}</div>
           <div class="qty">Qty: ${product.qty || 1}</div>
@@ -2637,9 +2790,16 @@ function renderCheckout(){
       <div class="cost-row total"><span>Total</span><span>₹${t.total.toLocaleString('en-IN')}</span></div>
     `;
   if(selectedAddr && t.deliveryInfo){
-    document.getElementById('checkoutDelivery').innerHTML = `<div class="delivery-banner"><svg viewBox="0 0 24 24" fill="none" stroke="#4B7A1E" stroke-width="2"><rect x="1" y="7" width="14" height="9"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="18" cy="19" r="1.6"/></svg><div><div class="title">${t.deliveryInfo.text}</div><div class="sub">${t.shipping===0 ? 'Free delivery' : 'Shipping ₹'+t.shipping}</div></div></div>`;
+    if(t.deliveryInfo.blocked){
+      document.getElementById('checkoutDelivery').innerHTML = `<div class="delivery-banner" style="background:#FDE8E6; border-color:#F5C6CB;"><svg viewBox="0 0 24 24" fill="none" stroke="#C43A3A" stroke-width="2"><path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M15 9l-6 6"/><path d="M9 9l6 6"/></svg><div><div class="title">Delivery unavailable for this address</div><div class="sub">Please choose another address or contact support.</div></div></div>`;
+      const button = document.querySelector('#screen-checkout .cta-button'); if(button) button.disabled = true;
+    } else {
+      document.getElementById('checkoutDelivery').innerHTML = `<div class="delivery-banner"><svg viewBox="0 0 24 24" fill="none" stroke="#4B7A1E" stroke-width="2"><rect x="1" y="7" width="14" height="9"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="18" cy="19" r="1.6"/></svg><div><div class="title">${t.deliveryInfo.text}</div><div class="sub">${t.shipping===0 ? 'Free delivery' : 'Shipping ₹'+t.shipping}</div></div></div>`;
+      const button = document.querySelector('#screen-checkout .cta-button'); if(button) button.disabled = false;
+    }
   } else {
     document.getElementById('checkoutDelivery').innerHTML = `<div class="delivery-banner"><svg viewBox="0 0 24 24" fill="none" stroke="#4B7A1E" stroke-width="2"><rect x="1" y="7" width="14" height="9"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="18" cy="19" r="1.6"/></svg><div><div class="title">Select an address to see delivery details</div><div class="sub">Delivery is calculated for your selected address in Hanamkonda, Telangana.</div></div></div>`;
+    const button = document.querySelector('#screen-checkout .cta-button'); if(button) button.disabled = false;
   }
 }
 
@@ -2668,8 +2828,15 @@ function saveAddress(){
   saveState(); renderCheckout(); toast('Address saved');
 }
 function goToPayment(){
-  if(checkoutItems().length===0){ toast('Your cart is empty'); return; }
+  const items = checkoutItems();
+  if(items.length===0){ toast('Your cart is empty'); return; }
   if(!state.selectedAddrId){ toast('Please select an address'); return; }
+  const addr = state.addresses.find(a=>a.id===state.selectedAddrId);
+  const t = cartTotals(items, addr);
+  if(t.deliveryInfo && t.deliveryInfo.blocked){
+    toast('Delivery is not available for this address. Please choose another address.');
+    return;
+  }
   nav('payment');
 }
 
@@ -2839,9 +3006,17 @@ async function placeOrder(){
   if(usingLiveBackend){
     if(!state.token){ requireAuth(() => placeOrder()); return; }
     try{
+      const parsedAddr = parseAddressExtras(addr);
       const body = {
         items: items.map(i => ({ productId: i.id, qty: i.qty })),
-        address: { name: addr.name, phone: addr.phone, line: addr.line, city: addr.city || '', state: addr.state || '', pincode: addr.pincode || '' },
+        address: {
+          name: parsedAddr.name,
+          phone: parsedAddr.phone,
+          line: parsedAddr.line,
+          city: parsedAddr.city || '',
+          state: parsedAddr.state || '',
+          pincode: parsedAddr.pincode || '',
+        },
         paymentMethod,
       };
       const data = await apiFetch('/orders', { method:'POST', body: JSON.stringify(body) });
@@ -2953,7 +3128,11 @@ async function loadMyOrders(){
       items: o.items || [],
       total: o.total || 0,
       date: o.createdAt || o.date || new Date().toISOString(),
-      status: o.status || 'confirmed'
+      status: o.status || 'confirmed',
+      address: o.address || null,
+      customerName: o.customerName || state.user?.name,
+      customerEmail: o.customerEmail || state.user?.email,
+      paymentStatus: o.paymentStatus || 'pending'
     }));
     saveState();
   }catch(e){ console.warn('Could not load orders', e); }

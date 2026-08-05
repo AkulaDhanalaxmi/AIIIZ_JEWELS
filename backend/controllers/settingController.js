@@ -3,7 +3,7 @@ const Setting = require('../models/Setting');
 async function getSetting(req, res) {
   try {
     const key = req.params.key;
-    const setting = await Setting.findOne({ key });
+    const setting = await Setting.findOne({ key }).lean();
     return res.json({ setting: setting ? setting.value : null });
   } catch (err) {
     return res.status(500).json({ message: 'Could not load setting' });

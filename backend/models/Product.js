@@ -26,6 +26,11 @@ productSchema.virtual('discountPercent').get(function () {
 });
 productSchema.set('toJSON', { virtuals: true });
 
+// Text search index already exists for search queries.
 productSchema.index({ name: 'text', description: 'text' });
+
+// Index fields that are commonly used in product listing filters and sorting.
+productSchema.index({ category: 1, isFeatured: 1, price: 1 });
+productSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model('Product', productSchema);

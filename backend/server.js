@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+console.log(process.env.MONGO_URI);
 const connectDB = require('./config/db');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
@@ -25,12 +26,19 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
-app.use('/api/payments', paymentRoutes);
-// Raised limit so the admin panel can upload product photos as base64 data URIs
 app.use(express.json({ limit: '12mb' }));
+app.use((req, res, next) => {
+  const start = process.hrtime();
+  res.on('finish', () => {
+    const diff = process.hrtime(start);
+    const ms = Math.round(diff[0] * 1000 + diff[1] / 1e6);
+    console.log(`${req.method} ${req.originalUrl} ${res.statusCode} ${ms}ms`);
+  });
+  next();
+});
+app.use('/api/payments', paymentRoutes);
 
-// Temporary request logger for debugging auth/header issues
-// (removed temporary debug logger)
+// Raised limit so the admin panel can upload product photos as base64 data URIs
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', service: 'aiiz-backend' }));
 

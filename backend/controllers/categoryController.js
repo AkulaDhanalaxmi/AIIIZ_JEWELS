@@ -5,13 +5,13 @@ const slugify = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replac
 
 // GET /api/categories
 exports.list = async (req, res) => {
-  const categories = await Category.find().sort({ name: 1 });
+  const categories = await Category.find().sort({ name: 1 }).lean();
   res.json({ categories });
 };
 
 // GET /api/categories/:id
 exports.getOne = async (req, res) => {
-  const category = await Category.findById(req.params.id);
+  const category = await Category.findById(req.params.id).lean();
   if (!category) return res.status(404).json({ message: 'Category not found' });
   res.json({ category });
 };

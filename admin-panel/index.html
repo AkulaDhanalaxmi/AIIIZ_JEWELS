@@ -217,7 +217,7 @@
     <div class="page" id="page-delivery">
       <div class="page-head"><div><h1>Delivery Settings</h1><p>Configure store address, shipping rules, estimated delivery windows, and delivery availability.</p></div></div>
       <div class="card">
-        <div class="card-head"><h3>Store Address</h3></div>
+        <div class="card-head" style="display:flex; align-items:center; justify-content:space-between;"><h3>Store Address</h3><button id="deliveryAddressEditBtn" class="btn btn-outline btn-sm" onclick="toggleStoreAddressEdit()">Edit Store Address</button></div>
         <div style="padding:20px;">
           <div class="field-row"><div class="field"><label>Store Name</label><input id="deliveryStoreName" placeholder="Aiiz Store"></div><div class="field"><label>Phone</label><input id="deliveryStorePhone" placeholder="1234567890"></div></div>
           <div class="field-row"><div class="field"><label>Address</label><input id="deliveryStoreAddress" placeholder="123 Main Street"></div><div class="field"><label>Pincode</label><input id="deliveryStorePincode" placeholder="500001"></div></div>
@@ -570,7 +570,31 @@ function parseDeliveryRange(value, fallback){
   return { min, max };
 }
 
+function setStoreAddressEditable(enabled) {
+  ['deliveryStoreName', 'deliveryStorePhone', 'deliveryStoreAddress', 'deliveryStorePincode', 'deliveryStoreCity', 'deliveryStoreState'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = !enabled;
+  });
+  const btn = document.getElementById('deliveryAddressEditBtn');
+  if (btn) btn.textContent = enabled ? 'Lock Store Address' : 'Edit Store Address';
+}
+
+function toggleStoreAddressEdit(){
+  const firstField = document.getElementById('deliveryStoreName');
+  if (!firstField) return;
+  setStoreAddressEditable(firstField.disabled);
+}
+
 async function loadDeliverySettings(){
+  const defaultStoreInfo = {
+    name: 'Shaik Asma',
+    address: '5-1-119 Kumpalli, Bokkalgadda, Hanumakonda',
+    pincode: '',
+    city: 'Hanumakonda',
+    state: 'Telangana',
+    phone: '8096651267',
+  };
+
   try{
     const res = await apiFetch('/settings/delivery_settings');
     const s = res.setting || {};
@@ -579,12 +603,13 @@ async function loadDeliverySettings(){
     const days = s.deliveryDays || {};
     const availability = s.deliveryAvailability || {};
 
-    document.getElementById('deliveryStoreName').value = store.name || '';
-    document.getElementById('deliveryStoreAddress').value = store.address || '';
-    document.getElementById('deliveryStorePincode').value = store.pincode || '';
-    document.getElementById('deliveryStoreCity').value = store.city || '';
-    document.getElementById('deliveryStoreState').value = store.state || '';
-    document.getElementById('deliveryStorePhone').value = store.phone || '';
+    document.getElementById('deliveryStoreName').value = store.name || defaultStoreInfo.name;
+    document.getElementById('deliveryStoreAddress').value = store.address || defaultStoreInfo.address;
+    document.getElementById('deliveryStorePincode').value = store.pincode || defaultStoreInfo.pincode;
+    document.getElementById('deliveryStoreCity').value = store.city || defaultStoreInfo.city;
+    document.getElementById('deliveryStoreState').value = store.state || defaultStoreInfo.state;
+    document.getElementById('deliveryStorePhone').value = store.phone || defaultStoreInfo.phone;
+    setStoreAddressEditable(false);
 
     document.getElementById('deliverySamePIN').value = ship.samePIN ?? '';
     document.getElementById('deliverySameDistrict').value = ship.sameDistrict ?? '';
@@ -601,7 +626,24 @@ async function loadDeliverySettings(){
     document.getElementById('deliveryNationwide').checked = availability.nationwide !== false;
     document.getElementById('deliveryBlockedPincodes').value = (availability.blockedPincodes || []).join(', ');
     document.getElementById('deliveryBlockedStates').value = (availability.blockedStates || []).join(', ');
+
+    const shippingFieldsEmpty = [ship.samePIN, ship.sameDistrict, ship.sameState, ship.differentState, ship.freeAbove].every(v => v == null || v === '');
+
+    if(shippingFieldsEmpty){
+      document.getElementById('deliverySamePIN').value = 30;
+      document.getElementById('deliverySameDistrict').value = 50;
+      document.getElementById('deliverySameState').value = 70;
+      document.getElementById('deliveryDifferentState').value = 120;
+      document.getElementById('deliveryFreeAbove').value = 999;
+    }
   }catch(e){
+    document.getElementById('deliveryStoreName').value = defaultStoreInfo.name;
+    document.getElementById('deliveryStoreAddress').value = defaultStoreInfo.address;
+    document.getElementById('deliveryStorePincode').value = defaultStoreInfo.pincode;
+    document.getElementById('deliveryStoreCity').value = defaultStoreInfo.city;
+    document.getElementById('deliveryStoreState').value = defaultStoreInfo.state;
+    document.getElementById('deliveryStorePhone').value = defaultStoreInfo.phone;
+    setStoreAddressEditable(false);
     toast(e.message || 'Could not load delivery settings');
   }
 }
@@ -695,9 +737,10 @@ function renderProducts(){
       <td>${catName(p.category)}</td>
       <td>₹${p.price.toLocaleString('en-IN')}</td>
       <td style="color:var(--muted); text-decoration:line-through;">₹${p.mrp.toLocaleString('en-IN')}</td>
-      <td>${p.stock<10?`<span style="color:var(--danger); font-weight:700;">${p.stock} left</span>`:p.stock}</td>
+      <td>${p.stock===0 ? `<span style="color:var(--danger); font-weight:700;">Sold out</span>` : p.stock<10 ? `<span style="color:var(--danger); font-weight:700;">${p.stock} left</span>` : p.stock}</td>
       <td style="text-align:right;">
         <button class="icon-btn-sm" onclick="openProductModal('${p.id}')" title="Edit">✎</button>
+        ${p.stock===0 ? `<button class="icon-btn-sm" disabled title="Already sold out">⚠</button>` : `<button class="icon-btn-sm" onclick="markProductSoldOut('${p.id}')" title="Mark Sold Out">⚠</button>`}
         <button class="icon-btn-sm" onclick="deleteProduct('${p.id}')" title="Delete">🗑</button>
       </td></tr>`).join('') : `<tr><td colspan="6"><div class="empty">No products yet. Add your first one.</div></td></tr>`;
 }
@@ -977,6 +1020,16 @@ async function saveProduct(){
     await loadData();
   }catch(e){
     toast(e.message || 'Could not save product');
+  }
+}
+async function markProductSoldOut(id){
+  if(!confirm('Mark this product as sold out?')) return;
+  try{
+    await apiFetch(`/products/${id}`, { method:'PUT', body: JSON.stringify({ stock: 0 }) });
+    toast('Product marked sold out');
+    await loadData();
+  }catch(e){
+    toast(e.message || 'Could not mark product as sold out');
   }
 }
 async function deleteProduct(id){

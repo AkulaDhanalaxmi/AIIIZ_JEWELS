@@ -1,0 +1,16 @@
+# Ignore local environment files
+backend/.env
+frontend/.env
+admin-panel/.env
+
+# Ignore node_modules directories
+node_modules/
+**/node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
