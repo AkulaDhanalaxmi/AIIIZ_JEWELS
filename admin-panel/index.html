@@ -395,8 +395,8 @@
 
 <script>
 /* ===================== API CONFIG ===================== */
-// Point this at your deployed backend. Defaults to a local dev server on port 5000.
-const API_BASE = (window.AIIZ_ADMIN_API_BASE) || (window.AIIZ_API_BASE) || 'http://localhost:5000/api';
+// Point this at your deployed backend. Defaults to the deployed Render API.
+const API_BASE = (window.AIIZ_ADMIN_API_BASE) || (window.AIIZ_API_BASE) || 'https://aiiiz-jewels.onrender.com/api';
 
 /* ===================== STORAGE (works both inside Claude artifacts and in a real browser) ===================== */
 const adminStore = {
