@@ -25,7 +25,7 @@ exports.list = async (req, res) => {
   // This avoids sending the full images array and other large fields.
   console.time('Product.find');
   const products = await Product.find(filter)
-    .select('name category price mrp material occasion weight description images stock rating numReviews')
+    .select('name category price mrp material finish size stoneType color style occasion packageIncludes care weight description images stock rating numReviews')
     .slice('images', 1)
     .sort({ createdAt: -1 })
     .skip(skip)
@@ -57,14 +57,42 @@ exports.getOne = async (req, res) => {
 
 // POST /api/products (admin)
 exports.create = async (req, res) => {
-  const product = await Product.create(req.body);
+  console.log('[Product API] create req.body', req.body);
+  const stock = req.body.stock != null ? Number(req.body.stock) : 0;
+  if (Number.isNaN(stock) || stock < 0) return res.status(400).json({ message: 'Invalid stock value' });
+  const size = req.body.size != null ? String(req.body.size).trim() : '';
+  const createBody = {
+    ...req.body,
+    stock,
+    size,
+  };
+  console.log('[Product API] create body', createBody);
+  const product = await Product.create(createBody);
+  console.log('[Product API] created product', product);
   res.status(201).json({ product });
 };
 
 // PUT /api/products/:id (admin)
 exports.update = async (req, res) => {
-  const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+  console.log('[Product API] update req.body', req.body);
+  const updateBody = { ...req.body };
+  if (updateBody.stock != null) {
+    const stock = Number(updateBody.stock);
+    if (Number.isNaN(stock) || stock < 0) return res.status(400).json({ message: 'Invalid stock value' });
+    updateBody.stock = stock;
+  }
+  if (req.body.size != null) {
+    updateBody.size = String(req.body.size).trim();
+  }
+  console.log('[Product API] update body', updateBody);
+  const product = await Product.findByIdAndUpdate(req.params.id, updateBody, { new: true, runValidators: true });
   if (!product) return res.status(404).json({ message: 'Product not found' });
+  const verify = await Product.findById(product._id);
+  console.log('Updated product size:', product.size);
+  console.log('Full updated product:', product);
+  console.log('[Product API] verify product after update', verify);
+  console.log('[Product API] verify size after update', verify?.size);
+  console.log('[Product API] updated product', product);
   res.json({ product });
 };
 

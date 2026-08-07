@@ -11,11 +11,17 @@ const productRoutes = require('./routes/productRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const orderManagementRoutes = require('./routes/orderManagementRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const settingRoutes = require('./routes/settingRoutes');
+const productManagementRoutes = require('./routes/productManagementRoutes');
+const returnRoutes = require('./routes/returnRoutes');
+const rawBodySaver = require('./middleware/webhookRawBody');
 
 const app = express();
+console.log('SERVER FILE:', __filename);
+console.log('SERVER DIR :', __dirname);
 
 const corsOptions = {
   origin: true,
@@ -26,6 +32,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
+app.use('/api/payments/webhook', express.json({ verify: rawBodySaver, limit: '12mb' }));
 app.use(express.json({ limit: '12mb' }));
 app.use((req, res, next) => {
   const start = process.hrtime();
@@ -48,8 +55,11 @@ app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/order-management', orderManagementRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/settings', settingRoutes);
+app.use('/api/product-management', productManagementRoutes);
+app.use('/api/returns', returnRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

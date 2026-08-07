@@ -121,10 +121,14 @@
     </div>
     <div class="sb-item active" data-page="dashboard" onclick="showPage('dashboard')">📊 Dashboard</div>
     <div class="sb-item" data-page="categories" onclick="showPage('categories')">🗂 Categories</div>
+    <div class="sb-item" data-page="subcategories" onclick="showPage('subcategories')">🧩 Subcategories</div>
     <div class="sb-item" data-page="products" onclick="showPage('products')">💍 Products</div>
     <div class="sb-item" data-page="banner" onclick="showPage('banner')">🖼 Home Banner</div>
     <div class="sb-item" data-page="delivery" onclick="showPage('delivery')">🚚 Delivery Settings</div>
     <div class="sb-item" data-page="orders" onclick="showPage('orders')">📦 Orders</div>
+    <div class="sb-item" data-page="stock" onclick="showPage('stock')">📦 Stock Management</div>
+    <div class="sb-item" data-page="returns" onclick="showPage('returns')">🔄 Returns</div>
+    <div class="sb-item" data-page="transactions" onclick="showPage('transactions')">💳 Transactions</div>
     <div class="sb-bottom" onclick="doLogout()">⎋ Logout</div>
   </div>
 
@@ -151,8 +155,20 @@
         <button class="btn btn-primary" onclick="openCatModal()">+ Add Category</button>
       </div>
       <div class="card">
-        <table><thead><tr><th>Category</th><th>Slug</th><th>Products</th><th></th></tr></thead>
+        <table><thead><tr><th>Category</th><th>Parent</th><th>Slug</th><th>Products</th><th></th></tr></thead>
         <tbody id="catTableBody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- SUBCATEGORIES -->
+    <div class="page" id="page-subcategories">
+      <div class="page-head">
+        <div><h1>Subcategories</h1><p>Manage nested categories under parent categories</p></div>
+        <button class="btn btn-primary" onclick="openSubcatModal()">+ Add Subcategory</button>
+      </div>
+      <div class="card">
+        <table><thead><tr><th>Subcategory</th><th>Parent</th><th>Slug</th><th>Products</th><th></th></tr></thead>
+        <tbody id="subcatTableBody"></tbody></table>
       </div>
     </div>
 
@@ -262,6 +278,123 @@
         <tbody id="orderTableBody"></tbody></table>
       </div>
     </div>
+
+    <!-- TRANSACTIONS -->
+    <div class="page" id="page-transactions">
+      <div class="page-head">
+        <div>
+          <h1>Transactions</h1>
+          <p>View all Razorpay payments and transaction history</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head" style="justify-content:space-between;">
+          <h3>Payment Transactions</h3>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <select id="txnStatusFilter" style="padding:8px 12px; border:1px solid #ddd; border-radius:8px; font-size:12px;" onchange="loadTransactions()">
+              <option value="">All Statuses</option>
+              <option value="CREATED">Created</option>
+              <option value="ATTEMPTED">Attempted</option>
+              <option value="PAID">Paid</option>
+              <option value="FAILED">Failed</option>
+              <option value="CANCELLED">Cancelled</option>
+              <option value="REFUNDED">Refunded</option>
+            </select>
+            <button class="btn btn-outline btn-sm" onclick="loadTransactions()">Refresh</button>
+          </div>
+        </div>
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom:1.5px solid #E0E4EC;">
+              <th style="text-align:left; padding:14px 16px; font-weight:600; font-size:12px; color:#7C889B;">Payment ID</th>
+              <th style="text-align:left; padding:14px 16px; font-weight:600; font-size:12px; color:#7C889B;">Order ID</th>
+              <th style="text-align:left; padding:14px 16px; font-weight:600; font-size:12px; color:#7C889B;">Customer</th>
+              <th style="text-align:left; padding:14px 16px; font-weight:600; font-size:12px; color:#7C889B;">Amount</th>
+              <th style="text-align:left; padding:14px 16px; font-weight:600; font-size:12px; color:#7C889B;">Method</th>
+              <th style="text-align:left; padding:14px 16px; font-weight:600; font-size:12px; color:#7C889B;">Status</th>
+              <th style="text-align:left; padding:14px 16px; font-weight:600; font-size:12px; color:#7C889B;">Date</th>
+            </tr>
+          </thead>
+          <tbody id="txnTableBody">
+            <tr><td colspan="7" style="text-align:center; padding:40px; color:#7C889B;">Loading transactions...</td></tr>
+          </tbody>
+        </table>
+        <div id="txnPagination" style="display:flex; justify-content:center; gap:8px; margin-top:20px; padding-top:20px; border-top:1px solid #E0E4EC;"></div>
+      </div>
+    </div>
+
+    <!-- STOCK MANAGEMENT -->
+    <div class="page" id="page-stock">
+      <div class="page-head">
+        <div>
+          <h1>Stock Management</h1>
+          <p>Update product stock and availability status</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head" style="justify-content:space-between;">
+          <h3>Products</h3>
+          <select id="stockFilterStatus" style="padding:8px 12px; border:1px solid #ddd; border-radius:8px; font-size:12px;" onchange="loadStockProducts()">
+            <option value="">All Stock Status</option>
+            <option value="in-stock">In Stock</option>
+            <option value="low-stock">Low Stock</option>
+            <option value="out-of-stock">Out of Stock</option>
+          </select>
+        </div>
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom:1.5px solid #E0E4EC;">
+              <th style="text-align:left; padding:14px 16px; font-weight:600; font-size:12px; color:#7C889B;">Product Name</th>
+              <th style="text-align:left; padding:14px 16px; font-weight:600; font-size:12px; color:#7C889B;">Price</th>
+              <th style="text-align:left; padding:14px 16px; font-weight:600; font-size:12px; color:#7C889B;">Stock Qty</th>
+              <th style="text-align:left; padding:14px 16px; font-weight:600; font-size:12px; color:#7C889B;">Status</th>
+              <th style="text-align:left; padding:14px 16px; font-weight:600; font-size:12px; color:#7C889B;"></th>
+            </tr>
+          </thead>
+          <tbody id="stockTableBody">
+            <tr><td colspan="5" style="text-align:center; padding:40px; color:#7C889B;">Loading products...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RETURNS MANAGEMENT -->
+    <div class="page" id="page-returns">
+      <div class="page-head">
+        <div>
+          <h1>Return Requests</h1>
+          <p>Manage product return requests from customers</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head" style="justify-content:space-between;">
+          <h3>Return Requests</h3>
+          <select id="returnFilterStatus" style="padding:8px 12px; border:1px solid #ddd; border-radius:8px; font-size:12px;" onchange="loadReturns()">
+            <option value="">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="returned">Returned</option>
+            <option value="refunded">Refunded</option>
+          </select>
+        </div>
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom:1.5px solid #E0E4EC;">
+              <th style="text-align:left; padding:14px 16px; font-weight:600; font-size:12px; color:#7C889B;">Order ID</th>
+              <th style="text-align:left; padding:14px 16px; font-weight:600; font-size:12px; color:#7C889B;">Customer</th>
+              <th style="text-align:left; padding:14px 16px; font-weight:600; font-size:12px; color:#7C889B;">Product</th>
+              <th style="text-align:left; padding:14px 16px; font-weight:600; font-size:12px; color:#7C889B;">Reason</th>
+              <th style="text-align:left; padding:14px 16px; font-weight:600; font-size:12px; color:#7C889B;">Status</th>
+              <th style="text-align:left; padding:14px 16px; font-weight:600; font-size:12px; color:#7C889B;"></th>
+            </tr>
+          </thead>
+          <tbody id="returnsTableBody">
+            <tr><td colspan="6" style="text-align:center; padding:40px; color:#7C889B;">Loading returns...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -271,6 +404,7 @@
     <h3 id="catModalTitle">Add Category</h3>
     <input type="hidden" id="catId">
     <div class="field"><label>Category Name</label><input id="catName" placeholder="e.g. Anklets"></div>
+  <div class="field"><label>Parent Category</label><select id="catParent"><option value="">-- None --</option></select></div>
     <div class="field">
       <label>Category Image</label>
       <div style="display:flex; align-items:center; gap:12px;">
@@ -303,12 +437,24 @@
     </div>
     <div class="field-row">
       <div class="field"><label>Material</label><input id="prodMaterial" placeholder="18K Gold, Diamond"></div>
+      <div class="field"><label>Finish</label><input id="prodFinish" placeholder="Gold-plated, Matte"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Stone Type</label><input id="prodStoneType" placeholder="Pearl, Cubic Zirconia"></div>
       <div class="field"><label>Color</label><input id="prodColor" placeholder="Rose Gold, Yellow Gold"></div>
+    </div>
+    <div class="field-row" id="prodSizeRow" style="display:none;">
+      <div class="field"><label>Size</label><input id="prodSize" placeholder="Free size or 2-2, 2-4"></div>
+      <div class="field"><label>Style</label><input id="prodStyle" placeholder="Traditional, Contemporary"></div>
     </div>
     <div class="field-row">
       <div class="field"><label>Occasion</label><input id="prodOccasion" placeholder="Wedding, Daily Wear"></div>
-      <div class="field"><label>Stock Qty</label><input id="prodStock" type="number" placeholder="25"></div>
+      <div class="field" style="flex:1"><label>Package Includes</label><input id="prodPackageIncludes" placeholder="1 pair earrings, 1 box"></div>
     </div>
+    <div class="field-row">
+      <div class="field"><label>Stock</label><input id="prodStock" type="number" min="0" placeholder="10"></div>
+    </div>
+    <div class="field"><label>Care</label><textarea id="prodCare" rows="2" placeholder="e.g. Keep away from water and store in a dry place"></textarea></div>
     <div class="field"><label>Description</label><textarea id="prodDesc" rows="3" placeholder="Short product description"></textarea></div>
     <div class="field">
       <label>Product Photo</label>
@@ -396,7 +542,10 @@
 <script>
 /* ===================== API CONFIG ===================== */
 // Point this at your deployed backend. Defaults to the deployed Render API.
-const API_BASE = (window.AIIZ_ADMIN_API_BASE) || (window.AIIZ_API_BASE) || 'https://aiiiz-jewels.onrender.com/api';
+// Prefer a local backend when the admin panel is served locally.
+const _defaultRemote = 'https://aiiiz-jewels.onrender.com/api';
+const isLocalhost = (typeof window !== 'undefined') && (window.location && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'));
+const API_BASE = (window.AIIZ_ADMIN_API_BASE) || (window.AIIZ_API_BASE) || (isLocalhost ? 'http://localhost:5000/api' : _defaultRemote);
 
 /* ===================== STORAGE (works both inside Claude artifacts and in a real browser) ===================== */
 const adminStore = {
@@ -497,6 +646,8 @@ function showApp(){
   document.getElementById('app').classList.add('active');
   loadData();
   startOrdersPolling();
+  const initialPage = window.location.hash ? window.location.hash.slice(1) : 'dashboard';
+  showPage(initialPage);
 }
 
 let ordersPollInterval = null;
@@ -530,7 +681,11 @@ async function loadData(){
       fetch(`${API_BASE}/products?limit=200`).then(r=>r.json()),
       apiFetch('/orders/admin/all'),
     ]);
-    DATA.categories = (catRes.categories||[]).map(c=>({ ...c, id:c._id }));
+    DATA.categories = (catRes.categories||[]).map(c=>({
+      ...c,
+      id:c._id,
+      parent: c.parent && typeof c.parent === 'object' ? c.parent._id : c.parent || null,
+    }));
     DATA.products = (prodRes.products||[]).map(p=>({
       ...p, id:p._id,
       category: (p.category && typeof p.category==='object') ? p.category._id : p.category,
@@ -553,12 +708,21 @@ async function loadData(){
 
 /* ===================== NAV ===================== */
 function showPage(name){
+  const target = name && document.getElementById('page-'+name) ? name : 'dashboard';
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  document.querySelector('.sb-item[data-page="'+name+'"]').classList.add('active');
-  if(name==='banner'){ loadBannerSetting(); }
-  if(name==='delivery'){ loadDeliverySettings(); }
+  const pageEl = document.getElementById('page-'+target);
+  const tabEl = document.querySelector('.sb-item[data-page="'+target+'"]');
+  if(pageEl) pageEl.classList.add('active');
+  if(tabEl) tabEl.classList.add('active');
+  if(window.location.hash !== '#'+target){
+    window.history.replaceState(null, '', '#'+target);
+  }
+  if(target==='banner'){ loadBannerSetting(); }
+  if(target==='delivery'){ loadDeliverySettings(); }
+  if(target==='transactions'){ loadTransactions(); }
+  if(target==='stock'){ loadStockProducts(); }
+  if(target==='returns'){ loadReturns(); }
 }
 
 function parseDeliveryRange(value, fallback){
@@ -587,14 +751,13 @@ function toggleStoreAddressEdit(){
 
 async function loadDeliverySettings(){
   const defaultStoreInfo = {
-    name: 'Shaik Asma',
+    name: 'Aiiz Store',
     address: '5-1-119 Kumpalli, Bokkalgadda, Hanumakonda',
     pincode: '',
     city: 'Hanumakonda',
     state: 'Telangana',
-    phone: '8096651267',
+    phone: '8880001886',
   };
-
   try{
     const res = await apiFetch('/settings/delivery_settings');
     const s = res.setting || {};
@@ -691,8 +854,23 @@ async function saveDeliverySettings(){
 function renderAll(){
   renderDashboard();
   renderCategories();
+  renderSubcategories();
   renderProducts();
   renderOrders();
+}
+
+function countProductsForCategory(categoryId){
+  const categoryIds = new Set([categoryId]);
+  function addChildCategories(parentId){
+    DATA.categories.filter(c => c.parent === parentId).forEach(c => {
+      if(!categoryIds.has(c.id)){
+        categoryIds.add(c.id);
+        addChildCategories(c.id);
+      }
+    });
+  }
+  addChildCategories(categoryId);
+  return DATA.products.filter(p => categoryIds.has(p.category)).length;
 }
 
 function renderDashboard(){
@@ -717,16 +895,35 @@ function renderDashboard(){
 }
 
 function renderCategories(){
-  document.getElementById('catTableBody').innerHTML = DATA.categories.length ? DATA.categories.map(c=>{
-    const count = DATA.products.filter(p=>p.category===c.id).length;
+  const parentName = id => (DATA.categories.find(c=>c.id===id)||{}).name || '-';
+  const topCategories = DATA.categories.filter(c => !c.parent);
+  document.getElementById('catTableBody').innerHTML = topCategories.length ? topCategories.map(c=>{
+    const count = countProductsForCategory(c.id);
     return `<tr>
       <td class="cell-flex"><div class="prod-thumb"></div><strong>${escHtml(c.name)}</strong></td>
+      <td>${escHtml(parentName(c.parent))}</td>
       <td>${c.slug || c.id}</td><td>${count} products</td>
       <td style="text-align:right;">
         <button class="icon-btn-sm" onclick="openCatModal('${c.id}')" title="Edit">✎</button>
         <button class="icon-btn-sm" onclick="deleteCategory('${c.id}')" title="Delete">🗑</button>
       </td></tr>`;
-  }).join('') : `<tr><td colspan="4"><div class="empty">No categories yet. Add your first one.</div></td></tr>`;
+  }).join('') : `<tr><td colspan="5"><div class="empty">No categories yet. Add your first one.</div></td></tr>`;
+}
+
+function renderSubcategories(){
+  const parentName = id => (DATA.categories.find(c=>c.id===id)||{}).name || '-';
+  const subcategories = DATA.categories.filter(c => c.parent);
+  document.getElementById('subcatTableBody').innerHTML = subcategories.length ? subcategories.map(c=>{
+    const count = countProductsForCategory(c.id);
+    return `<tr>
+      <td class="cell-flex"><div class="prod-thumb"></div><strong>${escHtml(c.name)}</strong></td>
+      <td>${escHtml(parentName(c.parent))}</td>
+      <td>${c.slug || c.id}</td><td>${count} products</td>
+      <td style="text-align:right;">
+        <button class="icon-btn-sm" onclick="openSubcatModal('${c.id}')" title="Edit">✎</button>
+        <button class="icon-btn-sm" onclick="deleteCategory('${c.id}')" title="Delete">🗑</button>
+      </td></tr>`;
+  }).join('') : `<tr><td colspan="5"><div class="empty">No subcategories yet. Add your first one.</div></td></tr>`;
 }
 
 function renderProducts(){
@@ -874,22 +1071,36 @@ function setCatImagePreview(src){
   if(src){ img.src = src; img.style.display = 'block'; }
   else { img.src = ''; img.style.display = 'none'; }
 }
-function openCatModal(id){
+function openCatModal(id, opts={}){
   document.getElementById('catId').value = id||'';
   document.getElementById('catModalTitle').textContent = id ? 'Edit Category' : 'Add Category';
+  const parentSelect = document.getElementById('catParent');
+  const candidateCategories = DATA.categories.filter(c=>c.id!==id && (!opts.subcategoryMode || !c.parent));
+  const defaultOption = opts.allowNone !== false ? `<option value="">-- None --</option>` : '';
+  parentSelect.innerHTML = defaultOption + candidateCategories.map(c=>`<option value="${c.id}">${escHtml(c.name)}</option>`).join('');
   if(id){
     const c = DATA.categories.find(x=>x.id===id);
     document.getElementById('catName').value = c.name;
+    document.getElementById('catParent').value = c.parent || '';
     document.getElementById('catImage').value = c.image || '';
     setCatImagePreview(c.image || '');
     document.getElementById('catImageFile').value = '';
   } else {
     document.getElementById('catName').value='';
+    document.getElementById('catParent').value='';
     document.getElementById('catImage').value='';
     setCatImagePreview('');
     document.getElementById('catImageFile').value = '';
+    if(opts.defaultParent && parentSelect.options.length > 0){
+      parentSelect.value = parentSelect.options[0].value;
+    }
   }
   document.getElementById('catOverlay').classList.add('active');
+}
+
+function openSubcatModal(id){
+  openCatModal(id, { subcategoryMode: true, allowNone: false, defaultParent: true });
+  document.getElementById('catModalTitle').textContent = id ? 'Edit Subcategory' : 'Add Subcategory';
 }
 function handleCategoryImageSelect(evt){
   const file = evt.target.files && evt.target.files[0];
@@ -907,6 +1118,7 @@ function handleCategoryImageSelect(evt){
 async function saveCategory(){
   const id = document.getElementById('catId').value;
   const name = document.getElementById('catName').value.trim();
+  const parent = document.getElementById('catParent').value || null;
   const image = document.getElementById('catImage').value.trim();
   if(!name){ toast('Please enter a category name'); return; }
   // Require an image when creating a new category
@@ -916,10 +1128,11 @@ async function saveCategory(){
     return;
   }
   try{
+    const body = { name, parent, image };
     if(id){
-      await apiFetch(`/categories/${id}`, { method:'PUT', body: JSON.stringify({ name, image }) });
+      await apiFetch(`/categories/${id}`, { method:'PUT', body: JSON.stringify(body) });
     } else {
-      await apiFetch('/categories', { method:'POST', body: JSON.stringify({ name, image }) });
+      await apiFetch('/categories', { method:'POST', body: JSON.stringify(body) });
     }
     closeModal('catOverlay');
     toast('Category saved');
@@ -941,7 +1154,33 @@ async function deleteCategory(id){
 
 /* ===================== PRODUCT CRUD ===================== */
 function populateCategorySelect(){
-  document.getElementById('prodCategory').innerHTML = DATA.categories.map(c=>`<option value="${c.id}">${escHtml(c.name)}</option>`).join('');
+  const topCategories = DATA.categories.filter(c => !c.parent);
+  const subcategories = DATA.categories.filter(c => c.parent);
+  const grouped = topCategories.map(parent => {
+    const children = subcategories.filter(child => child.parent === parent.id);
+    const childOptions = children.map(child => `<option value="${child.id}">-- ${escHtml(child.name)}</option>`).join('');
+    return `<optgroup label="${escHtml(parent.name)}"><option value="${parent.id}">${escHtml(parent.name)}</option>${childOptions}</optgroup>`;
+  }).join('');
+  const standaloneSubcats = subcategories.filter(child => !topCategories.some(parent => parent.id === child.parent)).map(child => `<option value="${child.id}">${escHtml(child.name)}</option>`).join('');
+  const prodCategory = document.getElementById('prodCategory');
+  if(prodCategory) {
+    prodCategory.innerHTML = grouped + standaloneSubcats;
+    prodCategory.onchange = handleProductCategoryChange;
+  }
+}
+function shouldShowSizeField(categoryId){
+  if(!categoryId || !DATA.categories) return false;
+  const cat = DATA.categories.find(c => c.id === categoryId);
+  if(!cat) return false;
+  const text = `${cat.name || ''} ${cat.slug || ''}`.toLowerCase();
+  if(/bangle/.test(text)) return true;
+  return cat.parent ? shouldShowSizeField(cat.parent) : false;
+}
+function handleProductCategoryChange(){
+  const selectedCategory = document.getElementById('prodCategory')?.value;
+  const row = document.getElementById('prodSizeRow');
+  if(!row) return;
+  row.style.display = shouldShowSizeField(selectedCategory) ? 'flex' : 'none';
 }
 function populateBannerTargetSelect(){
   const select = document.getElementById('bannerTargetCategory');
@@ -949,29 +1188,53 @@ function populateBannerTargetSelect(){
   select.innerHTML = [{id:'all', name:'All Products'}].concat(DATA.categories).map(c=>`<option value="${c.id}">${escHtml(c.name)}</option>`).join('');
 }
 function openProductModal(id){
+  const setValue = (id, value) => {
+    const el = document.getElementById(id);
+    if(el) el.value = value;
+  };
+  const clearValue = id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  };
+
   populateCategorySelect();
-  document.getElementById('prodId').value = id||'';
-  document.getElementById('prodModalTitle').textContent = id ? 'Edit Product' : 'Add Product';
-  document.getElementById('prodImageFile').value = '';
+  setValue('prodId', id||'');
+  const prodModalTitle = document.getElementById('prodModalTitle');
+  if(prodModalTitle) prodModalTitle.textContent = id ? 'Edit Product' : 'Add Product';
+  const prodImageFile = document.getElementById('prodImageFile');
+  if(prodImageFile) prodImageFile.value = '';
+
   if(id){
     const p = DATA.products.find(x=>x.id===id);
-    document.getElementById('prodName').value = p.name;
-    document.getElementById('prodCategory').value = p.category;
-    document.getElementById('prodPrice').value = p.price;
-    document.getElementById('prodMrp').value = p.mrp;
-    document.getElementById('prodMaterial').value = p.material || '';
-    document.getElementById('prodColor').value = p.color || '';
-    document.getElementById('prodOccasion').value = p.occasion || '';
-    document.getElementById('prodStock').value = p.stock;
-    document.getElementById('prodDesc').value = p.description || '';
-    const img = (p.images && p.images[0]) || '';
-    document.getElementById('prodImage').value = img;
-    setProdImagePreview(img);
+    if(p){
+      setValue('prodName', p.name);
+      setValue('prodCategory', p.category);
+      setValue('prodPrice', p.price);
+      setValue('prodMrp', p.mrp);
+      setValue('prodMaterial', p.material || '');
+      setValue('prodFinish', p.finish || '');
+      setValue('prodSize', p.size || '');
+      setValue('prodStoneType', p.stoneType || '');
+      setValue('prodColor', p.color || '');
+      setValue('prodStyle', p.style || '');
+      setValue('prodOccasion', p.occasion || '');
+      setValue('prodPackageIncludes', p.packageIncludes || '');
+      setValue('prodCare', p.care || '');
+      setValue('prodStock', p.stock != null ? p.stock : '');
+      setValue('prodDesc', p.description || '');
+      const img = (p.images && p.images[0]) || '';
+      setValue('prodImage', img);
+      setProdImagePreview(img);
+      handleProductCategoryChange();
+    }
   } else {
-    ['prodName','prodPrice','prodMrp','prodMaterial','prodColor','prodOccasion','prodStock','prodDesc','prodImage'].forEach(f=>document.getElementById(f).value='');
+    ['prodName','prodPrice','prodMrp','prodMaterial','prodFinish','prodSize','prodStoneType','prodColor','prodStyle','prodOccasion','prodPackageIncludes','prodCare','prodStock','prodDesc','prodImage'].forEach(clearValue);
     setProdImagePreview('');
   }
-  document.getElementById('prodOverlay').classList.add('active');
+
+  handleProductCategoryChange();
+  const prodOverlay = document.getElementById('prodOverlay');
+  if(prodOverlay) prodOverlay.classList.add('active');
 }
 function setProdImagePreview(src){
   const img = document.getElementById('prodImagePreview');
@@ -1001,20 +1264,30 @@ async function saveProduct(){
   const price = Number(document.getElementById('prodPrice').value);
   const mrp = Number(document.getElementById('prodMrp').value);
   const material = document.getElementById('prodMaterial').value.trim();
+  const finish = document.getElementById('prodFinish').value.trim();
+  const size = document.getElementById('prodSize').value.trim();
+  const stoneType = document.getElementById('prodStoneType').value.trim();
   const color = document.getElementById('prodColor').value.trim();
+  const style = document.getElementById('prodStyle').value.trim();
   const occasion = document.getElementById('prodOccasion').value.trim();
-  const stock = Number(document.getElementById('prodStock').value) || 0;
+  const packageIncludes = document.getElementById('prodPackageIncludes').value.trim();
+  const care = document.getElementById('prodCare').value.trim();
+  const stock = Number(document.getElementById('prodStock')?.value ?? 0);
   const description = document.getElementById('prodDesc').value.trim();
-  const imageData = document.getElementById('prodImage').value.trim();
+  const imageData = document.getElementById('prodImage')?.value.trim() || '';
   if(!name || !price || !mrp || !category){ toast('Please fill in name, category, price and MRP'); return; }
-  const payload = { name, category, price, mrp, material, color, occasion, stock, description };
+  if(Number.isNaN(stock) || stock < 0){ toast('Stock must be a valid number 0 or greater'); return; }
+  const payload = { name, category, price, mrp, material, finish, size, stoneType, color, style, occasion, packageIncludes, care, stock, description };
+  console.log('[Admin] saveProduct payload', { id, payload });
   if(imageData) payload.images = [imageData];
   try{
+    let response;
     if(id){
-      await apiFetch(`/products/${id}`, { method:'PUT', body: JSON.stringify(payload) });
+      response = await apiFetch(`/products/${id}`, { method:'PUT', body: JSON.stringify(payload) });
     } else {
-      await apiFetch('/products', { method:'POST', body: JSON.stringify(payload) });
+      response = await apiFetch('/products', { method:'POST', body: JSON.stringify(payload) });
     }
+    console.log('[Admin] saveProduct response', response);
     closeModal('prodOverlay');
     toast('Product saved');
     await loadData();
@@ -1134,6 +1407,268 @@ async function loadBannerSetting(){
 async function showBannerPage(){
   populateBannerTargetSelect();
   await loadBannerSetting();
+}
+
+/* ===================== TRANSACTIONS ===================== */
+async function loadTransactions(page=1){
+  try {
+    const status = document.getElementById('txnStatusFilter')?.value || '';
+    const query = new URLSearchParams();
+    query.append('page', page);
+    query.append('limit', 20);
+    if(status) query.append('status', status);
+
+    const res = await fetch(`${API_BASE}/payments/admin/all?${query}`, {
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
+    
+    if(!res.ok) throw new Error('Failed to load transactions');
+    const {data: payments, pagination} = await res.json();
+    
+    const tbody = document.getElementById('txnTableBody');
+    if(payments.length === 0){
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:#7C889B;">No transactions found</td></tr>';
+    } else {
+      tbody.innerHTML = payments.map(p => {
+        const date = new Date(p.createdAt).toLocaleDateString('en-IN', {year:'numeric', month:'short', day:'numeric'});
+        const time = new Date(p.createdAt).toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
+        const statusColor = p.status === 'PAID' ? '#3E8C63' : p.status === 'FAILED' ? '#C4573D' : '#7C889B';
+        return `<tr style="border-bottom:1px solid #E0E4EC;">
+          <td style="padding:14px 16px; font-size:12px; font-family:monospace;">${p.razorpayPaymentId || p.razorpayOrderId.substring(0,8)}...</td>
+          <td style="padding:14px 16px; font-size:12px;">${p.order?.orderNumber || '-'}</td>
+          <td style="padding:14px 16px; font-size:12px;">${p.user?.name || p.user?.email || '-'}</td>
+          <td style="padding:14px 16px; font-size:12px; font-weight:600;">₹${(p.amount/100).toFixed(2)}</td>
+          <td style="padding:14px 16px; font-size:12px;">Razorpay</td>
+          <td style="padding:14px 16px; font-size:12px; color:${statusColor}; font-weight:600;">${p.status}</td>
+          <td style="padding:14px 16px; font-size:11px; color:#7C889B;">${date}<br>${time}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // Render pagination
+    const paginationDiv = document.getElementById('txnPagination');
+    paginationDiv.innerHTML = '';
+    
+    if(pagination.pages > 1){
+      if(pagination.page > 1){
+        const prev = document.createElement('button');
+        prev.className = 'btn btn-outline btn-sm';
+        prev.textContent = '← Previous';
+        prev.onclick = () => loadTransactions(pagination.page - 1);
+        paginationDiv.appendChild(prev);
+      }
+
+      for(let i = Math.max(1, pagination.page - 2); i <= Math.min(pagination.pages, pagination.page + 2); i++){
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.className = i === pagination.page ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+        btn.onclick = () => loadTransactions(i);
+        paginationDiv.appendChild(btn);
+      }
+
+      if(pagination.page < pagination.pages){
+        const next = document.createElement('button');
+        next.className = 'btn btn-outline btn-sm';
+        next.textContent = 'Next →';
+        next.onclick = () => loadTransactions(pagination.page + 1);
+        paginationDiv.appendChild(next);
+      }
+    }
+  } catch(e) {
+    document.getElementById('txnTableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:#C4573D;">${e.message}</td></tr>`;
+  }
+}
+
+/* ===================== STOCK MANAGEMENT ===================== */
+async function loadStockProducts(page=1){
+  try {
+    const status = document.getElementById('stockFilterStatus')?.value || '';
+    const query = new URLSearchParams();
+    query.append('page', page);
+    query.append('limit', 20);
+    if(status) query.append('stockStatus', status);
+
+    const res = await fetch(`${API_BASE}/product-management/admin/all?${query}`, {
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
+    
+    if(!res.ok) throw new Error('Failed to load products');
+    const {data: productsRaw} = await res.json();
+    const products = (productsRaw || []).map(p => ({
+      ...p,
+      stockStatus: p.stockStatus || (typeof p.stock === 'number' ? (p.stock > 10 ? 'in-stock' : (p.stock > 0 ? 'low-stock' : 'out-of-stock')) : 'unknown')
+    }));
+    
+    const tbody = document.getElementById('stockTableBody');
+    if(products.length === 0){
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:#7C889B;">No products found</td></tr>';
+    } else {
+      tbody.innerHTML = products.map(p => {
+        const statusColor = p.stockStatus === 'in-stock' ? '#3E8C63' : p.stockStatus === 'low-stock' ? '#E67E22' : '#C4573D';
+        const statusLabel = (p.stockStatus || 'unknown').toString().toUpperCase();
+        return `<tr style="border-bottom:1px solid #E0E4EC;">
+          <td style="padding:14px 16px; font-size:12px; font-weight:500;">${escHtml(p.name)}</td>
+          <td style="padding:14px 16px; font-size:12px;">₹${p.price}</td>
+          <td style="padding:14px 16px; font-size:12px;"><input type="number" data-product-id="${p._id}" class="stock-qty-input" value="${p.stock}" min="0" style="width:60px; padding:6px; border:1px solid #ddd; border-radius:4px;"></td>
+          <td style="padding:14px 16px; font-size:11px; color:${statusColor}; font-weight:600;">${statusLabel}</td>
+          <td style="padding:14px 16px; text-align:center;">
+            <button class="btn btn-primary btn-sm" onclick="updateProductStock('${p._id}')">Update</button>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+  } catch(e) {
+    document.getElementById('stockTableBody').innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:#C4573D;">${e.message}</td></tr>`;
+  }
+}
+
+async function updateProductStock(productId){
+  try {
+    const input = document.querySelector(`[data-product-id="${productId}"]`);
+    const stock = Number(input.value);
+    
+    const res = await fetch(`${API_BASE}/product-management/admin/${productId}/stock`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({ stock })
+    });
+
+    if(!res.ok) throw new Error('Failed to update stock');
+    toast('Product stock updated successfully');
+    loadStockProducts();
+  } catch(e) {
+    toast('Error: ' + e.message);
+  }
+}
+
+/* ===================== RETURNS MANAGEMENT ===================== */
+async function loadReturns(page=1){
+  try {
+    const status = document.getElementById('returnFilterStatus')?.value || '';
+    const query = new URLSearchParams();
+    query.append('page', page);
+    query.append('limit', 20);
+    if(status) query.append('status', status);
+
+    const res = await fetch(`${API_BASE}/returns/admin/all?${query}`, {
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
+    
+    if(!res.ok) throw new Error('Failed to load returns');
+    const {data: returns} = await res.json();
+    
+    const tbody = document.getElementById('returnsTableBody');
+    if(returns.length === 0){
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:40px; color:#7C889B;">No return requests found</td></tr>';
+    } else {
+      tbody.innerHTML = returns.map(r => {
+        const statusColor = r.status === 'approved' ? '#3E8C63' : r.status === 'rejected' ? '#C4573D' : r.status === 'refunded' ? '#9b59b6' : '#7C889B';
+        const actions = r.status === 'pending' ? `
+          <button class="btn btn-primary btn-sm" onclick="approveReturn('${r._id}')">Approve</button>
+          <button class="btn btn-outline btn-sm" onclick="rejectReturn('${r._id}')" style="margin-left:4px;">Reject</button>
+        ` : r.status === 'approved' ? `
+          <button class="btn btn-primary btn-sm" onclick="markReturned('${r._id}')">Mark Returned</button>
+        ` : r.status === 'returned' ? `
+          <button class="btn btn-primary btn-sm" onclick="processRefund('${r._id}')">Process Refund</button>
+        ` : '<span style="color:#7C889B; font-size:11px;">' + r.status.toUpperCase() + '</span>';
+        
+        return `<tr style="border-bottom:1px solid #E0E4EC;">
+          <td style="padding:14px 16px; font-size:12px; font-family:monospace;">${r.order?.orderNumber || '-'}</td>
+          <td style="padding:14px 16px; font-size:12px;">${r.user?.name || r.user?.email || '-'}</td>
+          <td style="padding:14px 16px; font-size:12px;">${r.product?.name || '-'}</td>
+          <td style="padding:14px 16px; font-size:11px; color:#7C889B;">${r.reason}</td>
+          <td style="padding:14px 16px; font-size:11px; color:${statusColor}; font-weight:600;">${r.status.toUpperCase()}</td>
+          <td style="padding:14px 16px; text-align:center; font-size:11px;">${actions}</td>
+        </tr>`;
+      }).join('');
+    }
+  } catch(e) {
+    document.getElementById('returnsTableBody').innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px; color:#C4573D;">${e.message}</td></tr>`;
+  }
+}
+
+async function approveReturn(returnId){
+  try {
+    const adminNote = prompt('Enter admin note (optional):');
+    const refundAmount = prompt('Enter refund amount (₹):');
+    
+    const res = await fetch(`${API_BASE}/returns/admin/${returnId}/approve`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({
+        adminNote,
+        refundAmount: refundAmount ? Number(refundAmount) : undefined
+      })
+    });
+
+    if(!res.ok) throw new Error('Failed to approve return');
+    toast('Return approved');
+    loadReturns();
+  } catch(e) {
+    toast('Error: ' + e.message);
+  }
+}
+
+async function rejectReturn(returnId){
+  try {
+    const adminNote = prompt('Enter rejection reason:');
+    if(!adminNote) return;
+    
+    const res = await fetch(`${API_BASE}/returns/admin/${returnId}/reject`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({ adminNote })
+    });
+
+    if(!res.ok) throw new Error('Failed to reject return');
+    toast('Return rejected');
+    loadReturns();
+  } catch(e) {
+    toast('Error: ' + e.message);
+  }
+}
+
+async function markReturned(returnId){
+  try {
+    const res = await fetch(`${API_BASE}/returns/admin/${returnId}/mark-returned`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${adminToken}`
+      }
+    });
+
+    if(!res.ok) throw new Error('Failed to mark return');
+    toast('Return marked as returned');
+    loadReturns();
+  } catch(e) {
+    toast('Error: ' + e.message);
+  }
+}
+
+async function processRefund(returnId){
+  try {
+    const res = await fetch(`${API_BASE}/returns/admin/${returnId}/process-refund`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${adminToken}`
+      }
+    });
+
+    if(!res.ok) throw new Error('Failed to process refund');
+    toast('Refund processed');
+    loadReturns();
+  } catch(e) {
+    toast('Error: ' + e.message);
+  }
 }
 
 /* ===================== UTIL ===================== */

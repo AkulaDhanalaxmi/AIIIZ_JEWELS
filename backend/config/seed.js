@@ -28,39 +28,39 @@ async function run() {
 
   const createdProducts = await Product.insertMany([
     // Bangles (5)
-    { name: 'Heritage Gold Bangle Set', category: byName('Bangles'), price: 41990, mrp: 47990, material: '22K Gold', occasion: 'Festive', weight: '18g', description: 'Intricately engraved heritage bangles.', stock: 15, image: '', isFeatured: true },
-    { name: 'Antique Temple Bangles', category: byName('Bangles'), price: 47990, mrp: 54990, material: '22K Gold', occasion: 'Wedding', weight: '22g', description: 'Temple-motif handcrafted bangles.', stock: 8, image: '' },
-    { name: 'Slim Everyday Bangle', category: byName('Bangles'), price: 15990, mrp: 18990, material: '18K Gold', occasion: 'Daily Wear', weight: '6g', description: 'Slim lightweight bangle for daily wear.', stock: 22, image: '' },
-    { name: 'Studded Kada', category: byName('Bangles'), price: 19990, mrp: 22990, material: '18K Gold', occasion: 'Party', weight: '10g', description: 'Kada with stone studs.', stock: 12, image: '' },
-    { name: 'Minimal Thin Bangle', category: byName('Bangles'), price: 8990, mrp: 11990, material: '18K Gold', occasion: 'Daily Wear', weight: '3g', description: 'Minimal thin bangle.', stock: 30, image: '' },
+    { name: 'Heritage Gold Bangle Set', category: byName('Bangles'), price: 41990, mrp: 47990, material: '22K Gold', occasion: 'Festive', weight: '18g', description: 'Intricately engraved heritage bangles.', stock: 15, images: [], isFeatured: true },
+    { name: 'Antique Temple Bangles', category: byName('Bangles'), price: 47990, mrp: 54990, material: '22K Gold', occasion: 'Wedding', weight: '22g', description: 'Temple-motif handcrafted bangles.', stock: 8, images: [] },
+    { name: 'Slim Everyday Bangle', category: byName('Bangles'), price: 15990, mrp: 18990, material: '18K Gold', occasion: 'Daily Wear', weight: '6g', description: 'Slim lightweight bangle for daily wear.', stock: 22, images: [] },
+    { name: 'Studded Kada', category: byName('Bangles'), price: 19990, mrp: 22990, material: '18K Gold', occasion: 'Party', weight: '10g', description: 'Kada with stone studs.', stock: 12, images: [] },
+    { name: 'Minimal Thin Bangle', category: byName('Bangles'), price: 8990, mrp: 11990, material: '18K Gold', occasion: 'Daily Wear', weight: '3g', description: 'Minimal thin bangle.', stock: 30, images: [] },
 
     // Necklaces (5)
-    { name: 'Floral Diamond Pendant', category: byName('Necklaces'), price: 28990, mrp: 34990, material: '18K Gold, Diamond', occasion: 'Daily Wear', weight: '3.2g', description: 'Delicate floral pendant with diamonds.', stock: 18, image: '', isFeatured: true },
-    { name: 'Pearl Drop Necklace', category: byName('Necklaces'), price: 22990, mrp: 26990, material: '18K Gold, Pearl', occasion: 'Daily Wear', weight: '4g', description: 'Freshwater pearl drop necklace.', stock: 14, image: '' },
-    { name: 'Bridal Choker Necklace', category: byName('Necklaces'), price: 64990, mrp: 74990, material: '22K Gold, Kundan', occasion: 'Wedding', weight: '28g', description: 'Opulent bridal choker with kundan work.', stock: 5, image: '' },
-    { name: 'Layered Chain Set', category: byName('Necklaces'), price: 17990, mrp: 21990, material: '18K Gold', occasion: 'Party', weight: '7g', description: 'Layered chain necklace set.', stock: 20, image: '' },
-    { name: 'Locket Classic', category: byName('Necklaces'), price: 10990, mrp: 12990, material: '18K Gold', occasion: 'Daily Wear', weight: '5g', description: 'Classic locket with engraving.', stock: 25, image: '' },
+    { name: 'Floral Diamond Pendant', category: byName('Necklaces'), price: 28990, mrp: 34990, material: '18K Gold, Diamond', occasion: 'Daily Wear', weight: '3.2g', description: 'Delicate floral pendant with diamonds.', stock: 18, images: [], isFeatured: true },
+    { name: 'Pearl Drop Necklace', category: byName('Necklaces'), price: 22990, mrp: 26990, material: '18K Gold, Pearl', occasion: 'Daily Wear', weight: '4g', description: 'Freshwater pearl drop necklace.', stock: 14, images: [] },
+    { name: 'Bridal Choker Necklace', category: byName('Necklaces'), price: 64990, mrp: 74990, material: '22K Gold, Kundan', occasion: 'Wedding', weight: '28g', description: 'Opulent bridal choker with kundan work.', stock: 5, images: [] },
+    { name: 'Layered Chain Set', category: byName('Necklaces'), price: 17990, mrp: 21990, material: '18K Gold', occasion: 'Party', weight: '7g', description: 'Layered chain necklace set.', stock: 20, images: [] },
+    { name: 'Locket Classic', category: byName('Necklaces'), price: 10990, mrp: 12990, material: '18K Gold', occasion: 'Daily Wear', weight: '5g', description: 'Classic locket with engraving.', stock: 25, images: [] },
 
     // Earrings (5)
-    { name: 'Royal Drop Earrings', category: byName('Earrings'), price: 29990, mrp: 36990, material: '22K Gold, Kundan', occasion: 'Wedding', weight: '6.5g', description: 'Statement royal drop earrings.', stock: 9, image: '', isFeatured: true },
-    { name: 'Kundan Jhumka Earrings', category: byName('Earrings'), price: 18990, mrp: 22990, material: '22K Gold, Kundan', occasion: 'Festive', weight: '8g', description: 'Traditional jhumka earrings.', stock: 20, image: '' },
-    { name: 'Minimal Diamond Studs', category: byName('Earrings'), price: 12990, mrp: 15990, material: '18K Gold, Diamond', occasion: 'Daily Wear', weight: '1.6g', description: 'Understated diamond studs.', stock: 30, image: '' },
-    { name: 'Hoop Elegance', category: byName('Earrings'), price: 9990, mrp: 11990, material: '18K Gold', occasion: 'Daily Wear', weight: '4g', description: 'Classic hoop earrings.', stock: 40, image: '' },
-    { name: 'Pearl Cluster Drops', category: byName('Earrings'), price: 14990, mrp: 17990, material: '18K Gold, Pearl', occasion: 'Party', weight: '5g', description: 'Clustered pearl drop earrings.', stock: 16, image: '' },
+    { name: 'Royal Drop Earrings', category: byName('Earrings'), price: 29990, mrp: 36990, material: '22K Gold, Kundan', occasion: 'Wedding', weight: '6.5g', description: 'Statement royal drop earrings.', stock: 9, images: [], isFeatured: true },
+    { name: 'Kundan Jhumka Earrings', category: byName('Earrings'), price: 18990, mrp: 22990, material: '22K Gold, Kundan', occasion: 'Festive', weight: '8g', description: 'Traditional jhumka earrings.', stock: 20, images: [] },
+    { name: 'Minimal Diamond Studs', category: byName('Earrings'), price: 12990, mrp: 15990, material: '18K Gold, Diamond', occasion: 'Daily Wear', weight: '1.6g', description: 'Understated diamond studs.', stock: 30, images: [] },
+    { name: 'Hoop Elegance', category: byName('Earrings'), price: 9990, mrp: 11990, material: '18K Gold', occasion: 'Daily Wear', weight: '4g', description: 'Classic hoop earrings.', stock: 40, images: [] },
+    { name: 'Pearl Cluster Drops', category: byName('Earrings'), price: 14990, mrp: 17990, material: '18K Gold, Pearl', occasion: 'Party', weight: '5g', description: 'Clustered pearl drop earrings.', stock: 16, images: [] },
 
     // Rings (5)
-    { name: 'Classic Solitaire Ring', category: byName('Rings'), price: 34990, mrp: 39990, material: '18K Gold, Diamond', occasion: 'Engagement', weight: '2.8g', description: 'Timeless solitaire ring.', stock: 12, image: '', isFeatured: true },
-    { name: 'Emerald Halo Ring', category: byName('Rings'), price: 38990, mrp: 44990, material: '18K Gold, Emerald', occasion: 'Party', weight: '3.1g', description: 'Emerald halo ring with diamonds.', stock: 10, image: '' },
-    { name: 'Stackable Band Set', category: byName('Rings'), price: 12990, mrp: 14990, material: '18K Gold', occasion: 'Daily Wear', weight: '2g', description: 'Set of three stackable bands.', stock: 28, image: '' },
-    { name: 'Signet Ring', category: byName('Rings'), price: 17990, mrp: 19990, material: '18K Gold', occasion: 'Party', weight: '5g', description: 'Classic signet ring.', stock: 14, image: '' },
-    { name: 'Delicate Midi Ring', category: byName('Rings'), price: 4990, mrp: 6990, material: '18K Gold', occasion: 'Daily Wear', weight: '0.8g', description: 'Delicate midi ring for stacking.', stock: 50, image: '' },
+    { name: 'Classic Solitaire Ring', category: byName('Rings'), price: 34990, mrp: 39990, material: '18K Gold, Diamond', occasion: 'Engagement', weight: '2.8g', description: 'Timeless solitaire ring.', stock: 12, images: [], isFeatured: true },
+    { name: 'Emerald Halo Ring', category: byName('Rings'), price: 38990, mrp: 44990, material: '18K Gold, Emerald', occasion: 'Party', weight: '3.1g', description: 'Emerald halo ring with diamonds.', stock: 10, images: [] },
+    { name: 'Stackable Band Set', category: byName('Rings'), price: 12990, mrp: 14990, material: '18K Gold', occasion: 'Daily Wear', weight: '2g', description: 'Set of three stackable bands.', stock: 28, images: [] },
+    { name: 'Signet Ring', category: byName('Rings'), price: 17990, mrp: 19990, material: '18K Gold', occasion: 'Party', weight: '5g', description: 'Classic signet ring.', stock: 14, images: [] },
+    { name: 'Delicate Midi Ring', category: byName('Rings'), price: 4990, mrp: 6990, material: '18K Gold', occasion: 'Daily Wear', weight: '0.8g', description: 'Delicate midi ring for stacking.', stock: 50, images: [] },
 
     // Bracelets (5)
-    { name: 'Diamond Cuff Bracelet', category: byName('Bracelets'), price: 52990, mrp: 61990, material: '18K Gold, Diamond', occasion: 'Party', weight: '12g', description: 'Bold cuff bracelet with diamonds.', stock: 6, image: '', isFeatured: true },
-    { name: 'Twin Charm Bracelet', category: byName('Bracelets'), price: 15990, mrp: 18990, material: '18K Gold', occasion: 'Daily Wear', weight: '2.4g', description: 'Twin charm delicate bracelet.', stock: 17, image: '' },
-    { name: 'Chain Bracelet', category: byName('Bracelets'), price: 8990, mrp: 10990, material: '18K Gold', occasion: 'Daily Wear', weight: '3g', description: 'Classic chain bracelet.', stock: 22, image: '' },
-    { name: 'Beaded Stretch Bracelet', category: byName('Bracelets'), price: 3990, mrp: 4990, material: 'Gold Plated', occasion: 'Casual', weight: '1g', description: 'Beaded stretch bracelet.', stock: 60, image: '' },
-    { name: 'Charm Bangle', category: byName('Bracelets'), price: 12990, mrp: 14990, material: '18K Gold', occasion: 'Gift', weight: '4g', description: 'Bangle with removable charms.', stock: 15, image: '' },
+    { name: 'Diamond Cuff Bracelet', category: byName('Bracelets'), price: 52990, mrp: 61990, material: '18K Gold, Diamond', occasion: 'Party', weight: '12g', description: 'Bold cuff bracelet with diamonds.', stock: 6, images: [], isFeatured: true },
+    { name: 'Twin Charm Bracelet', category: byName('Bracelets'), price: 15990, mrp: 18990, material: '18K Gold', occasion: 'Daily Wear', weight: '2.4g', description: 'Twin charm delicate bracelet.', stock: 17, images: [] },
+    { name: 'Chain Bracelet', category: byName('Bracelets'), price: 8990, mrp: 10990, material: '18K Gold', occasion: 'Daily Wear', weight: '3g', description: 'Classic chain bracelet.', stock: 22, images: [] },
+    { name: 'Beaded Stretch Bracelet', category: byName('Bracelets'), price: 3990, mrp: 4990, material: 'Gold Plated', occasion: 'Casual', weight: '1g', description: 'Beaded stretch bracelet.', stock: 60, images: [] },
+    { name: 'Charm Bangle', category: byName('Bracelets'), price: 12990, mrp: 14990, material: '18K Gold', occasion: 'Gift', weight: '4g', description: 'Bangle with removable charms.', stock: 15, images: [] },
   ]);
 
   const adminExists = await User.findOne({ email: 'admin@aiiz.com' });

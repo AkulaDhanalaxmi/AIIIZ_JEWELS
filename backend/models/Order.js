@@ -49,15 +49,19 @@ const orderSchema = new mongoose.Schema(
     reviewRequested: { type: Boolean, default: false },
     status: {
       type: String,
-      enum: ['confirmed', 'packed', 'shipped', 'delivered', 'cancelled'],
+      enum: ['confirmed', 'packed', 'shipped', 'delivered', 'cancelled', 'delayed', 'out-of-stock'],
       default: 'confirmed',
     },
     statusHistory: [
       {
         status: String,
+        message: String,
         at: { type: Date, default: Date.now },
       },
     ],
+    adminNote: { type: String },
+    cancelReason: { type: String },
+    cancelledAt: { type: Date },
   },
   { timestamps: true }
 );

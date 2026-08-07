@@ -326,10 +326,54 @@ async function handleRefundProcessed(event) {
   logger.info('Webhook confirmed refund processed', { razorpayPaymentId });
 }
 
+// Admin: Get all payments with filters
+async function adminGetAllPayments(req, res, next) {
+  try {
+    const { status, startDate, endDate, page = 1, limit = 20 } = req.query;
+    
+    const filter = {};
+    if (status) filter.status = status;
+    if (startDate || endDate) {
+      filter.createdAt = {};
+      if (startDate) filter.createdAt.$gte = new Date(startDate);
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        filter.createdAt.$lte = end;
+      }
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+    const total = await Payment.countDocuments(filter);
+    const payments = await Payment.find(filter)
+      .populate('user', 'name email phone')
+      .populate('order', 'orderNumber items total deliveryAddress')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit))
+      .lean();
+
+    res.json({
+      success: true,
+      data: payments,
+      pagination: {
+        total,
+        page: Number(page),
+        pages: Math.ceil(total / Number(limit)),
+        limit: Number(limit)
+      }
+    });
+  } catch (error) {
+    logger.error('Error fetching payments', { error: error.message });
+    res.status(500).json({ success: false, message: 'Error fetching payments' });
+  }
+}
+
 module.exports = {
   createPaymentOrder,
   verifyPayment,
   recordPaymentFailure,
   getPaymentStatus,
   handleWebhook,
+  adminGetAllPayments,
 };
