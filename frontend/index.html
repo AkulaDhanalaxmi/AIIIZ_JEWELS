@@ -2139,7 +2139,9 @@ const navIcons = {
 };
 
 /* ===================== API CONFIG ===================== */
-const API_BASE = window.AIIZ_API_BASE || window.AIIZ_ADMIN_API_BASE || 'http://localhost:5000/api';
+const _defaultRemote = 'https://aiiiz-jewels.onrender.com/api';
+const isLocalhost = (typeof window !== 'undefined') && (window.location && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'));
+const API_BASE = window.AIIZ_API_BASE || window.AIIZ_ADMIN_API_BASE || (isLocalhost ? 'http://localhost:5000/api' : _defaultRemote);
 const GOOGLE_CLIENT_ID = '124694113252-ag19hvkgp1lgveoq9ra24qdk4l2k10eu.apps.googleusercontent.com';
 const GOOGLE_SIGNIN_ENABLED = GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.includes('REPLACE_WITH');
 /* ===================== STORAGE ===================== */
