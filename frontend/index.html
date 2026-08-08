@@ -3731,17 +3731,20 @@ function renderCheckout(){
     }).join('');
   }
   document.getElementById('addrForm').style.display='none';
-  const product = items[0] || {};
-  const productImage = product.images && product.images[0] && product.images[0].trim();
-  document.getElementById('checkoutSummary').innerHTML = `
+  const productRows = items.map(p => {
+    const productImage = p.images && p.images[0] && p.images[0].trim();
+    return `
       <div class="product-row">
         <div class="product-thumb">${productImage ? '<img src="' + productImage + '"/>' : '<svg viewBox="0 0 24 24" fill="none" stroke="#B08B3A" stroke-width="1.5"><circle cx="12" cy="9" r="4"/><path d="M9 13l-2 8h10l-2-8"/></svg>'}</div>
         <div class="product-info">
-          <div class="name">${product.name || 'Order item'}</div>
-          <div class="qty">Qty: ${product.qty || 1}</div>
+          <div class="name">${p.name || 'Order item'}</div>
+          <div class="qty">Qty: ${p.qty || 1}</div>
         </div>
-        <div class="product-price">₹${product.qty ? (product.price * product.qty).toLocaleString('en-IN') : '0'}</div>
-      </div>
+        <div class="product-price">₹${p.qty ? (p.price * p.qty).toLocaleString('en-IN') : '0'}</div>
+      </div>`;
+  }).join('');
+  document.getElementById('checkoutSummary').innerHTML = `
+      ${productRows}
 
       <hr class="divider">
 
