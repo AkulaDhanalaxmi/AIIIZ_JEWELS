@@ -3605,6 +3605,7 @@ function renderCart(){
     const outOfStock = (stock !== null) && stock <= 0;
     const qtyExceeds = (stock !== null) && (Number(p.qty) > stock);
     const stockProblem = outOfStock || qtyExceeds;
+    const plusDisabled = (stock !== null) && (Number(p.qty) >= stock);
     return `
     <div class="cart-row">
       <div class="cart-thumb" style="overflow:hidden;">${productThumbHtml(p)}</div>
@@ -3613,10 +3614,17 @@ function renderCart(){
         <div class="price">₹${p.price.toLocaleString('en-IN')}</div>
         <div style="display:flex;gap:10px;align-items:center;margin-top:8px;">
           <div class="cart-remove" onclick="removeFromCart('${p.id}')">Remove</div>
-          ${stockProblem ? `<div class="out-of-stock" style="color:#C43A3A;font-weight:700;padding:6px 10px;border-radius:8px;background:rgba(196,58,58,0.06);">Out of stock</div>` : ''}
+          ${stockProblem ? `<div class="out-of-stock" style="color:#C43A3A;font-weight:700;padding:6px 10px;border-radius:8px;background:rgba(196,58,58,0.06);">Only ${stock} in stock</div>` : ''}
         </div>
       </div>
-      <div class="qty-box small">Qty: ${p.qty}${(stock!==null && !stockProblem) ? ` • ${stock} in stock` : ''}</div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+        <div class="qty-box small" style="display:flex;align-items:center;gap:8px;"> 
+          <button class="qty-btn" onclick="setCartQty('${p.id}', ${Number(p.qty)-1})">−</button>
+          <div style="min-width:36px; text-align:center; font-weight:700;">${p.qty}</div>
+          <button class="qty-btn" onclick="setCartQty('${p.id}', ${Number(p.qty)+1})" ${plusDisabled ? 'disabled' : ''}>+</button>
+        </div>
+        ${ (stock!==null && qtyExceeds) ? `<div style="color:#C43A3A;font-size:13px;font-weight:600;">Reduce quantity to ${stock} or below to proceed.</div>` : (stock!==null ? `<div style="font-size:12px;color:#6B7280;">${stock} in stock</div>` : '') }
+      </div>
     </div>`;
   }).join('');
   const selectedAddr = state.addresses.find(a=>a.id===state.selectedAddrId) || (state.addresses.length ? state.addresses[0] : null);
