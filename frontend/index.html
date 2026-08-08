@@ -3701,9 +3701,12 @@ function renderCheckout(){
             <svg viewBox="0 0 24 24" fill="none" stroke="#101A3D" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
             Home
           </div>
-          <div class="edit-link" onclick="event.stopPropagation(); editAddress('${a.id}')">
-            Edit
-            <svg viewBox="0 0 24 24" fill="none" stroke="#C9922B" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <div class="edit-link" onclick="event.stopPropagation(); editAddress('${a.id}')">
+              Edit
+              <svg viewBox="0 0 24 24" fill="none" stroke="#C9922B" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>
+            </div>
+            ${isSelected ? '' : `<div class="edit-link" onclick="event.stopPropagation(); selectAddress('${a.id}');">Use</div>`}
           </div>
         </div>
         <div class="addr-name">${a.name}</div>
@@ -3777,7 +3780,7 @@ function saveAddress(){
     state.addresses.push({id,name,phone,line});
     state.selectedAddrId = id;
   }
-  saveState(); renderCheckout(); toast('Address saved');
+  saveState(); renderCheckout(); renderAddresses(); toast('Address saved');
 }
 function goToPayment(){
   const items = checkoutItems();
