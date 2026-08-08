@@ -99,7 +99,7 @@
   @media (max-width:760px){
     .topbar{ flex-wrap:nowrap; align-items:center; padding:14px 16px 12px; gap:12px; }
     .brand{ min-width:0; gap:10px; }
-    .brand-logo{ max-height:32px; }
+    .brand-logo{ max-height:48px; }
     .top-icons{ width:auto; justify-content:flex-end; gap:10px; min-width:0; }
     .top-icons .icon-btn{ flex-shrink:0; }
     .brand .name{ font-size:18px; }
@@ -185,9 +185,31 @@
   }
   .brand-logo{
     display:block;
-    height:36px;
+    height:48px;
     width:auto;
     object-fit:contain;
+  }
+  .brand-name-gold{
+    display:inline-flex;
+    align-items:center;
+    gap:2px;
+    margin-left:10px;
+    font-family:'Cormorant Garamond', serif;
+    font-weight:700;
+    font-size:19px;
+    letter-spacing:0.5px;
+    color:#E3C57E;
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .brand-name-gold .brand-subtitle{
+    display:block;
+    font-size:12px;
+    font-weight:500;
+    color:#F0D9A1;
+    letter-spacing:0.6px;
+    margin-top:2px;
+    text-transform:uppercase;
   }
   .brand .name{ font-family:'Cormorant Garamond',serif; font-size:20px; letter-spacing:2px; font-weight:700; }
   .brand .tag{ font-size:8px; letter-spacing:3px; color:var(--gold-300); display:block; margin-top:-2px;}
@@ -868,15 +890,18 @@
   .address-top{ display:flex; align-items:center; justify-content:space-between; }
   .address-top .home{ display:flex; align-items:center; gap:6px; font-weight:700; font-size:14px; color:#1A1A1A; }
   .address-top .home svg{ width:15px; height:15px; }
-  .edit-link{ display:flex; align-items:center; gap:4px; font-size:13px; font-weight:600; color:#C9922B; cursor:pointer; }
+  .edit-link{ display:flex; align-items:center; gap:4px; font-size:13px; font-weight:600; color:#1A1A1A; cursor:pointer; }
   .edit-link svg{ width:13px; height:13px; }
+  .delivery-mark{ display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:#5C531F; margin-top:10px; }
+  .delivery-mark svg{ width:14px; height:14px; }
   .addr-name{ font-weight:700; font-size:13.5px; color:#1A1A1A; margin-top:10px; letter-spacing:0.2px; }
   .addr-phone, .addr-line{ display:flex; align-items:center; gap:6px; font-size:13.5px; color:#333333; margin-top:6px; }
   .addr-phone svg, .addr-line svg{ width:13px; height:13px; flex-shrink:0; }
   .selected-pill{ display:inline-flex; align-items:center; gap:5px; margin-top:12px; background:#DCD3A6; color:#5C531F; font-size:11.5px; font-weight:700; padding:4px 10px; border-radius:12px; }
   .selected-pill svg{ width:11px; height:11px; }
   .order-card{ margin:0 16px 6px; background:#FFFFFF; border:1px solid #ECECEC; border-radius:10px; padding:14px 16px; }
-  .product-row{ display:flex; gap:12px; align-items:center; }
+  .product-row{ display:flex; gap:12px; align-items:center; margin-bottom:12px; }
+  .product-row:last-child{ margin-bottom:0; }
   .product-thumb{ width:60px; height:60px; border-radius:8px; background:#F3E9D8; flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }
   .product-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
   .product-thumb svg{ width:34px; height:34px; }
@@ -1076,8 +1101,8 @@
   .menu-icon{ width:36px; height:36px; border-radius:10px; background:var(--cream-dim); display:flex; align-items:center; justify-content:center; }
 
   .toast{
-    position:absolute; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--navy-950); color:#fff;
-    padding:10px 18px; border-radius:24px; font-size:12px; font-weight:600; opacity:0; pointer-events:none; transition:.25s; z-index:50; white-space:nowrap; max-width:90vw; overflow:hidden; text-overflow:ellipsis; display:inline-flex; align-items:center; justify-content:center;
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--navy-950); color:#fff;
+    padding:10px 18px; border-radius:24px; font-size:12px; font-weight:600; opacity:0; pointer-events:none; transition:.25s; z-index:9999; white-space:nowrap; max-width:90vw; overflow:hidden; text-overflow:ellipsis; display:inline-flex; align-items:center; justify-content:center;
   }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 
@@ -1279,8 +1304,12 @@
   <div class="screen" id="screen-home">
     <div class="topbar">
       <div class="brand">
-        <img class="brand-logo" src="/logo.png" alt="AIIZ Logo" />
-      </div>
+  <img class="brand-logo" src="/logo.png" alt="AIIZ Logo" />
+  <span class="brand-name-gold">
+    Asma
+    <span class="brand-subtitle">Luxe Store</span>
+  </span>
+</div>
       <div class="top-icons">
         <div class="icon-btn" onclick="requireAuth(()=>nav('wishlist'))">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FBF7EF" stroke-width="1.8"><path d="M12.1 8.64l-.1.1-.11-.11C10.14 6.6 7.1 6.6 5.24 8.5c-1.87 1.9-1.87 4.98 0 6.88L12 22l6.76-6.63c1.87-1.9 1.87-4.98 0-6.88-1.86-1.9-4.9-1.9-6.66.15z"/></svg>
@@ -1514,7 +1543,7 @@
       <div class="sticky-actions" id="pdStickyActions">
         <div class="pd-detail-actions">
           <button class="pd-action-btn pd-wish wishlist-btn" aria-label="Add to wishlist" onclick="requireAuth(()=>toggleWishlist(currentProductId, true))">♡</button>
-          <button class="pd-action-btn pd-cart add-cart-btn" onclick="event.stopPropagation(); requireAuth(()=>{addToCart(currentProductId, 1); toast('Added to cart');});">Add to Cart</button>
+          <button class="pd-action-btn pd-cart add-cart-btn" data-product-id="${currentProductId}" onclick="event.stopPropagation(); requireAuth(()=>{addToCart(currentProductId, 1);});">Add to Cart</button>
           <button class="pd-action-btn pd-buy buy-now-btn" onclick="requireAuth(()=>buyNow(currentProductId, 1))">Buy Now</button>
         </div>
       </div>
@@ -1665,6 +1694,7 @@
       <textarea id="fLine" placeholder="Full Address (House, Street, City, PIN)" rows="3"></textarea>
       <button class="btn btn-solid btn-full" onclick="saveAddress()">Save Address</button>
     </div>
+    <div id="giftWrapOption" style="margin:16px 0;"></div>
 
     <div class="section-title">Order Summary</div>
     <div class="order-card" id="checkoutSummary"></div>
@@ -2181,6 +2211,7 @@ let currentSearch = '', currentSort = 'default';
 let searchPromptActive = false;
 let buyNowMode = false, buyNowItem = null;
 let pendingAction = null;
+let giftWrapEditing = false;
 
 /* ===================== CATALOGUE ===================== */
 function normalizeProduct(p){
@@ -2302,6 +2333,18 @@ function parseAddressExtras(address){
   return parsed;
 }
 
+function stripParsedPartsFromLine(parsed){
+  let line = String(parsed.line || '').trim();
+  [parsed.pincode, parsed.city, parsed.state].forEach(val => {
+    if(val){
+      const esc = String(val).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp('\\b' + esc + '\\b', 'i');
+      line = line.replace(re, '');
+    }
+  });
+  return line.split(',').map(s=>s.trim()).filter(Boolean).join(', ');
+}
+
 function formatDeliveryRange(range){
   if (!range) return '';
   if (range.min === range.max) return `${range.min} day`;
@@ -2339,6 +2382,9 @@ async function loadState(){
   }
   if(!state.reviews || typeof state.reviews !== 'object'){
     state.reviews = {};
+  }
+  if(!state.giftWrap || typeof state.giftWrap !== 'object'){
+    state.giftWrap = { enabled:false, message:'' };
   }
   await fetchCatalog();
   await Promise.all([loadDeliverySettings(), loadHomeBannerSetting()]);
@@ -3012,7 +3058,7 @@ function productCardHtml(p){
       <div class="p-name"><span class="name-text">${p.name}</span></div>
       <div class="p-price"><span class="now">₹${p.price.toLocaleString('en-IN')}</span><span class="old">₹${p.mrp.toLocaleString('en-IN')}</span>${p.off>0?`<span class="off">(${p.off}% OFF)</span>`:''}</div>
       <div class="p-footer">
-        <button class="p-cart-btn" onclick="event.stopPropagation(); requireAuth(()=>{addToCart('${p.id}',1); toast('Added to cart');});">
+        <button class="p-cart-btn" data-product-id="${p.id}" onclick="event.stopPropagation(); requireAuth(()=>{addToCart('${p.id}',1);});">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6L4.5 3H2"/><circle cx="9.5" cy="20" r="1.4" fill="currentColor"/><circle cx="17" cy="20" r="1.4" fill="currentColor"/></svg>
           Add to Cart
         </button>
@@ -3461,10 +3507,11 @@ function emptyStateHtml(title, sub){
 }
 
 /* ===================== CART ===================== */
-function addToCart(id, qty){
+function addToCart(id, qty, showMessage=true){
   qty = qty||1;
   state.cart[id] = (state.cart[id]||0) + qty;
   saveState(); updateBadges();
+  if(showMessage){ toast('Added to cart'); }
 }
 function setCartQty(id, qty){
   if(qty<=0){ delete state.cart[id]; } else { state.cart[id]=qty; }
@@ -3586,13 +3633,14 @@ function getShippingDetails(address, subtotal){
   const text = range ? `Estimated delivery ${formatDeliveryRange(range)}` : '';
   return { group, shipping, range, text, blocked:false };
 }
-function cartTotals(items, address){
+function cartTotals(items, address, giftWrap = {enabled:false, message:''}){
   const subtotal = (items || []).reduce((s,i)=>s + (Number(i.price)||0) * (Number(i.qty)||1), 0);
   const parsed = address ? parseAddressExtras(address) : null;
   const shippingInfo = parsed ? getShippingDetails(parsed, subtotal) : null;
   const shipping = shippingInfo ? shippingInfo.shipping : 0;
-  const total = subtotal+shipping;
-  return {subtotal, shipping, total, deliveryInfo: shippingInfo};
+  const giftWrapCost = giftWrap && giftWrap.enabled ? 30 : 0;
+  const total = subtotal + shipping + giftWrapCost;
+  return {subtotal, shipping, giftWrapCost, total, deliveryInfo: shippingInfo};
 }
 function renderCart(){
   buyNowMode = false;
@@ -3629,7 +3677,7 @@ function renderCart(){
   }).join('');
   const selectedAddr = state.addresses.find(a=>a.id===state.selectedAddrId) || (state.addresses.length ? state.addresses[0] : null);
   const hasSavedAddress = state.addresses.length > 0;
-  const t = cartTotals(items, selectedAddr);
+  const t = cartTotals(items, selectedAddr, state.giftWrap);
   const shippingLabel = selectedAddr ? (t.shipping===0 ? 'FREE' : '₹'+t.shipping) : 'Available at checkout';
   const totalLabel = selectedAddr ? `₹${t.total.toLocaleString('en-IN')}` : `₹${t.subtotal.toLocaleString('en-IN')} + shipping`;
   const deliveryText = selectedAddr && t.deliveryInfo ? t.deliveryInfo.text : (hasSavedAddress ? 'Saved address available. Confirm at checkout.' : 'Delivery charge available at checkout');
@@ -3691,7 +3739,44 @@ function renderCheckout(){
       }).filter(Boolean);
     }
   }
-  const t = cartTotals(items, selectedAddr);
+  const t = cartTotals(items, selectedAddr, state.giftWrap);
+  const giftWrapHtml = `
+  <div style="border:1px solid #E5D9C8; border-radius:18px; padding:16px; background:#FEF8F2; margin:0 16px 18px;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+      <div>
+        <div style="font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px;"><span style="font-size:18px;">🎁</span>Gift wrap ?</div>
+        <div style="font-size:12px; color:#5A6B7A;">Add a gift note and we’ll wrap your order beautifully.</div>
+      </div>
+      <div style="text-align:right; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
+        <div style="font-weight:700;">₹30</div>
+        <div style="display:flex; gap:14px; align-items:center;">
+          ${state.giftWrap.enabled
+            ? `<span onclick="openGiftWrapEditor()" title="Edit gift note" style="cursor:pointer; display:flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:50%; background:#fff; border:1px solid #E5DAC0;">
+                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9922B" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>
+               </span>`
+            : `<button class="btn btn-solid btn-sm" onclick="openGiftWrapEditor()">Add</button>`}
+          ${state.giftWrap.enabled ? `<span onclick="removeGiftWrap()" style="color:#C43A3A; font-weight:700; font-size:13px; cursor:pointer;">Remove</span>` : ''}
+        </div>
+      </div>
+    </div>
+
+    ${giftWrapEditing ? `
+      <div style="margin-top:14px;">
+        <textarea id="giftMessageInput" rows="3" placeholder="Write your gift message here..."
+          style="width:100%; padding:12px 14px; border:1px solid #E5DAC0; border-radius:10px; font-size:13px; font-family:'Inter',sans-serif; outline:none; resize:vertical; background:#fff;"
+        >${escHtmlFrontend(state.giftWrap.message || '')}</textarea>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <button class="btn btn-solid" onclick="saveGiftWrapMessage()">Save</button>
+          <button class="btn btn-outline" onclick="cancelGiftWrapEditor()">Cancel</button>
+        </div>
+      </div>
+    ` : (state.giftWrap.enabled && state.giftWrap.message ? `
+      <div style="margin-top:10px; font-size:13px; color:#3E4A67; background:#fff; border:1px solid #EEE3C9; border-radius:10px; padding:10px 12px;">
+        ${escHtmlFrontend(state.giftWrap.message)}
+      </div>
+    ` : '')}
+  </div>`;
+  document.getElementById('giftWrapOption').innerHTML = giftWrapHtml;
   if (state.addresses.length === 0) {
     el.innerHTML = `
       <div class="empty-state" style="padding:18px 16px; border:1px dashed #D7C49F; border-radius:18px; background:#FFF9F0; margin-bottom:18px; text-align:center; color:#5A4A28;">
@@ -3726,7 +3811,7 @@ function renderCheckout(){
           <svg viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
           ${a.line}
         </div>
-        ${isSelected ? '<div class="selected-pill"><svg viewBox="0 0 24 24" fill="none" stroke="#5C531F" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Selected</div>' : ''}
+        ${isSelected ? '<div class="delivery-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#5C531F" stroke-width="2.5"><path d="M3 12h2l2-4h10l2 4h2"/><path d="M7 18h10"/><circle cx="7.5" cy="18.5" r="1.5"/><circle cx="16.5" cy="18.5" r="1.5"/></svg>Delivery</div>' : ''}
       </div>`;
     }).join('');
   }
@@ -3750,7 +3835,7 @@ function renderCheckout(){
 
       <div class="cost-row"><span>Subtotal</span><span>₹${t.subtotal.toLocaleString('en-IN')}</span></div>
       <div class="cost-row"><span>Shipping</span><span>₹${t.shipping===0 ? '0' : t.shipping.toLocaleString('en-IN')}</span></div>
-
+      ${state.giftWrap.enabled ? `<div class="cost-row"><span>Gift wrap</span><span>₹${t.giftWrapCost.toLocaleString('en-IN')}</span></div>` : ''}
       <hr class="divider">
 
       <div class="cost-row total"><span>Total</span><span>₹${t.total.toLocaleString('en-IN')}</span></div>
@@ -3793,12 +3878,33 @@ function saveAddress(){
   }
   saveState(); renderCheckout(); renderAddresses(); toast('Address saved');
 }
+function openGiftWrapEditor(){
+  giftWrapEditing = true;
+  renderCheckout();
+  setTimeout(()=>{ const el = document.getElementById('giftMessageInput'); if(el) el.focus(); }, 0);
+}
+function saveGiftWrapMessage(){
+  const val = document.getElementById('giftMessageInput')?.value.trim() || '';
+  state.giftWrap = { enabled:true, message: val };
+  giftWrapEditing = false;
+  saveState(); renderCheckout();
+  toast('Gift note saved');
+}
+function cancelGiftWrapEditor(){
+  giftWrapEditing = false;
+  renderCheckout();
+}
+function removeGiftWrap(){
+  state.giftWrap = { enabled:false, message:'' };
+  giftWrapEditing = false;
+  saveState(); renderCheckout();
+}
 function goToPayment(){
   const items = checkoutItems();
   if(items.length===0){ toast('Your cart is empty'); return; }
   if(!state.selectedAddrId){ toast('Please select an address'); return; }
   const addr = state.addresses.find(a=>a.id===state.selectedAddrId);
-  const t = cartTotals(items, addr);
+  const t = cartTotals(items, addr, state.giftWrap);
   if(t.deliveryInfo && t.deliveryInfo.blocked){
     toast('Delivery is not available for this address. Please choose another address.');
     return;
@@ -3861,11 +3967,12 @@ function renderPayment(){
   }).join('');
   const items = checkoutItems();
   const selectedAddr = state.addresses.find(a=>a.id===state.selectedAddrId);
-  const t = cartTotals(items, selectedAddr);
+  const t = cartTotals(items, selectedAddr, state.giftWrap);
   const item = items[0];
   document.getElementById('paymentSummary').innerHTML = `
     <div class="cost-row"><span>Items (${(items && items.length>0) ? items.reduce((sum,p)=>sum+p.qty,0) : (Object.values(state.cart||{}).reduce((s,n)=>s+(n||0),0))})</span><span>₹${t.subtotal.toLocaleString('en-IN')}</span></div>
     <div class="cost-row"><span>Shipping</span><span>${t.shipping===0?'₹0':'₹'+t.shipping}</span></div>
+    ${state.giftWrap.enabled ? `<div class="cost-row"><span>Gift wrap</span><span>₹${t.giftWrapCost.toLocaleString('en-IN')}</span></div>` : ''}
     <hr class="divider">
     <div class="cost-row total"><span>Total Payable</span><span>₹${t.total.toLocaleString('en-IN')}</span></div>`;
 }
@@ -3969,24 +4076,27 @@ async function placeOrder(){
   if(items.length===0){ toast('No items to order'); return; }
   const addr = state.addresses.find(a=>a.id===state.selectedAddrId);
   if(!addr){ toast('Please select an address'); return; }
-  const t = cartTotals(items, addr);
+  const t = cartTotals(items, addr, state.giftWrap);
   const paymentMethod = state.selectedPayment || 'cod';
 
   if(usingLiveBackend){
     if(!state.token){ requireAuth(() => placeOrder()); return; }
     try{
       const parsedAddr = parseAddressExtras(addr);
+      const cleanedLine = stripParsedPartsFromLine(parsedAddr);
       const body = {
         items: items.map(i => ({ productId: i.id, qty: i.qty })),
         address: {
           name: parsedAddr.name,
           phone: parsedAddr.phone,
-          line: parsedAddr.line,
+          line: cleanedLine,
           city: parsedAddr.city || '',
           state: parsedAddr.state || '',
           pincode: parsedAddr.pincode || '',
         },
         paymentMethod,
+        giftWrap: !!state.giftWrap?.enabled,
+        giftMessage: state.giftWrap?.message || '',
       };
       const data = await apiFetch('/orders', { method:'POST', body: JSON.stringify(body) });
       const ord = data.order;
@@ -4002,11 +4112,16 @@ async function placeOrder(){
         paymentStatus: ord.paymentStatus || 'pending',
         date: new Date(ord.createdAt || Date.now()).toISOString(),
         status: ord.status || 'confirmed',
+        giftWrap: ord.giftWrap || false,
+        giftMessage: ord.giftMessage || '',
+        giftWrapCost: ord.giftWrap ? Number(ord.giftWrapCost || 30) : 0,
       };
 
       state.orders.unshift(order);
+      // clear local gift wrap state after placing an order so it doesn't persist for next user
+      state.giftWrap = { enabled:false, message: '' };
       if(buyNowMode){ buyNowMode=false; buyNowItem=null; } else { state.cart = {}; }
-      saveState(); updateBadges();
+      saveState(); updateBadges(); renderCheckout();
       lastOrderId = order.id;
 
       if(paymentMethod !== 'cod'){
@@ -4041,11 +4156,16 @@ async function placeOrder(){
   const orderId = 'AIIZ' + Math.floor(100000+Math.random()*899999);
   const order = {
     id: orderId, items, total: t.total, address: addr, payment: paymentMethod,
-    date: new Date().toISOString(), status: 'confirmed'
+    date: new Date().toISOString(), status: 'confirmed',
+    giftWrap: !!state.giftWrap?.enabled,
+    giftMessage: state.giftWrap?.message || '',
+    giftWrapCost: state.giftWrap?.enabled ? 30 : 0,
   };
   state.orders.unshift(order);
+  // clear local gift wrap state after placing an order in demo mode
+  state.giftWrap = { enabled:false, message: '' };
   if(buyNowMode){ buyNowMode=false; buyNowItem=null; } else { state.cart = {}; }
-  saveState(); updateBadges();
+  saveState(); updateBadges(); renderCheckout();
   lastOrderId = orderId;
   document.getElementById('successOrderId').textContent = 'Order No. ' + (orderId||'');
   document.getElementById('successTotalPaid').textContent = '₹'+t.total.toLocaleString('en-IN');
