@@ -685,9 +685,6 @@
     gap:18px;
     padding:0 16px 20px;
   }
-  @media (max-width:560px){
-    .related-row{ grid-template-columns:1fr; }
-  }
   .related-row .p-thumb{ height:136px; }
   .related-row::-webkit-scrollbar{ display:none; }
   .pd-section-title{ font-size:17px; letter-spacing:.5px; font-weight:700; color:var(--navy-900); margin:0; padding:0; }
@@ -745,8 +742,12 @@
   .pd-price-row .old{ font-size:14px; color:var(--muted); text-decoration:line-through;}
   .pd-price-row .off{ font-size:12px; color:var(--ok); font-weight:700; background:#E7F5EC; padding:3px 8px; border-radius:8px;}
   .pd-desc{ font-size:13px; color:#4B5566; line-height:1.75; margin-bottom:20px; }
-  .pd-desc.collapsed{ display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
+  .pd-desc.collapsed{ display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden; }
   .pd-desc-toggle{ font-size:12px; font-weight:700; color:var(--gold-500); margin-top:-10px; margin-bottom:14px; cursor:pointer; }
+  .pd-meta-row{ display:flex; flex-direction:column; gap:8px; margin:10px 0; }
+  .pd-qty-stock{ display:flex; flex-direction:column; gap:4px; }
+  .pd-qty-label{ font-size:13px; font-weight:600; color:var(--ink); }
+  .pd-stock-status{ font-size:13px; color:var(--ink); }
   .pd-section-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:0 20px; margin-top:24px; margin-bottom:14px; }
   .pd-section-head.pd-details-header{ cursor:pointer; justify-content:flex-start; gap:10px; margin-top:14px; margin-bottom:6px; padding:0; }
   .pd-section-head.pd-details-header .pd-section-title,
@@ -799,6 +800,21 @@
   .btn-gold{ background:var(--gold-500); color:var(--navy-950); }
   .btn-full{ width:100%; }
   .btn:disabled{ opacity:.5; cursor:not-allowed; }
+
+  .btn-sm{
+    flex:0 0 auto;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:6px 10px;
+    border-radius:8px;
+    font-weight:700;
+    font-size:12px;
+    text-transform:none;
+    min-width:56px;
+    height:32px;
+    cursor:pointer;
+  }
 
   /* ---------- Cart / list rows ---------- */
   .cart-row{ display:flex; gap:12px; padding:14px 18px; border-bottom:1px solid #EEE3C9; align-items:center; }
@@ -1386,7 +1402,7 @@
       </div>
       <div class="home-footer">
         <div class="footer-brand">
-          <div class="footer-logo">AIIIZ</div>
+          <div class="footer-logo">AIIZ</div>
           <div class="footer-subtitle">Timeless Jewellery, Crafted for You.</div>
           <div class="footer-tagline">Luxury | Trust | Elegance</div>
         </div>
@@ -1457,7 +1473,7 @@
             <span class="footer-divider-star">✦</span>
             <span class="footer-divider-line"></span>
           </div>
-          <div class="footer-copy-text">© 2026 AIIIZ Jewels</div>
+          <div class="footer-copy-text">© 2026 AIIZ Jewels</div>
           <div class="footer-copy-note">Designed with ❤️ in India</div>
           <div class="footer-copy-sub">Crafted with Elegance.</div>
         </div>
@@ -1525,9 +1541,12 @@
         <div class="pd-name" id="pdName"></div>
         <div class="pd-rating-row" id="pdRatingRow"></div>
         <div class="pd-price-row" id="pdPrice"></div>
-        <div style="display:flex; align-items:center; gap:14px; padding:8px 0;">
-          <div id="pdStockStatus" style="font-size:13px;"></div>
-          <div id="pdSize" style="font-size:14px; font-weight:600; color:var(--ink);"></div>
+        <div class="pd-meta-row">
+          <div id="pdSize" class="pd-size"></div>
+          <div class="pd-qty-stock">
+            <div id="pdQtyLabel" class="pd-qty-label"></div>
+            <div id="pdStockStatus" class="pd-stock-status"></div>
+          </div>
         </div>
         <div class="pd-desc collapsed" id="pdDesc"></div>
         <div class="pd-desc-toggle" id="pdDescToggle" onclick="togglePdDesc()">See more</div>
@@ -1564,7 +1583,7 @@
 
       <div class="home-footer">
         <div class="footer-brand">
-          <div class="footer-logo">AIIIZ</div>
+          <div class="footer-logo">AIIZ</div>
           <div class="footer-subtitle">Timeless Jewellery, Crafted for You.</div>
           <div class="footer-tagline">Luxury | Trust | Elegance</div>
         </div>
@@ -1635,7 +1654,7 @@
             <span class="footer-divider-star">✦</span>
             <span class="footer-divider-line"></span>
           </div>
-          <div class="footer-copy-text">© 2026 AIIIZ Jewels</div>
+          <div class="footer-copy-text">© 2026 AIIZ Jewels</div>
           <div class="footer-copy-note">Designed with ❤️ in India</div>
           <div class="footer-copy-sub">Crafted with Elegance.</div>
         </div>
@@ -2723,14 +2742,11 @@ function setupProductDetailScroll(){
     } else {
       sticky.classList.remove('hidden');
       sticky.classList.remove('inline');
-      // Only use placeholder height on mobile when sticky is visible
-      if(isMobile){
-        placeholder.classList.add('active');
-        placeholder.style.height = stickyHeight + 'px';
-      } else {
-        placeholder.classList.remove('active');
-        placeholder.style.height = '0px';
-      }
+      // Sticky bar is fixed to viewport bottom already — no need to
+      // reserve extra space in the document flow, which was causing
+      // a visible gap between "Product Details" and "Reviews".
+      placeholder.classList.remove('active');
+      placeholder.style.height = '0px';
     }
   };
 
@@ -3166,16 +3182,25 @@ function renderProductDetail(){
   
   // Display stock status
   const stockStatusEl = document.getElementById('pdStockStatus');
+  const qtyLabel = document.getElementById('pdQtyLabel');
+  if(qtyLabel){
+    qtyLabel.textContent = `Quantity: ${pdQty || 1}`;
+  }
   if(stockStatusEl) {
-    const isOutOfStock = p.stockStatus === 'out-of-stock' || p.stock <= 0;
-    const isLowStock = p.stockStatus === 'low-stock' || (p.stock > 0 && p.stock < 5);
+    const stockVal = p.stock == null || p.stock === '' ? null : Number(p.stock);
+    const hasStock = stockVal !== null && !Number.isNaN(stockVal);
+    const isOutOfStock = p.stockStatus === 'out-of-stock' || (hasStock && stockVal <= 0);
+    const isLowStock = p.stockStatus === 'low-stock' || (hasStock && stockVal > 0 && stockVal < 5);
+    const isInStock = !isOutOfStock && (p.stockStatus === 'in-stock' || hasStock);
     let statusHTML = '';
     if(isOutOfStock) {
       statusHTML = '<span style="color:#C4573D; font-weight:600; font-size:13px;">🚫 Out of Stock</span>';
     } else if(isLowStock) {
-      statusHTML = `<span style="color:#E67E22; font-weight:600; font-size:13px;">⚠️ Only ${p.stock} left</span>`;
-    } else {
+      statusHTML = `<span style="color:#E67E22; font-weight:600; font-size:13px;">⚠️ Only ${stockVal} left</span>`;
+    } else if(isInStock) {
       statusHTML = '<span style="color:#3E8C63; font-weight:600; font-size:13px;">✓ In Stock</span>';
+    } else {
+      statusHTML = '<span style="color:#6B7280; font-weight:600; font-size:13px;">N/A</span>';
     }
     stockStatusEl.innerHTML = statusHTML;
   }
@@ -3279,7 +3304,7 @@ function togglePdDetails(){
 /* ===================== RELATED PRODUCTS ===================== */
 function renderRelatedProducts(p){
   const wrap = document.getElementById('pdRelated');
-  const related = PRODUCTS.filter(x=>x.category===p.category && x.id!==p.id).slice(0,4);
+  const related = PRODUCTS.filter(x=>x.category===p.category && x.id!==p.id).slice(0,2);
   const section = wrap.previousElementSibling;
   if(related.length===0){
     wrap.innerHTML = '';
@@ -3744,24 +3769,23 @@ function renderCheckout(){
   <div style="border:1px solid #E5D9C8; border-radius:18px; padding:16px; background:#FEF8F2; margin:0 16px 18px;">
     <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
       <div>
-        <div style="font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px;"><span style="font-size:18px;">🎁</span>Gift wrap ?</div>
-        <div style="font-size:12px; color:#5A6B7A;">Add a gift note and we’ll wrap your order beautifully.</div>
+        <div style="font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px;"><span style="font-size:18px;">🎁</span>Gift wrap (optional)</div>
+        <div style="font-size:12px; color:#5A6B7A;">Add a gift note and we’ll wrap your order beautifully. Message is optional.</div>
       </div>
       <div style="text-align:right; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
         <div style="font-weight:700;">₹30</div>
         <div style="display:flex; gap:14px; align-items:center;">
           ${state.giftWrap.enabled
-            ? `<span onclick="openGiftWrapEditor()" title="Edit gift note" style="cursor:pointer; display:flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:50%; background:#fff; border:1px solid #E5DAC0;">
-                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9922B" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>
-               </span>`
-            : `<button class="btn btn-solid btn-sm" onclick="openGiftWrapEditor()">Add</button>`}
-          ${state.giftWrap.enabled ? `<span onclick="removeGiftWrap()" style="color:#C43A3A; font-weight:700; font-size:13px; cursor:pointer;">Remove</span>` : ''}
+            ? `<button class="btn btn-outline btn-sm" onclick="openGiftMessageEditor()">Message</button>`
+            : `<button class="btn btn-solid btn-sm" onclick="addGiftWrap()">Add</button>`}
+          ${(state.giftWrap.enabled || giftWrapEditing) ? `<span onclick="removeGiftWrap()" style="color:#C43A3A; font-weight:700; font-size:13px; cursor:pointer;">Remove</span>` : ''}
         </div>
       </div>
     </div>
 
     ${giftWrapEditing ? `
       <div style="margin-top:14px;">
+        <label style="display:block; margin-bottom:8px; font-weight:600; font-size:12px; color:#4B5566;">Gift message (optional)</label>
         <textarea id="giftMessageInput" rows="3" placeholder="Write your gift message here..."
           style="width:100%; padding:12px 14px; border:1px solid #E5DAC0; border-radius:10px; font-size:13px; font-family:'Inter',sans-serif; outline:none; resize:vertical; background:#fff;"
         >${escHtmlFrontend(state.giftWrap.message || '')}</textarea>
@@ -3770,9 +3794,9 @@ function renderCheckout(){
           <button class="btn btn-outline" onclick="cancelGiftWrapEditor()">Cancel</button>
         </div>
       </div>
-    ` : (state.giftWrap.enabled && state.giftWrap.message ? `
+    ` : (state.giftWrap.enabled ? `
       <div style="margin-top:10px; font-size:13px; color:#3E4A67; background:#fff; border:1px solid #EEE3C9; border-radius:10px; padding:10px 12px;">
-        ${escHtmlFrontend(state.giftWrap.message)}
+        ${state.giftWrap.message ? escHtmlFrontend(state.giftWrap.message) : 'Gift wrap added without a message.'}
       </div>
     ` : '')}
   </div>`;
@@ -3878,7 +3902,23 @@ function saveAddress(){
   }
   saveState(); renderCheckout(); renderAddresses(); toast('Address saved');
 }
-function openGiftWrapEditor(){
+function addGiftWrap(){
+  if(!state.giftWrap || typeof state.giftWrap !== 'object'){
+    state.giftWrap = { enabled:true, message:'' };
+  } else {
+    state.giftWrap.enabled = true;
+    state.giftWrap.message = state.giftWrap.message || '';
+  }
+  giftWrapEditing = false;
+  saveState(); renderCheckout();
+}
+function openGiftMessageEditor(){
+  if(!state.giftWrap || typeof state.giftWrap !== 'object'){
+    state.giftWrap = { enabled:true, message:'' };
+  } else {
+    state.giftWrap.enabled = true;
+  }
+  saveState();
   giftWrapEditing = true;
   renderCheckout();
   setTimeout(()=>{ const el = document.getElementById('giftMessageInput'); if(el) el.focus(); }, 0);
