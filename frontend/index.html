@@ -221,19 +221,25 @@
   .screen#screen-terms .subheader,
   .screen#screen-privacy .subheader,
   .screen#screen-refund .subheader,
-  .screen#screen-shipping .subheader{ position:sticky; top:0; z-index:30; background:var(--navy-900); color:var(--cream); height:64px; display:flex; align-items:center; justify-content:flex-start; padding:0 16px; }
+  .screen#screen-shipping .subheader,
+  .screen#screen-orders .subheader,
+  .screen#screen-addresses .subheader{ position:sticky; top:0; z-index:30; background:var(--navy-900); color:var(--cream); height:64px; display:flex; align-items:center; justify-content:flex-start; padding:0 16px; }
   .screen#screen-profile .subheader h2,
   .screen#screen-contact .subheader h2,
   .screen#screen-terms .subheader h2,
   .screen#screen-privacy .subheader h2,
   .screen#screen-refund .subheader h2,
-  .screen#screen-shipping .subheader h2{ margin:0; font-size:16px; font-weight:700; color:var(--cream); display:flex; align-items:center; gap:10px; }
+  .screen#screen-shipping .subheader h2,
+  .screen#screen-orders .subheader h2,
+  .screen#screen-addresses .subheader h2{ margin:0; font-size:16px; font-weight:700; color:var(--cream); display:flex; align-items:center; gap:10px; }
   .screen#screen-profile .subheader .back-btn,
   .screen#screen-contact .subheader .back-btn,
   .screen#screen-terms .subheader .back-btn,
   .screen#screen-privacy .subheader .back-btn,
   .screen#screen-refund .subheader .back-btn,
-  .screen#screen-shipping .subheader .back-btn{ position:static; width:auto; height:auto; background:transparent; border-radius:0; margin-right:8px; padding:0; display:inline-flex; align-items:center; color:var(--cream); }
+  .screen#screen-shipping .subheader .back-btn,
+  .screen#screen-orders .subheader .back-btn,
+  .screen#screen-addresses .subheader .back-btn{ position:static; width:auto; height:auto; background:transparent; border-radius:0; margin-right:8px; padding:0; display:inline-flex; align-items:center; color:var(--cream); }
   .screen#screen-tracking .subheader{ position:sticky; top:0; z-index:30; background:var(--navy-900); color:var(--cream); height:64px; display:flex; align-items:center; justify-content:flex-start; padding:0 16px; }
   .screen#screen-tracking .subheader h2{ margin:0; font-size:16px; font-weight:700; color:var(--cream); display:flex; align-items:center; gap:10px; }
   .screen#screen-tracking .subheader .back-btn{ position:static; width:auto; height:auto; background:transparent; border-radius:0; margin-right:8px; padding:0; display:inline-flex; align-items:center; color:var(--cream); }
@@ -1907,11 +1913,11 @@
           <div class="icon">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
           </div>
-          <div class="info-body">
-            <h3>Email Us</h3>
-            <p>support@aiiz.com</p>
-            <a href="mailto:support@aiiz.com"><button class="gold-btn">Email Us</button></a>
-          </div>
+            <div class="info-body">
+              <h3>Email Us</h3>
+              <p>Asmashaik1153@gmail.com</p>
+              <a href="mailto:Asmashaik1153@gmail.com"><button class="gold-btn">Email Us</button></a>
+            </div>
         </div>
 
         <div class="info-card">
@@ -3593,22 +3599,38 @@ function renderCart(){
   const el = document.getElementById('cartBody');
   const items = cartItemsDetailed();
   if(items.length===0){ el.innerHTML = emptyStateHtml('Your cart is empty','Add some beautiful jewellery to get started.'); return; }
-  const rows = items.map(p=>`
+  // Build rows with stock awareness. If a product has stock===0 or qty>stock, mark it out-of-stock.
+  const rows = items.map(p=>{
+    const stock = (p.stock == null) ? null : Number(p.stock);
+    const outOfStock = (stock !== null) && stock <= 0;
+    const qtyExceeds = (stock !== null) && (Number(p.qty) > stock);
+    const stockProblem = outOfStock || qtyExceeds;
+    return `
     <div class="cart-row">
       <div class="cart-thumb" style="overflow:hidden;">${productThumbHtml(p)}</div>
       <div class="cart-info">
         <div class="name">${p.name}</div>
         <div class="price">₹${p.price.toLocaleString('en-IN')}</div>
-        <div class="cart-remove" onclick="removeFromCart('${p.id}')">Remove</div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:8px;">
+          <div class="cart-remove" onclick="removeFromCart('${p.id}')">Remove</div>
+          ${stockProblem ? `<div class="out-of-stock" style="color:#C43A3A;font-weight:700;padding:6px 10px;border-radius:8px;background:rgba(196,58,58,0.06);">Out of stock</div>` : ''}
+        </div>
       </div>
-      <div class="qty-box small">Qty: ${p.qty}</div>
-    </div>`).join('');
+      <div class="qty-box small">Qty: ${p.qty}${(stock!==null && !stockProblem) ? ` • ${stock} in stock` : ''}</div>
+    </div>`;
+  }).join('');
   const selectedAddr = state.addresses.find(a=>a.id===state.selectedAddrId) || (state.addresses.length ? state.addresses[0] : null);
   const hasSavedAddress = state.addresses.length > 0;
   const t = cartTotals(items, selectedAddr);
   const shippingLabel = selectedAddr ? (t.shipping===0 ? 'FREE' : '₹'+t.shipping) : 'Available at checkout';
   const totalLabel = selectedAddr ? `₹${t.total.toLocaleString('en-IN')}` : `₹${t.subtotal.toLocaleString('en-IN')} + shipping`;
   const deliveryText = selectedAddr && t.deliveryInfo ? t.deliveryInfo.text : (hasSavedAddress ? 'Saved address available. Confirm at checkout.' : 'Delivery charge available at checkout');
+  // Determine if any cart row has stock problems and disable checkout accordingly
+  const hasStockProblem = items.some(p => {
+    const stock = (p.stock == null) ? null : Number(p.stock);
+    return (stock !== null) && (stock <= 0 || Number(p.qty) > stock);
+  });
+
   el.innerHTML = rows + `
     <div style="padding:0 18px 24px;">
       <div style="font-weight:700; font-size:14px; margin-bottom:12px; color:#081226;">ORDER SUMMARY</div>
@@ -3625,7 +3647,8 @@ function renderCart(){
         <div style="color:#5A6B7A;">${deliveryText}</div>
       </div>
 
-      <button class="btn btn-solid btn-full" onclick="nav('checkout')">PROCEED TO CHECKOUT</button>
+      <button class="btn btn-solid btn-full" onclick="nav('checkout')" ${hasStockProblem ? 'disabled' : ''}>PROCEED TO CHECKOUT</button>
+      ${hasStockProblem ? '<div style="margin-top:8px;color:#C43A3A;font-size:13px;font-weight:600;">Remove out-of-stock items to continue to checkout.</div>' : ''}
 
       <div style="text-align:center; font-size:11px; color:#7C889B; margin-top:12px;">
         🔒 Secure payment powered by Razorpay
