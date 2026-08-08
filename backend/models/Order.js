@@ -39,6 +39,9 @@ const orderSchema = new mongoose.Schema(
     payment: { type: mongoose.Schema.Types.ObjectId, ref: 'Payment' },
     paidAt: { type: Date },
     paymentDetails: { type: String },
+    giftWrap: { type: Boolean, default: false },
+    giftMessage: { type: String, default: '' },
+    giftWrapCost: { type: Number, default: 0 },
     deliveryDate: { type: Date },
     deliveryState: {
       type: String,

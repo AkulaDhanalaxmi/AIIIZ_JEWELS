@@ -97,23 +97,25 @@ function getShippingInfo(address, subtotal, settings) {
   return { group, shipping, range, text, blocked: false };
 }
 
-async function calcTotals(items, address) {
+async function calcTotals(items, address, giftWrap = false) {
   const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
   const settings = await getDeliverySettings();
   const shippingInfo = getShippingInfo(address, subtotal, settings);
+  const giftWrapCost = giftWrap ? 30 : 0;
   if (shippingInfo.blocked) {
-    return { subtotal, shipping: 0, tax: Math.round(subtotal * 0.03), total: subtotal + Math.round(subtotal * 0.03), deliveryBlocked: true, deliveryInfo: shippingInfo };
+    const tax = Math.round(subtotal * 0.03);
+    return { subtotal, shipping: 0, tax, giftWrapCost, total: subtotal + tax + giftWrapCost, deliveryBlocked: true, deliveryInfo: shippingInfo };
   }
   const shipping = shippingInfo.shipping;
   const tax = Math.round(subtotal * 0.03);
-  const total = subtotal + shipping + tax;
-  return { subtotal, shipping, tax, total, deliveryInfo: shippingInfo };
+  const total = subtotal + shipping + tax + giftWrapCost;
+  return { subtotal, shipping, tax, giftWrapCost, total, deliveryInfo: shippingInfo };
 }
 
 // POST /api/orders  { items?: [{productId, qty}], address, paymentMethod }
 // If `items` is omitted, the order is built from the user's current cart (checkout flow).
 exports.placeOrder = async (req, res) => {
-  const { items: directItems, address, paymentMethod } = req.body;
+  const { items: directItems, address, paymentMethod, giftWrap, giftMessage } = req.body;
   if (!address || !paymentMethod) {
     return res.status(400).json({ message: 'Address and payment method are required' });
   }
@@ -138,7 +140,7 @@ exports.placeOrder = async (req, res) => {
     price: i.product.price,
     qty: i.qty,
   }));
-  const totals = await calcTotals(orderItems, address);
+  const totals = await calcTotals(orderItems, address, !!giftWrap);
   if (totals.deliveryBlocked) {
     return res.status(400).json({ message: 'Delivery is not available for this address' });
   }
@@ -152,6 +154,9 @@ exports.placeOrder = async (req, res) => {
     address,
     paymentMethod,
     paymentStatus: 'pending',
+    giftWrap: !!giftWrap,
+    giftMessage: giftMessage ? String(giftMessage).trim() : '',
+    giftWrapCost: totals.giftWrapCost,
     ...totals,
     status: 'confirmed',
     statusHistory: [{ status: 'confirmed' }],

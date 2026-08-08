@@ -17,6 +17,7 @@ const reviewRoutes = require('./routes/reviewRoutes');
 const settingRoutes = require('./routes/settingRoutes');
 const productManagementRoutes = require('./routes/productManagementRoutes');
 const returnRoutes = require('./routes/returnRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 const rawBodySaver = require('./middleware/webhookRawBody');
 
 const app = express();
@@ -60,6 +61,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/settings', settingRoutes);
 app.use('/api/product-management', productManagementRoutes);
 app.use('/api/returns', returnRoutes);
+app.use('/api/uploads', uploadRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
