@@ -237,7 +237,7 @@
         <div style="padding:20px;">
           <div class="field-row"><div class="field"><label>Store Name</label><input id="deliveryStoreName" placeholder="Aiiz Store"></div><div class="field"><label>Phone</label><input id="deliveryStorePhone" placeholder="1234567890"></div></div>
           <div class="field-row"><div class="field"><label>Address</label><input id="deliveryStoreAddress" placeholder="123 Main Street"></div><div class="field"><label>Pincode</label><input id="deliveryStorePincode" placeholder="500001"></div></div>
-          <div class="field-row"><div class="field"><label>City</label><input id="deliveryStoreCity" placeholder="Hyderabad"></div><div class="field"><label>State</label><input id="deliveryStoreState" placeholder="Telangana"></div></div>
+          <div class="field-row"><div class="field"><label>City</label><input id="deliveryStoreCity" placeholder="Hyderabad"></div><div class="field"><label>District</label><input id="deliveryStoreDistrict" placeholder="Hanumakonda"></div><div class="field"><label>State</label><input id="deliveryStoreState" placeholder="Telangana"></div></div>
         </div>
       </div>
       <div class="card">
@@ -749,7 +749,7 @@ function parseDeliveryRange(value, fallback){
 }
 
 function setStoreAddressEditable(enabled) {
-  ['deliveryStoreName', 'deliveryStorePhone', 'deliveryStoreAddress', 'deliveryStorePincode', 'deliveryStoreCity', 'deliveryStoreState'].forEach(id => {
+  ['deliveryStoreName', 'deliveryStorePhone', 'deliveryStoreAddress', 'deliveryStorePincode', 'deliveryStoreCity', 'deliveryStoreDistrict', 'deliveryStoreState'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.disabled = !enabled;
   });
@@ -769,6 +769,7 @@ async function loadDeliverySettings(){
     address: '5-1-119 Kumpalli, Bokkalgadda, Hanumakonda',
     pincode: '',
     city: 'Hanumakonda',
+    district: 'Hanumakonda',
     state: 'Telangana',
     phone: '8880001886',
   };
@@ -784,6 +785,7 @@ async function loadDeliverySettings(){
     document.getElementById('deliveryStoreAddress').value = store.address || defaultStoreInfo.address;
     document.getElementById('deliveryStorePincode').value = store.pincode || defaultStoreInfo.pincode;
     document.getElementById('deliveryStoreCity').value = store.city || defaultStoreInfo.city;
+    document.getElementById('deliveryStoreDistrict').value = store.district || defaultStoreInfo.district || '';
     document.getElementById('deliveryStoreState').value = store.state || defaultStoreInfo.state;
     document.getElementById('deliveryStorePhone').value = store.phone || defaultStoreInfo.phone;
     setStoreAddressEditable(false);
@@ -831,6 +833,7 @@ async function saveDeliverySettings(){
     address: document.getElementById('deliveryStoreAddress').value.trim(),
     pincode: document.getElementById('deliveryStorePincode').value.trim(),
     city: document.getElementById('deliveryStoreCity').value.trim(),
+    district: document.getElementById('deliveryStoreDistrict').value.trim(),
     state: document.getElementById('deliveryStoreState').value.trim(),
     phone: document.getElementById('deliveryStorePhone').value.trim(),
   };

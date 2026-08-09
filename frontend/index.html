@@ -99,7 +99,7 @@
   @media (max-width:760px){
     .topbar{ flex-wrap:nowrap; align-items:center; padding:14px 16px 12px; gap:12px; }
     .brand{ min-width:0; gap:10px; }
-    .brand-logo{ max-height:48px; }
+    .brand-logo{ max-height:64px; }
     .top-icons{ width:auto; justify-content:flex-end; gap:10px; min-width:0; }
     .top-icons .icon-btn{ flex-shrink:0; }
     .brand .name{ font-size:18px; }
@@ -164,7 +164,7 @@
     background:var(--navy-900);
     color:var(--cream);
     height:64px;
-    padding:0 16px;
+    padding:0 16px 0 10px;
     display:flex; align-items:center; justify-content:space-between;
   }
   .brand{ display:flex; align-items:center; }
@@ -185,7 +185,7 @@
   }
   .brand-logo{
     display:block;
-    height:48px;
+    height:64px;
     width:auto;
     object-fit:contain;
   }
@@ -193,7 +193,7 @@
     display:inline-flex;
     align-items:center;
     gap:2px;
-    margin-left:10px;
+    margin-left:6px;
     font-family:'Cormorant Garamond', serif;
     font-weight:700;
     font-size:19px;
@@ -871,6 +871,7 @@
 
   .options{ padding:0 16px; display:flex; flex-direction:column; gap:10px; }
   .option{ display:flex; align-items:center; gap:12px; background:#FFFFFF; border:1px solid #ECECEC; border-radius:10px; padding:12px 14px; cursor:pointer; }
+  .option.disabled{ opacity:0.6; cursor:not-allowed; pointer-events:none; }
   .option.selected{ background:#FDF6E3; border:1px solid #E7B84C; }
   .option-icon{ width:34px; height:34px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:#F5F5F5; }
   .option-icon.upi{ background:#F1F1F1; }
@@ -3701,7 +3702,7 @@ function renderCart(){
           <div style="min-width:36px; text-align:center; font-weight:700;">${p.qty}</div>
           <button class="qty-btn" onclick="setCartQty('${p.id}', ${Number(p.qty)+1})" ${plusDisabled ? 'disabled' : ''}>+</button>
         </div>
-        ${outOfStock ? `<div style="color:#C43A3A;font-size:13px;font-weight:600;">This item is out of stock. Remove it to continue.</div>` : qtyExceeds ? `<div style="color:#C43A3A;font-size:13px;font-weight:600;">Reduce quantity to ${stock}</div>` : (stock!==null ? `<div style="font-size:12px;color:#6B7280;">${stock} in stock</div>` : '') }
+        ${outOfStock ? '' : qtyExceeds ? `<div style="color:#D97706;font-size:13px;font-weight:600;">1 in stock</div>` : (stock!==null ? `<div style="font-size:12px;color:#6B7280;">${stock} in stock</div>` : '') }
       </div>
     </div>`;
   }).join('');
@@ -3982,14 +3983,13 @@ function saveAddressStandalone(){ const name=document.getElementById('fName2').v
 
 /* ===================== PAYMENT ===================== */
 const paymentMethods = [
-  {id:'upi', name:'UPI (Google Pay / PhonePe)', icon:'📱', unavailable:true},
-  {id:'card', name:'Credit / Debit Card', icon:'💳', unavailable:true},
-  {id:'netbanking', name:'Net Banking', icon:'🏦', unavailable:true},
+  {id:'upi', name:'UPI (Google Pay / PhonePe)', icon:'📱', unavailable:false},
+  {id:'card', name:'Credit / Debit Card', icon:'💳', unavailable:false},
+  {id:'netbanking', name:'Net Banking', icon:'🏦', unavailable:false},
   {id:'cod', name:'Cash on Delivery', icon:'💵', unavailable:false},
 ];
 function renderPayment(){
   if(!state.selectedPayment) state.selectedPayment='cod';
-  if(!usingLiveBackend && state.selectedPayment !== 'cod') state.selectedPayment='cod';
   document.getElementById('payList').innerHTML = paymentMethods.map(m=>{
     const icon = m.id==='upi' ? '<svg viewBox="0 0 24 24" width="20" height="20"><text x="0" y="17" font-size="15" font-weight="700" fill="#4285F4">G</text></svg>' : m.id==='card' ? '<svg viewBox="0 0 24 24" width="20" height="20"><rect x="1" y="6" width="22" height="12" rx="2" fill="#1A1F71"/><circle cx="15" cy="12" r="4" fill="#EB001B" opacity="0.85"/><circle cx="19" cy="12" r="4" fill="#F79E1B" opacity="0.85"/></svg>' : '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#333" stroke-width="1.5"><path d="M3 10l9-6 9 6"/><rect x="4" y="10" width="16" height="9"/><path d="M2 21h20"/></svg>';
     const enabled = !m.unavailable;
@@ -4020,7 +4020,13 @@ function renderPayment(){
     <hr class="divider">
     <div class="cost-row total"><span>Total Payable</span><span>₹${t.total.toLocaleString('en-IN')}</span></div>`;
 }
-function selectPayment(id){ state.selectedPayment=id; saveState(); renderPayment(); }
+function selectPayment(id){
+  const method = paymentMethods.find(m => m.id === id);
+  if (!method || method.unavailable) return;
+  state.selectedPayment = id;
+  saveState();
+  renderPayment();
+}
 
 async function loadRazorpayScript(){
   if(window.Razorpay) return true;
@@ -4169,7 +4175,6 @@ async function placeOrder(){
       state.orders.unshift(order);
       // clear local gift wrap state after placing an order so it doesn't persist for next user
       state.giftWrap = { enabled:false, message: '' };
-      if(buyNowMode){ buyNowMode=false; buyNowItem=null; } else { state.cart = {}; }
       saveState(); updateBadges(); renderCheckout();
       lastOrderId = order.id;
 
@@ -4179,13 +4184,17 @@ async function placeOrder(){
           await openRazorpayCheckout(order, checkoutData);
           order.paymentStatus = 'paid';
           order.status = 'confirmed';
-          saveState();
+          if(buyNowMode){ buyNowMode=false; buyNowItem=null; } else { state.cart = {}; }
+          saveState(); updateBadges();
         } catch(err){
           order.paymentStatus = 'failed';
           saveState();
           toast(err.message || 'Payment failed. Please try again.');
           return;
         }
+      } else {
+        if(buyNowMode){ buyNowMode=false; buyNowItem=null; } else { state.cart = {}; }
+        saveState(); updateBadges();
       }
 
       nav('home', {}, {replace:true});
