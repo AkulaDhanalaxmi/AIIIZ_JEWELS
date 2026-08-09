@@ -115,64 +115,82 @@ async function calcTotals(items, address, giftWrap = false) {
 // POST /api/orders  { items?: [{productId, qty}], address, paymentMethod }
 // If `items` is omitted, the order is built from the user's current cart (checkout flow).
 exports.placeOrder = async (req, res) => {
-  const { items: directItems, address, paymentMethod, giftWrap, giftMessage } = req.body;
-  if (!address || !paymentMethod) {
-    return res.status(400).json({ message: 'Address and payment method are required' });
-  }
+  console.time('placeOrder:overall');
+  try {
+    const { items: directItems, address, paymentMethod, giftWrap, giftMessage } = req.body;
+    if (!address || !paymentMethod) {
+      return res.status(400).json({ message: 'Address and payment method are required' });
+    }
 
-  let sourceItems = directItems;
-  if (!sourceItems) {
-    const cart = await Cart.findOne({ user: req.user._id }).populate('items.product', 'name price stock');
-    if (!cart || cart.items.length === 0) return res.status(400).json({ message: 'Cart is empty' });
-    sourceItems = cart.items.map((i) => ({ productId: i.product._id, qty: i.qty, product: i.product }));
-  } else {
-    const productIds = sourceItems.map((i) => i.productId);
-    const products = await Product.find({ _id: { $in: productIds } }).select('name price stock');
-    sourceItems = sourceItems.map((i) => ({
-      ...i,
-      product: products.find((p) => p._id.toString() === i.productId),
+    let sourceItems = directItems;
+    if (!sourceItems) {
+      console.time('placeOrder:load-cart');
+      const cart = await Cart.findOne({ user: req.user._id }).populate('items.product', 'name price stock');
+      console.timeEnd('placeOrder:load-cart');
+      if (!cart || cart.items.length === 0) return res.status(400).json({ message: 'Cart is empty' });
+      sourceItems = cart.items.map((i) => ({ productId: i.product._id, qty: i.qty, product: i.product }));
+    } else {
+      const productIds = sourceItems.map((i) => i.productId);
+      console.time('placeOrder:load-products');
+      const products = await Product.find({ _id: { $in: productIds } }).select('name price stock');
+      console.timeEnd('placeOrder:load-products');
+      sourceItems = sourceItems.map((i) => ({
+        ...i,
+        product: products.find((p) => p._id.toString() === i.productId),
+      }));
+    }
+
+    console.time('placeOrder:build-order-items');
+    const orderItems = sourceItems.map((i) => ({
+      product: i.product._id,
+      name: i.product.name,
+      price: i.product.price,
+      qty: i.qty,
     }));
+    console.timeEnd('placeOrder:build-order-items');
+
+    console.time('placeOrder:calc-totals');
+    const totals = await calcTotals(orderItems, address, !!giftWrap);
+    console.timeEnd('placeOrder:calc-totals');
+    if (totals.deliveryBlocked) {
+      return res.status(400).json({ message: 'Delivery is not available for this address' });
+    }
+
+    console.time('placeOrder:create-order');
+    const order = await Order.create({
+      orderNumber: generateOrderNumber(),
+      user: req.user._id,
+      customerName: req.user.name,
+      customerEmail: req.user.email,
+      items: orderItems,
+      address,
+      paymentMethod,
+      paymentStatus: 'pending',
+      giftWrap: !!giftWrap,
+      giftMessage: giftMessage ? String(giftMessage).trim() : '',
+      giftWrapCost: totals.giftWrapCost,
+      ...totals,
+      status: 'confirmed',
+      statusHistory: [{ status: 'confirmed' }],
+    });
+    console.timeEnd('placeOrder:create-order');
+
+    console.time('placeOrder:decrement-stock');
+    await Promise.all(
+      orderItems.map((i) => Product.findByIdAndUpdate(i.product, { $inc: { stock: -i.qty } }))
+    );
+    console.timeEnd('placeOrder:decrement-stock');
+
+    if (!directItems) {
+      console.time('placeOrder:clear-cart');
+      await Cart.findOneAndUpdate({ user: req.user._id }, { items: [] });
+      console.timeEnd('placeOrder:clear-cart');
+    }
+
+    res.status(201).json({ order });
+  } finally {
+    console.timeEnd('placeOrder:overall');
   }
-
-  const orderItems = sourceItems.map((i) => ({
-    product: i.product._id,
-    name: i.product.name,
-    price: i.product.price,
-    qty: i.qty,
-  }));
-  const totals = await calcTotals(orderItems, address, !!giftWrap);
-  if (totals.deliveryBlocked) {
-    return res.status(400).json({ message: 'Delivery is not available for this address' });
-  }
-
-  const order = await Order.create({
-    orderNumber: generateOrderNumber(),
-    user: req.user._id,
-    customerName: req.user.name,
-    customerEmail: req.user.email,
-    items: orderItems,
-    address,
-    paymentMethod,
-    paymentStatus: 'pending',
-    giftWrap: !!giftWrap,
-    giftMessage: giftMessage ? String(giftMessage).trim() : '',
-    giftWrapCost: totals.giftWrapCost,
-    ...totals,
-    status: 'confirmed',
-    statusHistory: [{ status: 'confirmed' }],
-  });
-
-  // Decrement stock
-  await Promise.all(
-    orderItems.map((i) => Product.findByIdAndUpdate(i.product, { $inc: { stock: -i.qty } }))
-  );
-
-  // Clear cart if this was a cart-based checkout
-  if (!directItems) {
-    await Cart.findOneAndUpdate({ user: req.user._id }, { items: [] });
-  }
-
-  res.status(201).json({ order });
 };
 
 // GET /api/orders (current user's orders)

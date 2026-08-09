@@ -685,7 +685,6 @@
     gap:18px;
     padding:0 16px 20px;
   }
-  .related-row .p-thumb{ height:136px; }
   .related-row::-webkit-scrollbar{ display:none; }
   .pd-section-title{ font-size:17px; letter-spacing:.5px; font-weight:700; color:var(--navy-900); margin:0; padding:0; }
   .pd-section-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:0 20px; margin-top:24px; margin-bottom:14px; }
@@ -1798,7 +1797,7 @@
         <p>Thank you for shopping with Aiiz. Your order has been confirmed.</p>
         <div class="order-id" id="successOrderId"></div>
         <div class="success-summary">
-          <div class="summary-row"><span>Total Paid</span><strong id="successTotalPaid">₹0</strong></div>
+          <div class="summary-row"><span>Total</span><strong id="successTotalPaid">₹0</strong></div>
           <div class="summary-row"><span>Payment Method</span><strong id="successPaymentMethod">—</strong></div>
           <div class="summary-row total"><span>Estimated Delivery</span><strong id="successDeliveryEstimate">Aug 7 - Aug 9</strong></div>
         </div>
@@ -1953,8 +1952,8 @@
           </div>
           <div class="info-body">
             <h3>Call Us</h3>
-            <p>+91 88800 01886</p>
-            <a href="tel:+918880001886"><button class="gold-btn">Call Now</button></a>
+            <p>+91 8096651267</p>
+            <a href="tel:+918096651267"><button class="gold-btn">Call Now</button></a>
           </div>
         </div>
 
@@ -1975,10 +1974,10 @@
           </div>
           <div class="info-body">
             <h3>Visit Us</h3>
-            <p>Aiiz Store — 5-1-119 Kumpalli, Bokkalgadda, Hanumakonda</p>
+            <p>Aiiz Store — 5-1-119 Kumarpalli, Bokkalgadda, Hanumakonda</p>
             <div class="map-preview">
-              <a href="https://www.google.com/maps/search/?api=1&query=5-1-119+Kumpalli+Bokkalgadda+Hanumakonda" target="_blank" aria-label="Open in Google Maps" style="display:block;width:100%;height:100%;">
-                <iframe src="https://maps.google.com/maps?q=5-1-119%20Kumpalli%20Bokkalgadda%20Hanumakonda&output=embed" style="width:100%;height:100%;border:0;" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+              <a href="https://www.google.com/maps/search/?api=1&query=5-1-119+Kumarpalli+Bokkalgadda+Hanumakonda" target="_blank" aria-label="Open in Google Maps" style="display:block;width:100%;height:100%;">
+                <iframe src="https://maps.google.com/maps?q=5-1-119%20Kumarpalli%20Bokkalgadda%20Hanumakonda&output=embed" style="width:100%;height:100%;border:0;" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
               </a>
             </div>
           </div>
@@ -1990,7 +1989,7 @@
           </div>
           <div class="info-body">
             <h3>Business Hours</h3>
-            <p>Mon – Sat: 10:00 AM – 6:00 PM IST</p>
+            <p>Mon – Sat: 10:00 AM – 7:00 PM IST</p>
           </div>
         </div>
 
@@ -2796,7 +2795,7 @@ function buildRoutePath(screen, params){
     case 'terms': return '#/terms';
     case 'privacy': return '#/privacy';
     case 'about': return '#/about';
-    case 'success': return '#/success';
+    case 'success': return params.orderId ? `#/success/${encodeURIComponent(params.orderId)}` : '#/success';
     case 'auth': {
       const base = '#/auth';
       const query = new URLSearchParams();
@@ -2836,7 +2835,7 @@ function parseRoute(hash){
   else if(segments[0]==='terms'){ route.screen = 'terms'; }
   else if(segments[0]==='privacy'){ route.screen = 'privacy'; }
   else if(segments[0]==='about'){ route.screen = 'about'; }
-  else if(segments[0]==='success'){ route.screen = 'success'; }
+  else if(segments[0]==='success'){ route.screen = 'success'; route.params.orderId = segments[1] || ''; }
   else if(segments[0]==='auth'){ route.screen = 'auth'; }
   else { route.screen = 'home'; }
   if(queryString){
@@ -2864,6 +2863,11 @@ function nav(screen, params, opts){
   if(isLoggedIn() && screen === 'auth'){
     screen = 'home';
     params = {};
+  }
+
+  if((screen === 'checkout' || screen === 'payment') && checkoutItems().length === 0){
+    nav('home', {}, {replace:true});
+    return;
   }
   
   const targetHash = buildRoutePath(screen, params);
@@ -2906,6 +2910,7 @@ function nav(screen, params, opts){
   if(screen==='addresses'){ renderAddresses(); }
   if(screen==='payment'){ renderPayment(); }
   if(screen==='tracking'){ renderTracking(params.orderId); }
+   if(screen==='success'){ renderSuccessScreen(params.orderId || lastOrderId); }
   if(screen==='orders'){ loadMyOrders().then(()=>renderOrders()); }
   if(screen==='return-request'){ initReturnRequest(params.orderId); }
   if(screen==='categories'){ renderAllCategories(); }
@@ -3184,7 +3189,7 @@ function renderProductDetail(){
   const stockStatusEl = document.getElementById('pdStockStatus');
   const qtyLabel = document.getElementById('pdQtyLabel');
   if(qtyLabel){
-    qtyLabel.textContent = `Quantity: ${pdQty || 1}`;
+    qtyLabel.textContent = pdQty > 1 ? `Quantity: ${pdQty}` : '';
   }
   if(stockStatusEl) {
     const stockVal = p.stock == null || p.stock === '' ? null : Number(p.stock);
@@ -3678,7 +3683,7 @@ function renderCart(){
     const outOfStock = (stock !== null) && stock <= 0;
     const qtyExceeds = (stock !== null) && (Number(p.qty) > stock);
     const stockProblem = outOfStock || qtyExceeds;
-    const plusDisabled = (stock !== null) && (Number(p.qty) >= stock);
+    const plusDisabled = (stock !== null) && (stock <= 0 || Number(p.qty) >= stock);
     return `
     <div class="cart-row">
       <div class="cart-thumb" style="overflow:hidden;">${productThumbHtml(p)}</div>
@@ -3687,7 +3692,7 @@ function renderCart(){
         <div class="price">₹${p.price.toLocaleString('en-IN')}</div>
         <div style="display:flex;gap:10px;align-items:center;margin-top:8px;">
           <div class="cart-remove" onclick="removeFromCart('${p.id}')">Remove</div>
-          ${stockProblem ? `<div class="out-of-stock" style="color:#C43A3A;font-weight:700;padding:6px 10px;border-radius:8px;background:rgba(196,58,58,0.06);">Only ${stock} in stock</div>` : ''}
+          ${outOfStock ? `<div class="out-of-stock" style="color:#C43A3A;font-weight:700;padding:6px 10px;border-radius:8px;background:rgba(196,58,58,0.06);">🚫 Out of stock</div>` : ''}
         </div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
@@ -3696,7 +3701,7 @@ function renderCart(){
           <div style="min-width:36px; text-align:center; font-weight:700;">${p.qty}</div>
           <button class="qty-btn" onclick="setCartQty('${p.id}', ${Number(p.qty)+1})" ${plusDisabled ? 'disabled' : ''}>+</button>
         </div>
-        ${ (stock!==null && qtyExceeds) ? `<div style="color:#C43A3A;font-size:13px;font-weight:600;">Reduce quantity to ${stock} or below to proceed.</div>` : (stock!==null ? `<div style="font-size:12px;color:#6B7280;">${stock} in stock</div>` : '') }
+        ${outOfStock ? `<div style="color:#C43A3A;font-size:13px;font-weight:600;">This item is out of stock. Remove it to continue.</div>` : qtyExceeds ? `<div style="color:#C43A3A;font-size:13px;font-weight:600;">Reduce quantity to ${stock}</div>` : (stock!==null ? `<div style="font-size:12px;color:#6B7280;">${stock} in stock</div>` : '') }
       </div>
     </div>`;
   }).join('');
@@ -3729,7 +3734,6 @@ function renderCart(){
       </div>
 
       <button class="btn btn-solid btn-full" onclick="nav('checkout')" ${hasStockProblem ? 'disabled' : ''}>PROCEED TO CHECKOUT</button>
-      ${hasStockProblem ? '<div style="margin-top:8px;color:#C43A3A;font-size:13px;font-weight:600;">Remove out-of-stock items to continue to checkout.</div>' : ''}
 
       <div style="text-align:center; font-size:11px; color:#7C889B; margin-top:12px;">
         🔒 Secure payment powered by Razorpay
@@ -4140,13 +4144,18 @@ async function placeOrder(){
       };
       const data = await apiFetch('/orders', { method:'POST', body: JSON.stringify(body) });
       const ord = data.order;
+
+      if(ord.total != null && Math.abs(Number(ord.total) - t.total) > 0.5){
+        console.warn('Order total mismatch — checkout showed ₹'+t.total+', backend calculated ₹'+ord.total);
+      }
+
       const order = {
         id: ord._id,
         orderNumber: ord.orderNumber,
         customerName: ord.customerName || state.user?.name,
         customerEmail: ord.customerEmail || state.user?.email,
         items: ord.items,
-        total: ord.total,
+        total: t.total,
         address: ord.address,
         payment: ord.paymentMethod,
         paymentStatus: ord.paymentStatus || 'pending',
@@ -4179,13 +4188,8 @@ async function placeOrder(){
         }
       }
 
-      document.getElementById('successOrderId').textContent = 'Order No. ' + (order.orderNumber || order.id || '');
-      document.getElementById('successTotalPaid').textContent = '₹'+order.total.toLocaleString('en-IN');
-      document.getElementById('successPaymentMethod').textContent = formatPaymentMethodLabel(order.payment);
-      const liveSubtotal = order.items.reduce((s,i)=>s+i.price*i.qty,0);
-      const liveDelivery = getShippingDetails(order.address, liveSubtotal);
-      document.getElementById('successDeliveryEstimate').textContent = liveDelivery.text;
-      nav('success');
+      nav('home', {}, {replace:true});
+      nav('success', {orderId: order.id});
       return;
     }catch(err){
       toast(err.message || 'Could not place order');
@@ -4202,17 +4206,14 @@ async function placeOrder(){
     giftWrapCost: state.giftWrap?.enabled ? 30 : 0,
   };
   state.orders.unshift(order);
+   order.total = t.total;
   // clear local gift wrap state after placing an order in demo mode
   state.giftWrap = { enabled:false, message: '' };
   if(buyNowMode){ buyNowMode=false; buyNowItem=null; } else { state.cart = {}; }
   saveState(); updateBadges(); renderCheckout();
   lastOrderId = orderId;
-  document.getElementById('successOrderId').textContent = 'Order No. ' + (orderId||'');
-  document.getElementById('successTotalPaid').textContent = '₹'+t.total.toLocaleString('en-IN');
-  document.getElementById('successPaymentMethod').textContent = formatPaymentMethodLabel(paymentMethod);
-  const demoDelivery = getShippingDetails(order.address, t.subtotal);
-  document.getElementById('successDeliveryEstimate').textContent = demoDelivery.text;
-  nav('success');
+  nav('home', {}, {replace:true});
+  nav('success', {orderId: order.id});
 }
 
 /* ===================== TRACKING ===================== */
@@ -4276,6 +4277,27 @@ async function loadMyOrders(){
     }));
     saveState();
   }catch(e){ console.warn('Could not load orders', e); }
+}
+function renderSuccessScreen(orderId){
+  const o = state.orders.find(x => x.id === orderId) || state.orders[0];
+  if(!o){
+    document.getElementById('successOrderId').textContent = '';
+    document.getElementById('successTotalPaid').textContent = '₹0';
+    document.getElementById('successPaymentMethod').textContent = '—';
+    document.getElementById('successDeliveryEstimate').textContent = '—';
+    return;
+  }
+  document.getElementById('successOrderId').textContent = 'Order No. ' + (o.orderNumber || o.id || '');
+  document.getElementById('successTotalPaid').textContent = '₹' + o.total.toLocaleString('en-IN');
+  document.getElementById('successPaymentMethod').textContent = formatPaymentMethodLabel(o.payment);
+  const subtotal = (o.items || []).reduce((s,i)=>s+(i.price||0)*(i.qty||1), 0);
+  const deliveryInfo = o.address ? getShippingDetails(o.address, subtotal) : null;
+  document.getElementById('successDeliveryEstimate').textContent = deliveryInfo ? deliveryInfo.text : 'Estimated Delivery unavailable';
+  lastOrderId = o.id;
+}
+
+function statusLabel(s){
+  return {confirmed:'Order Confirmed', packed:'Packed', shipped:'Shipped', delivered:'Delivered'}[s] || s;
 }
 function statusLabel(s){
   return {confirmed:'Order Confirmed', packed:'Packed', shipped:'Shipped', delivered:'Delivered'}[s] || s;
@@ -4343,7 +4365,7 @@ function renderTracking(orderId){
       ${deliveryState ? `<div class="summary-row"><span>Delivery Status</span><span>${deliveryState}</span></div>` : ''}
       ${deliveryNote ? `<div class="summary-row"><span style="font-weight:700;">Order delay due to</span><span style="color:var(--muted);">${deliveryNote}</span></div>` : ''}
       ${o.items.map(p=>`<div class="summary-row"><span>${p.name} × ${p.qty}</span><span>₹${(p.price*p.qty).toLocaleString('en-IN')}</span></div>`).join('')}
-      <div class="summary-row total"><span>Total Paid</span><span>₹${o.total.toLocaleString('en-IN')}</span></div>
+      <div class="summary-row total"><span>${o.payment === 'cod' ? 'Total' : 'Total Paid'}</span><span>₹${o.total.toLocaleString('en-IN')}</span></div>
     </div>
     ${curIdx<steps.length-1 ? `<div style="padding:16px 18px 24px; text-align:center; color:var(--muted); font-weight:600; font-size:13px;">Status: ${statusLabel(o.status)}</div>` : `<div style="padding:16px 18px 24px; text-align:center; color:var(--ok); font-weight:700; font-size:12.5px;">Delivered successfully 🎉</div>`}
   `;

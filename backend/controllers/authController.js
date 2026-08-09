@@ -36,15 +36,35 @@ exports.register = async (req, res) => {
 
 // POST /api/auth/login
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
+  console.time('login:overall');
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
 
-  const user = await User.findOne({ email }).select('+password');
-  if (!user || !(await user.comparePassword(password))) {
-    return res.status(401).json({ message: 'Invalid email or password' });
+    console.time('login:find-user');
+    const user = await User.findOne({ email }).select('+password');
+    console.timeEnd('login:find-user');
+
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    console.time('login:password-compare');
+    const passwordMatches = await user.comparePassword(password);
+    console.timeEnd('login:password-compare');
+
+    if (!passwordMatches) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    console.time('login:sign-token');
+    const token = signToken(user);
+    console.timeEnd('login:sign-token');
+
+    res.json({ token, user: shapeUser(user) });
+  } finally {
+    console.timeEnd('login:overall');
   }
-  const token = signToken(user);
-  res.json({ token, user: shapeUser(user) });
 };
 
 // POST /api/auth/forgot-password
