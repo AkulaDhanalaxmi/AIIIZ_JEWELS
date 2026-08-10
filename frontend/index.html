@@ -870,7 +870,8 @@
   .pay-option.selected .radio{ border-color:var(--gold-500); background:var(--gold-500); box-shadow:inset 0 0 0 4px #fff; }
 
   .options{ padding:0 16px; display:flex; flex-direction:column; gap:10px; }
-  .option{ display:flex; align-items:center; gap:12px; background:#FFFFFF; border:1px solid #ECECEC; border-radius:10px; padding:12px 14px; cursor:pointer; }
+  .option{ display:flex; align-items:center; gap:12px; background:#FFFFFF; border:1px solid #ECECEC; border-radius:10px; padding:12px 14px; cursor:pointer; transition:transform .15s ease, border-color .15s ease, background .15s ease; width:100%; text-align:left; }
+  .option:hover{ transform:translateY(-1px); border-color:#D8C184; }
   .option.disabled{ opacity:0.6; cursor:not-allowed; pointer-events:none; }
   .option.selected{ background:#FDF6E3; border:1px solid #E7B84C; }
   .option-icon{ width:34px; height:34px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:#F5F5F5; }
@@ -3984,29 +3985,29 @@ function saveAddressStandalone(){ const name=document.getElementById('fName2').v
 /* ===================== PAYMENT ===================== */
 const paymentMethods = [
   {id:'cod', name:'Cash on Delivery', icon:'💵', unavailable:false},
-  {id:'upi', name:'UPI (Google Pay / PhonePe)', icon:'📱', unavailable:true},
-  {id:'card', name:'Credit / Debit Card', icon:'💳', unavailable:true},
-  {id:'netbanking', name:'Net Banking', icon:'🏦', unavailable:true},
+  {id:'upi', name:'UPI (Google Pay / PhonePe)', icon:'📱', unavailable:false},
+  {id:'card', name:'Credit / Debit Card', icon:'💳', unavailable:false},
+  {id:'netbanking', name:'Net Banking', icon:'🏦', unavailable:false},
 ];
 function renderPayment(){
-  if(!state.selectedPayment || state.selectedPayment !== 'cod') state.selectedPayment='cod';
+  if(!state.selectedPayment) state.selectedPayment='cod';
   document.getElementById('payList').innerHTML = paymentMethods.map(m=>{
     const icon = m.id==='upi' ? '<svg viewBox="0 0 24 24" width="20" height="20"><text x="0" y="17" font-size="15" font-weight="700" fill="#4285F4">G</text></svg>' : m.id==='card' ? '<svg viewBox="0 0 24 24" width="20" height="20"><rect x="1" y="6" width="22" height="12" rx="2" fill="#1A1F71"/><circle cx="15" cy="12" r="4" fill="#EB001B" opacity="0.85"/><circle cx="19" cy="12" r="4" fill="#F79E1B" opacity="0.85"/></svg>' : '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#333" stroke-width="1.5"><path d="M3 10l9-6 9 6"/><rect x="4" y="10" width="16" height="9"/><path d="M2 21h20"/></svg>';
     const enabled = !m.unavailable;
     if(enabled){
       return `
-        <div class="option ${state.selectedPayment===m.id?'selected':''}" onclick="selectPayment('${m.id}')">
+        <button type="button" class="option ${state.selectedPayment===m.id?'selected':''}" onclick="selectPayment('${m.id}')">
           <div class="option-icon ${m.id==='upi' ? 'upi' : ''}">${icon}</div>
           <div class="option-label">${m.name}</div>
           <div class="radio ${state.selectedPayment===m.id ? 'on' : ''}"></div>
-        </div>`;
+        </button>`;
     } else {
       return `
-        <div class="option disabled">
+        <button type="button" class="option disabled" disabled>
           <div class="option-icon ${m.id==='upi' ? 'upi' : ''}">${icon}</div>
           <div class="option-label">${m.name} <span class="soon-badge">Not Available</span></div>
           <div class="radio"></div>
-        </div>`;
+        </button>`;
     }
   }).join('');
   const items = checkoutItems();
@@ -4021,7 +4022,6 @@ function renderPayment(){
     <div class="cost-row total"><span>Total Payable</span><span>₹${t.total.toLocaleString('en-IN')}</span></div>`;
 }
 function selectPayment(id){
-  if (id !== 'cod') return;
   const method = paymentMethods.find(m => m.id === id);
   if (!method || method.unavailable) return;
   state.selectedPayment = id;
