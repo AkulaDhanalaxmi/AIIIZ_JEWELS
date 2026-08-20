@@ -48,7 +48,6 @@
     overflow-x:hidden;
   }
   h1,h2,h3,.serif{ font-family:'Cormorant Garamond', serif; }
-
   #phone{
     width:100%;
     max-width:480px;
@@ -158,8 +157,6 @@
     z-index:20;
     background:var(--navy-900);
   }
-
-  /* ---------- Header ---------- */
   .topbar{
     background:var(--navy-900);
     color:var(--cream);
@@ -220,7 +217,6 @@
     position:absolute; top:-7px; right:-8px; background:var(--gold-500); color:var(--navy-950);
     font-size:9px; font-weight:700; border-radius:20px; padding:1px 5px; min-width:14px; text-align:center;
   }
-
   .search-header{
     width:100%;
     margin:28px auto 0;
@@ -228,7 +224,6 @@
     box-sizing:border-box;
     max-width:none;
   }
-  /* Make collections/categories header sticky and reserve space for bottom nav */
   .screen#screen-categories .topbar{ position:sticky; top:0; z-index:30; }
   .screen#screen-categories .scroll{ padding-bottom:100px; }
   /* Left-align Collections header and inline the back symbol like Wishlist */
@@ -266,7 +261,6 @@
   .screen#screen-tracking .subheader h2{ margin:0; font-size:16px; font-weight:700; color:var(--cream); display:flex; align-items:center; gap:10px; }
   .screen#screen-tracking .subheader .back-btn{ position:static; width:auto; height:auto; background:transparent; border-radius:0; margin-right:8px; padding:0; display:inline-flex; align-items:center; color:var(--cream); }
   .screen#screen-productlist .scroll{ padding-top:10px; padding-bottom:100px; }
-  /* Make wishlist header sticky and match topbar height/style */
   .screen#screen-wishlist .subheader{ position:sticky; top:0; z-index:30; background:var(--navy-900); color:var(--cream); height:64px; display:flex; align-items:center; justify-content:flex-start; padding:0 16px; }
   .screen#screen-wishlist .subheader h2{ margin:0; font-size:16px; font-weight:700; color:var(--cream); display:flex; align-items:center; gap:10px; }
   .screen#screen-wishlist .subheader .back-btn{ position:static; width:auto; height:auto; background:transparent; border-radius:0; margin-right:8px; padding:0; display:inline-flex; align-items:center; color:var(--cream); }
@@ -310,13 +304,11 @@
   .home-search-results .section-head h3{ font-size:16px; color:var(--navy-950); }
   .home-search-results .section-head .view-all{ color:var(--gold-500); }
   .home-search-results .grid2{ gap:18px; }
-
   .screen#screen-home.search-active .hero,
   .screen#screen-home.search-active .section {
     display:none;
   }
   .screen#screen-home.search-active .search-header { margin-bottom: 8px; }
-
   .subheader{
     background:var(--navy-900); padding:0 18px 18px; color:var(--cream);
     display:flex; align-items:center; justify-content:center; position:relative;
@@ -327,8 +319,6 @@
     display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
   }
   .subheader h2{ font-size:20px; font-weight:600; margin:0; }
-
-  /* ---------- Hero ---------- */
   .hero{
     margin:0 18px 22px; border-radius:var(--radius-lg); overflow:hidden; position:relative;
     background:
@@ -375,13 +365,10 @@
   .hero-dots{ position:absolute; left:20px; bottom:14px; display:flex; gap:5px; z-index:1; }
   .hero-dots span{ width:5px; height:5px; border-radius:50%; background:rgba(251,247,239,0.35); }
   .hero-dots span.active{ width:14px; border-radius:4px; background:var(--gold-400); }
-
-  /* ---------- Section ---------- */
   .section{ padding:0 24px 22px; }
   .section-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
   .section-head h3{ font-size:17px; letter-spacing:.5px; color:var(--navy-900); font-weight:700; }
   .view-all{ font-size:11px; color:var(--gold-500); font-weight:600; cursor:pointer; display:flex; align-items:center; gap:2px;}
-
   .home-footer{ background:#fff; border-radius:24px; padding:24px; margin:0 0 12px; border:1px solid #F0E6D6; box-shadow:0 10px 30px rgba(8,18,38,0.08); }
   .home-footer .footer-brand{ display:flex; flex-direction:column; gap:8px; margin-bottom:26px; }
   .home-footer .footer-logo{ font-family:'Cormorant Garamond', serif; font-size:42px; letter-spacing:3px; line-height:1; font-weight:900; text-transform:uppercase; color:transparent; background:linear-gradient(135deg,#D4AF37,#F8E7A2); -webkit-background-clip:text; background-clip:text; }
@@ -430,8 +417,6 @@
   .home-footer .footer-payments-card .payment-icons{ display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:12px; }
   .home-footer .payment-icon{ height:42px; min-height:42px; display:flex; align-items:center; justify-content:center; border-radius:18px; background:#fff; border:1px solid #E5DAC0; box-shadow:0 10px 30px rgba(0,0,0,.08); padding:8px 10px; }
   .home-footer .payment-icon svg{ width:100%; height:auto; max-width:78px; }
-
-
   .cat-row{ display:flex; gap:14px; overflow-x:auto; padding-bottom:4px; }
   .cat-row::-webkit-scrollbar{ display:none; }
   .cat-item{ flex-shrink:0; width:70px; text-align:center; cursor:pointer; }
@@ -443,13 +428,10 @@
   .cat-circle img{ width:100%; height:100%; object-fit:cover; border-radius:50%; }
   .cat-item:hover .cat-circle{ border-color:var(--gold-500); transform:translateY(-2px); }
   .cat-item span{ font-size:10.5px; color:var(--ink); font-weight:600; }
-
   .grid2{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px 14px; align-items:stretch; width:100%; grid-auto-rows:1fr; }
   @media (min-width:1020px){ .grid2{ gap:24px 18px; } }
   @media (max-width:560px){ .grid2{ grid-template-columns:repeat(2,minmax(100px,1fr)); gap:16px 10px; } }
   @media (max-width:460px){ .grid2{ grid-template-columns:repeat(2,minmax(100px,1fr)) !important; gap:14px 8px !important; } }
-
-  /* ---------- Product Card (Myntra/Meesho-style grid) ---------- */
   .p-card{
     display:flex; flex-direction:column; justify-content:flex-start;
     background:#fff; border-radius:10px; overflow:hidden; box-shadow:none;
@@ -2026,7 +2008,7 @@
           <div class="policy-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg></div>
           <div>
             <h3>Pricing</h3>
-            <p>Prices are listed in INR and include applicable taxes unless otherwise stated. Promotions and discounts may apply at checkout.</p>
+            <p>Prices are listed in INR. Promotions and discounts may apply at checkout.</p>
           </div>
         </div>
 
@@ -2911,7 +2893,17 @@ function nav(screen, params, opts){
   if(screen==='checkout'){ renderCheckout(); }
   if(screen==='addresses'){ renderAddresses(); }
   if(screen==='payment'){ renderPayment(); }
-  if(screen==='tracking'){ renderTracking(params.orderId); }
+  if(screen==='tracking'){
+    const requestedOrderId = String(params.orderId || '').trim();
+    if(usingLiveBackend && state.token && requestedOrderId){
+      loadMyOrders()
+        .then((loaded) => renderTracking(loaded ? requestedOrderId : ''));
+    } else if(usingLiveBackend) {
+      renderTracking('');
+    } else {
+      renderTracking(requestedOrderId);
+    }
+  }
    if(screen==='success'){ renderSuccessScreen(params.orderId || lastOrderId); }
   if(screen==='orders'){ loadMyOrders().then(()=>renderOrders()); }
   if(screen==='return-request'){ initReturnRequest(params.orderId); }
@@ -4162,7 +4154,9 @@ async function placeOrder(){
         customerName: ord.customerName || state.user?.name,
         customerEmail: ord.customerEmail || state.user?.email,
         items: ord.items,
-        total: t.total,
+        total: Number(ord.total),
+        subtotal: Number(ord.subtotal || 0),
+        shipping: Number(ord.shipping || 0),
         address: ord.address,
         payment: ord.paymentMethod,
         paymentStatus: ord.paymentStatus || 'pending',
@@ -4267,29 +4261,42 @@ async function cancelOrder(id){
 }
 
 async function loadMyOrders(){
-  if(!usingLiveBackend) return;
-  if(!state.token) return;
+  if(!usingLiveBackend || !state.token) return false;
   try{
     const data = await apiFetch('/orders');
     state.orders = (data.orders || []).map(o=>({
       id: o._id || o.id,
       orderNumber: o.orderNumber || (o._id||o.id),
       items: o.items || [],
-      total: o.total || 0,
+      total: o.total,
+      subtotal: o.subtotal,
+      shipping: o.shipping,
+      giftWrapCost: o.giftWrapCost,
       date: o.createdAt || o.date || new Date().toISOString(),
       status: o.status || 'confirmed',
       address: o.address || null,
       customerName: o.customerName || state.user?.name,
       customerEmail: o.customerEmail || state.user?.email,
+      payment: o.paymentMethod,
+      giftWrap: !!o.giftWrap,
       paymentStatus: o.paymentStatus || 'pending',
       deliveryDate: o.deliveryDate || null,
       deliveryNote: o.deliveryNote || null
     }));
     saveState();
-  }catch(e){ console.warn('Could not load orders', e); }
+    return true;
+  }catch(e){
+    console.warn('Could not load orders', e);
+    return false;
+  }
+}
+function findOrderByRouteId(orderId){
+  const requestedId = String(orderId || '').trim();
+  if(!requestedId) return null;
+  return state.orders.find(order => String(order.id || '') === requestedId || String(order.orderNumber || '') === requestedId) || null;
 }
 function renderSuccessScreen(orderId){
-  const o = state.orders.find(x => x.id === orderId) || state.orders[0];
+  const o = findOrderByRouteId(orderId);
   if(!o){
     document.getElementById('successOrderId').textContent = '';
     document.getElementById('successTotalPaid').textContent = '₹0';
@@ -4298,7 +4305,13 @@ function renderSuccessScreen(orderId){
     return;
   }
   document.getElementById('successOrderId').textContent = 'Order No. ' + (o.orderNumber || o.id || '');
-  document.getElementById('successTotalPaid').textContent = '₹' + o.total.toLocaleString('en-IN');
+  const successSubtotal = Number.isFinite(Number(o.subtotal))
+    ? Number(o.subtotal)
+    : (o.items || []).reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.qty) || 1), 0);
+  const successShipping = Number.isFinite(Number(o.shipping)) ? Number(o.shipping) : 0;
+  const successGiftWrap = Number.isFinite(Number(o.giftWrapCost)) ? Number(o.giftWrapCost) : 0;
+  const successTotal = successSubtotal + successShipping + successGiftWrap;
+  document.getElementById('successTotalPaid').textContent = '₹' + successTotal.toLocaleString('en-IN');
   document.getElementById('successPaymentMethod').textContent = formatPaymentMethodLabel(o.payment);
   const subtotal = (o.items || []).reduce((s,i)=>s+(i.price||0)*(i.qty||1), 0);
   const deliveryInfo = o.address ? getShippingDetails(o.address, subtotal) : null;
@@ -4322,9 +4335,14 @@ function deliveryStateLabel(s){
   }[s] || (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
 }
 function renderTracking(orderId){
-  const o = state.orders.find(x=>x.id===orderId) || state.orders[0];
+  const o = findOrderByRouteId(orderId);
   const el = document.getElementById('trackingBody');
-  if(!o){ el.innerHTML = emptyStateHtml('No order found','Place an order to track it here.'); return; }
+  if(!o){ el.innerHTML = emptyStateHtml('Order not found','The requested order could not be found.'); return; }
+  const itemSubtotal = (o.items || []).reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.qty) || 1), 0);
+  const subtotal = Number.isFinite(Number(o.subtotal)) ? Number(o.subtotal) : itemSubtotal;
+  const shipping = Number.isFinite(Number(o.shipping)) ? Number(o.shipping) : 0;
+  const giftWrapCost = Number.isFinite(Number(o.giftWrapCost)) ? Number(o.giftWrapCost) : 0;
+  const total = subtotal + shipping + giftWrapCost;
   const steps = ['confirmed','packed','shipped','delivered'];
   const stepMeta = {
     confirmed:{title:'Order Confirmed', sub:'We\'ve received your order'},
@@ -4375,7 +4393,10 @@ function renderTracking(orderId){
       ${deliveryState ? `<div class="summary-row"><span>Delivery Status</span><span>${deliveryState}</span></div>` : ''}
       ${deliveryNote ? `<div class="summary-row"><span style="font-weight:700;">Order delay due to</span><span style="color:var(--muted);">${deliveryNote}</span></div>` : ''}
       ${o.items.map(p=>`<div class="summary-row"><span>${p.name} × ${p.qty}</span><span>₹${(p.price*p.qty).toLocaleString('en-IN')}</span></div>`).join('')}
-      <div class="summary-row total"><span>${o.payment === 'cod' ? 'Total' : 'Total Paid'}</span><span>₹${o.total.toLocaleString('en-IN')}</span></div>
+      <div class="summary-row"><span>Subtotal</span><span>₹${subtotal.toLocaleString('en-IN')}</span></div>
+      <div class="summary-row"><span>Shipping</span><span>₹${shipping.toLocaleString('en-IN')}</span></div>
+      ${giftWrapCost > 0 ? `<div class="summary-row"><span>Gift wrap</span><span>₹${giftWrapCost.toLocaleString('en-IN')}</span></div>` : ''}
+      <div class="summary-row total"><span>Total Paid</span><span>₹${total.toLocaleString('en-IN')}</span></div>
     </div>
     ${curIdx<steps.length-1 ? `<div style="padding:16px 18px 24px; text-align:center; color:var(--muted); font-weight:600; font-size:13px;">Status: ${statusLabel(o.status)}</div>` : `<div style="padding:16px 18px 24px; text-align:center; color:var(--ok); font-weight:700; font-size:12.5px;">Delivered successfully 🎉</div>`}
   `;

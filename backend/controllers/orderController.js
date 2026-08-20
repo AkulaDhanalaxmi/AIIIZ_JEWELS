@@ -103,13 +103,11 @@ async function calcTotals(items, address, giftWrap = false) {
   const shippingInfo = getShippingInfo(address, subtotal, settings);
   const giftWrapCost = giftWrap ? 30 : 0;
   if (shippingInfo.blocked) {
-    const tax = Math.round(subtotal * 0.03);
-    return { subtotal, shipping: 0, tax, giftWrapCost, total: subtotal + tax + giftWrapCost, deliveryBlocked: true, deliveryInfo: shippingInfo };
+    return { subtotal, shipping: 0, giftWrapCost, total: subtotal + giftWrapCost, deliveryBlocked: true, deliveryInfo: shippingInfo };
   }
   const shipping = shippingInfo.shipping;
-  const tax = Math.round(subtotal * 0.03);
-  const total = subtotal + shipping + tax + giftWrapCost;
-  return { subtotal, shipping, tax, giftWrapCost, total, deliveryInfo: shippingInfo };
+  const total = subtotal + shipping + giftWrapCost;
+  return { subtotal, shipping, giftWrapCost, total, deliveryInfo: shippingInfo };
 }
 
 // POST /api/orders  { items?: [{productId, qty}], address, paymentMethod }

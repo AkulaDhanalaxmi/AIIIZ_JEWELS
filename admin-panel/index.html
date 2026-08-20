@@ -517,7 +517,6 @@
     <div class="field-row" style="gap:12px; margin-top:16px; justify-content:flex-end;">
       <div class="field" style="flex:0 0 180px"><label>Subtotal</label><div id="orderInfoSubtotal"></div></div>
       <div class="field" style="flex:0 0 140px"><label>Shipping</label><div id="orderInfoShipping"></div></div>
-      <div class="field" style="flex:0 0 120px"><label>Tax</label><div id="orderInfoTax"></div></div>
       <div class="field" style="flex:0 0 180px"><label>Total</label><div id="orderInfoTotal"></div></div>
     </div>
     <div class="field" style="margin-top:22px; padding:18px; border:1px solid #E0E4EC; border-radius:14px; background:#FBF8F4;">
@@ -660,6 +659,14 @@ function showApp(){
 
 let ordersPollInterval = null;
 let currentOrderId = null;
+function adminOrderTotal(order){
+  const subtotal = Number.isFinite(Number(order.subtotal))
+    ? Number(order.subtotal)
+    : (order.items || []).reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.qty) || 1), 0);
+  const shipping = Number(order.shipping) || 0;
+  const giftWrapCost = Number(order.giftWrapCost) || 0;
+  return subtotal + shipping + giftWrapCost;
+}
 function startOrdersPolling(){
   if(ordersPollInterval) return;
   ordersPollInterval = setInterval(async ()=>{
@@ -676,7 +683,7 @@ function startOrdersPolling(){
         giftWrapCost: Number(o.giftWrapCost || 0),
         date: new Date(o.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}),
         itemsCount: o.items.length,
-        total: o.total,
+        total: adminOrderTotal(o),
       }));
       renderOrders();
     }catch(e){ /* ignore transient errors */ }
@@ -711,7 +718,7 @@ async function loadData(){
       giftWrapCost: Number(o.giftWrapCost || 0),
       date: new Date(o.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}),
       itemsCount: o.items.length,
-      total: o.total,
+      total: adminOrderTotal(o),
     }));
     renderAll();
     populateBannerTargetSelect();
@@ -962,6 +969,7 @@ function renderProducts(){
 function renderOrders(){
   const steps = ['confirmed','packed','shipped','delivered'];
   document.getElementById('orderTableBody').innerHTML = DATA.orders.length ? DATA.orders.map(o=>{
+    logAdminOrderIdentity('table', o);
     const idx = steps.indexOf(o.status);
     const nextStep = (o.status!=='cancelled' && idx>-1 && idx<steps.length-1) ? steps[idx+1] : null;
     const doneLabel = o.status==='cancelled'
@@ -978,6 +986,18 @@ function renderOrders(){
       </tr>`;
   }).join('') : `<tr><td colspan="7"><div class="empty">No orders yet.</div></td></tr>`;
 }
+function logAdminOrderIdentity(surface, order){
+  console.debug('[Admin order identity]', {
+    surface,
+    apiBase: API_BASE,
+    mongoId: order.id || order._id || null,
+    orderNumber: order.orderNumber || null,
+    items: (order.items || []).map(item => ({ name: item.name, price: item.price, qty: item.qty })),
+    subtotal: order.subtotal,
+    shipping: order.shipping,
+    total: order.total,
+  });
+}
 function orderCategoryName(productId){
   const prod = DATA.products.find(p => p.id === productId);
   if(prod && prod.category){
@@ -992,7 +1012,11 @@ function orderStatusLabel(status){
 }
 async function openOrderModal(id){
   const order = DATA.orders.find(x=>x.id===id);
-  if(!order) return;
+  if(!order){
+    console.warn('[Admin order identity] modal order not found', { apiBase: API_BASE, requestedId: id });
+    return;
+  }
+  logAdminOrderIdentity('modal', order);
   currentOrderId = id;
   const orderDetails = document.getElementById('orderDetailsBody');
   orderDetails.innerHTML = order.items.map(item=>{
@@ -1009,6 +1033,9 @@ async function openOrderModal(id){
   const addr = order.address || {};
   document.getElementById('orderInfoAddress').textContent = `${addr.line || ''}${addr.city ? ', ' + addr.city : ''}${addr.state ? ', ' + addr.state : ''}${addr.pincode ? ', ' + addr.pincode : ''}`;
   document.getElementById('orderInfoPhone').textContent = addr.phone || '—';
+  document.getElementById('orderInfoSubtotal').textContent = `₹${Number(order.subtotal || 0).toLocaleString('en-IN')}`;
+  document.getElementById('orderInfoShipping').textContent = `₹${Number(order.shipping || 0).toLocaleString('en-IN')}`;
+  document.getElementById('orderInfoTotal').textContent = `₹${adminOrderTotal(order).toLocaleString('en-IN')}`;
   document.getElementById('orderInfoGiftWrap').textContent = order.giftWrap ? `Yes (₹${Number(order.giftWrapCost || 30).toLocaleString('en-IN')})` : 'No';
   document.getElementById('orderInfoGiftMessage').textContent = order.giftWrap ? (order.giftMessage || 'No message provided') : '—';
   document.getElementById('orderDeliveryDate').value = order.deliveryDate ? new Date(order.deliveryDate).toISOString().slice(0,10) : '';
