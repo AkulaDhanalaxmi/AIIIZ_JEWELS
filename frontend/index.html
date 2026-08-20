@@ -1221,7 +1221,6 @@
   }
 </style>
 <script async defer src="https://accounts.google.com/gsi/client"></script>
-<script async defer src="https://accounts.google.com/gsi/client"></script>
 </head>
 <body>
 <div id="phone">
@@ -2360,16 +2359,12 @@ async function loadDeliverySettings(){
     const res = await fetch(`${API_BASE}/settings/delivery_settings`);
     const data = await res.json();
     const value = data && typeof data === 'object' ? (data.setting || data) : {};
-    console.log('DEBUG loadDeliverySettings response', { data, value, usingLiveBackend });
-    console.log('DEBUG DELIVERY_SETTINGS before merge', DELIVERY_SETTINGS);
     DELIVERY_SETTINGS = {
       storeInfo: Object.assign({}, DEFAULT_DELIVERY_SETTINGS.storeInfo, value.storeInfo || {}),
       shipping: Object.assign({}, DEFAULT_DELIVERY_SETTINGS.shipping, value.shipping || {}),
       deliveryDays: Object.assign({}, DEFAULT_DELIVERY_SETTINGS.deliveryDays, value.deliveryDays || {}),
       deliveryAvailability: Object.assign({}, DEFAULT_DELIVERY_SETTINGS.deliveryAvailability, value.deliveryAvailability || {}),
     };
-    console.log('DEBUG DELIVERY_SETTINGS after merge', DELIVERY_SETTINGS);
-    console.log('DEBUG DELIVERY_SETTINGS.storeInfo', DELIVERY_SETTINGS.storeInfo);
   }catch(e){
     DELIVERY_SETTINGS = DEFAULT_DELIVERY_SETTINGS;
   }
@@ -2388,10 +2383,12 @@ async function loadState(){
   if(!state.giftWrap || typeof state.giftWrap !== 'object'){
     state.giftWrap = { enabled:false, message:'' };
   }
-  await fetchCatalog();
-  await Promise.all([loadDeliverySettings(), loadHomeBannerSetting()]);
+  const catalogPromise = fetchCatalog();
+  const settingsPromise = Promise.all([loadDeliverySettings(), loadHomeBannerSetting()]);
+  await catalogPromise;
   renderAll();
   initGoogleSignIn();
+  await settingsPromise;
   if(state.token){
     const ok = await apiMe();
     if(!ok){ state.token=null; state.user=null; }
@@ -2475,6 +2472,8 @@ async function apiFetch(path, opts={}){
   return data;
 }
 
+let googleInitialized = false;
+let googleInitRetryTimer = null;
 function initGoogleSignIn(){
   const container = document.getElementById('googleSignInDiv');
   if(!container){ return; }
@@ -2486,17 +2485,26 @@ function initGoogleSignIn(){
   if(typeof google === 'undefined' || !google.accounts || !google.accounts.id){
     container.style.display = 'flex';
     container.innerHTML = '<div style="width:100%; text-align:center; color:#7f1d1d; font-size:13px;">Google sign-in is unavailable right now. Please try again shortly.</div>';
-    setTimeout(initGoogleSignIn, 250);
+    if(!googleInitRetryTimer){
+      googleInitRetryTimer = setTimeout(() => {
+        googleInitRetryTimer = null;
+        initGoogleSignIn();
+      }, 250);
+    }
     return;
   }
   container.style.display = 'flex';
+  if(!googleInitialized){
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleCredential,
+      ux_mode: 'popup',
+      cancel_on_tap_outside: true,
+    });
+    googleInitialized = true;
+  }
+  if(container.children.length > 0) return;
   container.innerHTML = '';
-  google.accounts.id.initialize({
-    client_id: GOOGLE_CLIENT_ID,
-    callback: handleGoogleCredential,
-    ux_mode: 'popup',
-    cancel_on_tap_outside: true,
-  });
   google.accounts.id.renderButton(container, {
     theme:'outline',
     size:'large',
@@ -3039,7 +3047,7 @@ function renderNewArrivals(){
   let items = PRODUCTS.slice();
   if(homeSort==='price_asc') items.sort((a,b)=>a.price - b.price);
   else if(homeSort==='price_desc') items.sort((a,b)=>b.price - a.price);
-  items = items.slice(0,4);
+  items = items.slice(0,14);
   el.innerHTML = items.map(p=>productCardHtml(p)).join('');
   const sel = document.getElementById('homeSortSelect'); if(sel) sel.value = homeSort;
 }
