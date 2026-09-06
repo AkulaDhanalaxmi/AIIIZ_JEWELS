@@ -533,6 +533,16 @@
         <button class="btn btn-outline" onclick="clearOrderReviewForm()">Clear</button>
         <button class="btn btn-primary" onclick="saveAdminReview()">Create Review</button>
       </div>
+      <div style="margin-top:16px; padding-top:14px; border-top:1px solid #E0E4EC;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+          <div>
+            <strong style="font-size:12px;">Remove reviews for this product</strong>
+            <div id="orderReviewSummary" style="font-size:11px; color:var(--muted); margin-top:4px;">Loading reviews...</div>
+          </div>
+          <button class="btn btn-danger" onclick="removeProductReviews()">Remove All Reviews</button>
+        </div>
+        <div id="orderReviewList" style="margin-top:12px;"></div>
+      </div>
     </div>
     <div class="modal-actions" style="margin-top:20px; justify-content:flex-end;">
       <button class="btn btn-outline" onclick="closeOrderModal()">Close</button>
@@ -1047,9 +1057,11 @@ async function openOrderModal(id){
 
   const reviewProductSelect = document.getElementById('orderReviewProduct');
   reviewProductSelect.innerHTML = order.items.map(item => `<option value="${item.product}">${escHtml(item.name)}</option>`).join('');
+  reviewProductSelect.onchange = loadSelectedProductReviews;
   document.getElementById('orderReviewRating').value = '5';
   document.getElementById('orderReviewName').value = adminUser?.name || 'Admin';
   document.getElementById('orderReviewComment').value = '';
+  await loadSelectedProductReviews();
   document.getElementById('orderOverlay').classList.add('active');
 }
 async function closeOrderModal(){
@@ -1092,8 +1104,65 @@ async function saveAdminReview(){
     await apiFetch('/reviews/admin', { method:'POST', body: JSON.stringify({ productId, rating, name, comment }) });
     toast('Admin review created');
     clearOrderReviewForm();
+    await loadSelectedProductReviews();
   }catch(e){
     toast(e.message || 'Could not create review');
+  }
+}
+async function loadSelectedProductReviews(){
+  const productId = document.getElementById('orderReviewProduct').value;
+  const summary = document.getElementById('orderReviewSummary');
+  const list = document.getElementById('orderReviewList');
+  if(!productId){
+    summary.textContent = 'No product selected';
+    list.innerHTML = '';
+    return;
+  }
+  summary.textContent = 'Loading reviews...';
+  list.innerHTML = '';
+  try{
+    const data = await apiFetch(`/reviews/${productId}`);
+    const reviews = data.reviews || [];
+    const count = reviews.length;
+    summary.textContent = count ? `${count} review${count === 1 ? '' : 's'} currently published` : 'No reviews currently published';
+    list.innerHTML = reviews.length ? reviews.map(review => `
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:10px 0; border-top:1px solid #E0E4EC;">
+        <div style="min-width:0;">
+          <div style="font-size:12px; font-weight:700;">${escHtml(review.name || 'Anonymous')} <span style="color:var(--gold-500);">${'★'.repeat(Number(review.rating) || 0)}</span></div>
+          <div style="font-size:11px; color:var(--muted); margin-top:3px; white-space:pre-wrap; overflow-wrap:anywhere;">${escHtml(review.comment || 'No comment')}</div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="removeSingleReview('${review._id}')">Delete</button>
+      </div>
+    `).join('') : '';
+  }catch(e){
+    summary.textContent = 'Could not load review count';
+    list.innerHTML = '<div style="font-size:11px; color:var(--danger);">Could not load reviews.</div>';
+  }
+}
+async function removeSingleReview(reviewId){
+  if(!reviewId) return;
+  if(!window.confirm('Delete this review? This cannot be undone.')) return;
+  try{
+    await apiFetch(`/reviews/${reviewId}`, { method:'DELETE' });
+    toast('Review deleted');
+    await loadSelectedProductReviews();
+    await loadData();
+  }catch(e){
+    toast(e.message || 'Could not delete review');
+  }
+}
+async function removeProductReviews(){
+  const productId = document.getElementById('orderReviewProduct').value;
+  const productName = document.getElementById('orderReviewProduct').selectedOptions[0]?.textContent || 'this product';
+  if(!productId){ toast('Please choose a product first'); return; }
+  if(!window.confirm(`Remove all reviews for ${productName}? This cannot be undone.`)) return;
+  try{
+    const data = await apiFetch(`/reviews/product/${productId}`, { method:'DELETE' });
+    toast(`${data.deletedCount || 0} review${data.deletedCount === 1 ? '' : 's'} removed`);
+    await loadSelectedProductReviews();
+    await loadData();
+  }catch(e){
+    toast(e.message || 'Could not remove product reviews');
   }
 }
 async function advanceOrder(id){

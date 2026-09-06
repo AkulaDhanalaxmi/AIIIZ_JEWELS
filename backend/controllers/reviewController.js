@@ -55,6 +55,17 @@ exports.remove = async (req, res) => {
   res.json({ message: 'Review deleted' });
 };
 
+// DELETE /api/reviews/product/:productId (admin only)
+exports.removeByProduct = async (req, res) => {
+  const product = await Product.findById(req.params.productId).select('_id');
+  if (!product) return res.status(404).json({ message: 'Product not found' });
+
+  const result = await Review.deleteMany({ product: product._id });
+  await Product.findByIdAndUpdate(product._id, { rating: 0, numReviews: 0 });
+
+  res.json({ message: 'Product reviews deleted', deletedCount: result.deletedCount });
+};
+
 // POST /api/reviews/admin  (admin only)
 exports.createAdminReview = async (req, res) => {
   const { productId, rating, comment, name } = req.body;
