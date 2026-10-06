@@ -8,6 +8,14 @@ const orderItemSchema = new mongoose.Schema({
   categorySlug: String,
 });
 
+const mehendiBookingSchema = new mongoose.Schema({
+  address: { type: String, trim: true },
+  pincode: { type: String, trim: true },
+  city: { type: String, trim: true },
+  date: { type: String, trim: true },
+  timeSlot: { type: String, trim: true },
+}, { _id: false });
+
 const orderSchema = new mongoose.Schema(
   {
     orderNumber: { type: String, required: true, unique: true },
@@ -45,6 +53,7 @@ const orderSchema = new mongoose.Schema(
     giftWrap: { type: Boolean, default: false },
     giftMessage: { type: String, default: '' },
     giftWrapCost: { type: Number, default: 0 },
+    mehendiBooking: { type: mehendiBookingSchema, default: null },
     deliveryDate: { type: Date },
     deliveryState: {
       type: String,

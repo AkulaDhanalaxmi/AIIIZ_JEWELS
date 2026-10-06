@@ -313,7 +313,7 @@
     <div class="page" id="page-orders">
       <div class="page-head"><div><h1>Orders</h1><p>Track and update fulfilment status</p></div></div>
       <div class="card">
-        <table><thead><tr><th>Order ID</th><th>Customer</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th><th></th></tr></thead>
+        <table><thead><tr><th>Order ID</th><th>Customer</th><th>Date</th><th>Items</th><th>Mehendi booking</th><th>Total</th><th>Status</th><th></th></tr></thead>
         <tbody id="orderTableBody"></tbody></table>
       </div>
     </div>
@@ -534,6 +534,7 @@
       <div class="field" style="flex:1"><label>Delivery date</label><input id="orderDeliveryDate" type="date"></div>
       <div class="field" style="flex:1"><label>Delivery state</label><select id="orderDeliveryState"><option value="scheduled">Scheduled</option><option value="on-time">On-time</option><option value="delayed">Delayed</option><option value="out-of-stock">Out of stock</option><option value="rescheduled">Rescheduled</option></select></div>
     </div>
+    <div class="field" style="margin-bottom:18px;"><label>Mehendi service booking</label><div id="orderInfoMehendi">No booking</div></div>
     <div class="field-row" style="gap:16px; margin-bottom:18px;">
       <div class="field" style="flex:1"><label>Delivery note</label><input id="orderDeliveryNote" placeholder="Delay reason, restock ETA"></div>
       <div class="field" style="flex:1"><label>Payment status</label><select id="orderPaymentStatus"><option value="pending">Pending</option><option value="paid">Paid</option><option value="failed">Failed</option><option value="refunded">Refunded</option></select></div>
@@ -746,6 +747,7 @@ function startOrdersPolling(){
         giftWrap: !!o.giftWrap,
         giftMessage: o.giftMessage || '',
         giftWrapCost: Number(o.giftWrapCost || 0),
+        mehendiBooking: o.mehendiBooking || null,
         date: new Date(o.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}),
         itemsCount: o.items.length,
         total: adminOrderTotal(o),
@@ -781,6 +783,7 @@ async function loadData(){
       giftWrap: !!o.giftWrap,
       giftMessage: o.giftMessage || '',
       giftWrapCost: Number(o.giftWrapCost || 0),
+      mehendiBooking: o.mehendiBooking || null,
       date: new Date(o.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}),
       itemsCount: o.items.length,
       total: adminOrderTotal(o),
@@ -1040,8 +1043,15 @@ function renderOrders(){
     const doneLabel = o.status==='cancelled'
       ? `<span style="font-size:11px; color:var(--danger); font-weight:700;">Cancelled</span>`
       : `<span style="font-size:11px; color:var(--ok); font-weight:700;">✓ Complete</span>`;
+    const mehendiBooking = o.mehendiBooking;
+    const mehendiDate = mehendiBooking?.date
+      ? new Date(`${mehendiBooking.date}T00:00:00Z`).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric', timeZone:'UTC'})
+      : '';
+    const mehendiSummary = mehendiBooking
+      ? `<div style="font-size:11px; line-height:1.45;"><strong>${escHtml(mehendiDate)}</strong><br>${escHtml(mehendiBooking.timeSlot || '')}<br>${escHtml(mehendiBooking.address || '')}, ${escHtml(mehendiBooking.city || '')} (${escHtml(mehendiBooking.pincode || '')})</div>`
+      : `<span style="color:var(--muted);">—</span>`;
     return `<tr>
-      <td><strong>${escHtml(o.orderNumber)}</strong></td><td>${escHtml(o.customer)}</td><td>${o.date}</td><td>${o.itemsCount}</td>
+      <td><strong>${escHtml(o.orderNumber)}</strong></td><td>${escHtml(o.customer)}</td><td>${o.date}</td><td>${o.itemsCount}</td><td>${mehendiSummary}</td>
       <td>₹${o.total.toLocaleString('en-IN')}</td>
       <td><span class="badge-status st-${o.status}">${o.status}</span></td>
       <td style="text-align:right; white-space:nowrap;">
@@ -1049,7 +1059,7 @@ function renderOrders(){
         ${nextStep ? `<button class="btn btn-sm btn-outline" onclick="advanceOrder('${o.id}')">Mark ${nextStep}</button>` : doneLabel}
       </td>
       </tr>`;
-  }).join('') : `<tr><td colspan="7"><div class="empty">No orders yet.</div></td></tr>`;
+  }).join('') : `<tr><td colspan="8"><div class="empty">No orders yet.</div></td></tr>`;
 }
 function logAdminOrderIdentity(surface, order){
   console.debug('[Admin order identity]', {
@@ -1074,6 +1084,20 @@ function orderCategoryName(productId){
 function orderStatusLabel(status){
   if(status==='cancelled') return 'Cancelled';
   return status.charAt(0).toUpperCase() + status.slice(1);
+}
+function formatMehendiBookingDate(value){
+  const date = String(value || '').trim();
+  const match = date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!match) return date || '—';
+  const parsed = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+  if(
+    parsed.getUTCFullYear() !== Number(match[1]) ||
+    parsed.getUTCMonth() !== Number(match[2]) - 1 ||
+    parsed.getUTCDate() !== Number(match[3])
+  ) return date;
+  return parsed.toLocaleDateString('en-IN', {
+    day:'numeric', month:'short', year:'numeric', timeZone:'UTC',
+  });
 }
 async function openOrderModal(id){
   const order = DATA.orders.find(x=>x.id===id);
@@ -1104,6 +1128,26 @@ async function openOrderModal(id){
   document.getElementById('orderInfoTotal').textContent = `₹${adminOrderTotal(order).toLocaleString('en-IN')}`;
   document.getElementById('orderInfoGiftWrap').textContent = order.giftWrap ? `Yes (₹${Number(order.giftWrapCost || 30).toLocaleString('en-IN')})` : 'No';
   document.getElementById('orderInfoGiftMessage').textContent = order.giftWrap ? (order.giftMessage || 'No message provided') : '—';
+  const mehendiBooking = order.mehendiBooking;
+  const hasMehendiBooking = mehendiBooking &&
+    typeof mehendiBooking === 'object' &&
+    !Array.isArray(mehendiBooking) &&
+    ['address', 'pincode', 'city', 'date', 'timeSlot'].some(field =>
+      mehendiBooking[field] != null && String(mehendiBooking[field]).trim() !== ''
+    );
+  document.getElementById('orderInfoMehendi').innerHTML = hasMehendiBooking
+    ? `<div style="padding:14px 16px; border:1px solid #E0E4EC; border-radius:12px; background:#FBF8F4; color:var(--ink,#081226);">
+        <div style="margin-bottom:12px; color:#34734D; font-weight:700;">Status: Booked</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px 18px;">
+          <div><div style="margin-bottom:3px; color:var(--muted,#7C889B); font-size:10px; font-weight:700;">Service Address</div><div>${escHtml(mehendiBooking.address || '—')}</div></div>
+          <div><div style="margin-bottom:3px; color:var(--muted,#7C889B); font-size:10px; font-weight:700;">PIN Code</div><div>${escHtml(mehendiBooking.pincode || '—')}</div></div>
+          <div><div style="margin-bottom:3px; color:var(--muted,#7C889B); font-size:10px; font-weight:700;">City</div><div>${escHtml(mehendiBooking.city || '—')}</div></div>
+          <div><div style="margin-bottom:3px; color:var(--muted,#7C889B); font-size:10px; font-weight:700;">Booking Date</div><div>${escHtml(formatMehendiBookingDate(mehendiBooking.date))}</div></div>
+          <div><div style="margin-bottom:3px; color:var(--muted,#7C889B); font-size:10px; font-weight:700;">Time Slot</div><div>${escHtml(mehendiBooking.timeSlot || '—')}</div></div>
+          <div><div style="margin-bottom:3px; color:var(--muted,#7C889B); font-size:10px; font-weight:700;">Service</div><div>FREE MEHENDI — DOORSTEP</div></div>
+        </div>
+      </div>`
+    : 'No booking';
   document.getElementById('orderDeliveryDate').value = order.deliveryDate ? new Date(order.deliveryDate).toISOString().slice(0,10) : '';
   document.getElementById('orderDeliveryState').value = order.deliveryState || 'scheduled';
   document.getElementById('orderDeliveryNote').value = order.deliveryNote || '';

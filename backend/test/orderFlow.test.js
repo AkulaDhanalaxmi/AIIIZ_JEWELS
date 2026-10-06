@@ -153,6 +153,59 @@ test('coupon validation rejects a cart containing only products assigned to the 
   });
 });
 
+test('order creation rejects mehendi bookings outside the tri-city service area', async (t) => {
+  const { createdOrders } = withOrderMocks(t, { price: 858 });
+  const res = mockResponse();
+  await orderController.placeOrder(request(checkoutBody({
+    mehendiBooking: {
+      address: '12 Temple Street',
+      pincode: '500001',
+      date: '2026-10-20',
+      timeSlot: '10:00 AM – 12:00 PM',
+    },
+  })), res, (error) => { throw error; });
+
+  assert.equal(res.statusCode, 400);
+  assert.match(res.body.message, /not available for this location/i);
+  assert.equal(createdOrders.length, 0);
+});
+
+test('order creation persists a valid mehendi booking for the admin order API', async (t) => {
+  const booking = {
+    address: '12 Temple Street, near the park',
+    pincode: '506001',
+    date: '2026-10-20',
+    timeSlot: '4:00 PM – 6:00 PM',
+  };
+  const { createdOrders } = withOrderMocks(t, { price: 858 });
+  await withCouponStartDate(t, async () => {
+    const res = mockResponse();
+    await orderController.placeOrder(request(checkoutBody({
+      mehendiBooking: booking,
+      expectedTotal: 842.2,
+      expectedQuote: {
+        items: [{ productId: PRODUCT_ID, price: 858, qty: 1 }],
+        subtotal: 858,
+        shipping: 70,
+        discount: 85.8,
+        couponCode: 'DUSSEHRA10',
+        giftWrapCost: 0,
+        total: 842.2,
+      },
+    })), res, (error) => { throw error; });
+
+    assert.equal(res.statusCode, 201);
+    assert.deepEqual(createdOrders[0].mehendiBooking, {
+      address: booking.address,
+      pincode: booking.pincode,
+      city: 'Hanamkonda',
+      date: booking.date,
+      timeSlot: booking.timeSlot,
+    });
+    assert.deepEqual(res.body.order.mehendiBooking, createdOrders[0].mehendiBooking);
+  });
+});
+
 test('shipping quote applies configured same-PIN, same-district, same-state, and different-state rates', async (t) => {
   withOrderMocks(t, { price: 858 });
   const addresses = [

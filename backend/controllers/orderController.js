@@ -3,6 +3,7 @@ const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 const Setting = require('../models/Setting');
 const { calculatePayableTotal, roundMoney, validateDussehraCoupon } = require('../services/dussehraCoupons');
+const { validateMehendiBooking } = require('../services/mehendiBooking');
 
 function generateOrderNumber() {
   return 'AIIZ' + Math.floor(100000 + Math.random() * 899999);
@@ -284,6 +285,7 @@ exports.placeOrder = async (req, res, next) => {
       giftWrap,
       giftMessage,
       couponCode,
+      mehendiBooking: requestedMehendiBooking,
       expectedTotal,
       expectedQuote,
     } = req.body;
@@ -303,6 +305,11 @@ exports.placeOrder = async (req, res, next) => {
     const resolved = await resolveOrderItems(requestedItems);
     if (resolved.error) return res.status(400).json({ message: resolved.error });
     const orderItems = resolved.items;
+
+    const mehendiResult = validateMehendiBooking(requestedMehendiBooking);
+    if (!mehendiResult.valid) {
+      return res.status(400).json({ message: mehendiResult.message });
+    }
 
     let coupon = null;
     if (couponCode != null && couponCode !== '') {
@@ -365,6 +372,7 @@ exports.placeOrder = async (req, res, next) => {
       giftWrap: !!giftWrap,
       giftMessage: giftMessage ? String(giftMessage).trim() : '',
       giftWrapCost: totals.giftWrapCost,
+      mehendiBooking: mehendiResult.booking,
       couponCode: coupon ? coupon.code : null,
       discount,
       ...totals,

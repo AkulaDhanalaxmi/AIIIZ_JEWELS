@@ -1256,6 +1256,17 @@
   .checkout-address-card.selected .checkout-address-select{ background:#EDF7EF; border-color:#D4E8D7; color:#34734D; }
   .checkout-empty-address{ padding:16px; background:#fff; border:1px dashed #D8CBAF; border-radius:16px; color:#647084; font-size:12px; line-height:1.5; }
   .checkout-empty-address .btn{ margin-top:10px; }
+  .mehendi-booking-card{ padding:12px; background:#FFFCF8; }
+  .mehendi-booking-head{ display:flex; align-items:flex-start; gap:10px; }
+  .mehendi-booking-head input{ width:18px; height:18px; accent-color:#B8872B; margin:2px 0 0; }
+  .mehendi-booking-title{ color:var(--navy-900); font-size:13px; font-weight:800; }
+  .mehendi-booking-copy,.mehendi-booking-hint{ margin-top:4px; color:#707989; font-size:10px; line-height:1.45; }
+  .mehendi-booking-fields{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
+  .mehendi-booking-fields .full{ grid-column:1 / -1; }
+  .mehendi-booking-fields label{ display:block; margin-bottom:5px; color:var(--navy-900); font-size:10px; font-weight:750; }
+  .mehendi-booking-fields input,.mehendi-booking-fields select{ box-sizing:border-box; width:100%; min-height:39px; padding:8px 10px; border:1px solid #E2DDCF; border-radius:9px; background:#fff; color:var(--navy-900); font:11px 'Inter',sans-serif; }
+  .mehendi-booking-availability{ min-height:14px; margin-top:5px; color:#34734D; font-size:10px; }
+  .mehendi-booking-availability.unavailable{ color:#A8443F; }
   .checkout-gift-card{ padding:9px; background:#FFFDF9; }
   .checkout-gift-top{ display:flex; align-items:flex-start; gap:8px; }
   .checkout-gift-icon{ width:30px; height:30px; flex:0 0 30px; display:grid; place-items:center; border-radius:10px; background:#FFF1E9; color:#C66758; font-size:16px; }
@@ -1829,6 +1840,7 @@
         <div class="checkout-main">
           <div class="checkout-section-heading">Delivery Address</div>
           <div id="addrList"></div>
+          <div id="mehendiBookingOption"></div>
           <div class="form-box" id="addrForm" style="display:none;">
             <input id="fName" placeholder="Full Name">
             <input id="fPhone" placeholder="Phone Number">
@@ -2366,7 +2378,7 @@ const localStore = {
 };
 
 /* ===================== STATE ===================== */
-let state = { cart:{}, wishlist:[], addresses:[], orders:[], selectedAddrId:null, selectedPayment:null, token:null, user:null, reviews:{}, appliedCoupon:null, couponInput:'' };
+let state = { cart:{}, wishlist:[], addresses:[], orders:[], selectedAddrId:null, selectedPayment:null, token:null, user:null, reviews:{}, appliedCoupon:null, couponInput:'', mehendiBooking:{enabled:false,address:'',pincode:'',date:'',timeSlot:''} };
 let currentProductId = null, currentProductImageIndex = 0, currentCategory='all', lastOrderId=null, activeTab='home';
 let currentSearch = '', currentSort = 'default';
 let searchPromptActive = false;
@@ -2375,8 +2387,22 @@ let pendingAction = null;
 let giftWrapEditing = false;
 const DUSSEHRA_COUPONS = [
   { code:'DUSSEHRA10', percent:10, detail:'Eligible cart items only · Sale category excluded' },
-  { code:'DUSSEHRA15', percent:15, detail:'Buy 2+ items · Cart subtotal above ₹499 · Sale category excluded' },
-  { code:'DUSSEHRA20', percent:20, detail:'Buy 3+ items · Cart subtotal above ₹499 · Sale category excluded' },
+  { code:'DUSSEHRA15', percent:15, detail:'Eligible subtotal ₹499+ · Sale category excluded' },
+  { code:'DUSSEHRA20', percent:20, detail:'Eligible subtotal ₹999+ · Sale category excluded' },
+];
+const MEHENDI_SERVICE_PINS = Object.freeze(['506001','506002','506003']);
+const MEHENDI_SERVICE_CITIES = Object.freeze({
+  '506001':'Hanamkonda',
+  '506002':'Warangal',
+  '506003':'Kazipet',
+});
+const MEHENDI_BOOKING_START_DATE = '2026-10-06';
+const MEHENDI_BOOKING_END_DATE = '2026-10-20';
+const MEHENDI_TIME_SLOTS = [
+  '10:00 AM – 12:00 PM',
+  '12:00 PM – 2:00 PM',
+  '2:00 PM – 4:00 PM',
+  '4:00 PM – 6:00 PM',
 ];
 let couponEligibility = { signature:'', loading:false, offers:[] };
 let couponEligibilityRequest = 0;
@@ -2926,6 +2952,7 @@ function onAuthSuccess(data, welcomeMsg){
     state.orders = [];
     state.addresses = [];
     state.selectedAddrId = null;
+    state.mehendiBooking = {enabled:false,address:'',pincode:'',date:'',timeSlot:''};
   }
   adoptUserAddresses(data.user);
 
@@ -2954,6 +2981,7 @@ function logout(){
   state.orders = [];
   state.addresses = [];
   state.selectedAddrId = null;
+  state.mehendiBooking = {enabled:false,address:'',pincode:'',date:'',timeSlot:''};
   saveState();
   toast('You have been logged out');
   nav('home');
@@ -4319,6 +4347,124 @@ function computeOrderPayableTotal({ subtotal = 0, shipping = 0, discount = 0, gi
 function formatCheckoutMoney(value){
   return `₹${roundCheckoutMoney(value).toLocaleString('en-IN', {maximumFractionDigits:2})}`;
 }
+function currentIndiaDateKey(){
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone:'Asia/Kolkata', year:'numeric', month:'2-digit', day:'2-digit',
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+function mehendiBookingState(){
+  if(!state.mehendiBooking || typeof state.mehendiBooking !== 'object'){
+    state.mehendiBooking = {enabled:false,address:'',pincode:'',date:'',timeSlot:''};
+  }
+  state.mehendiBooking = Object.assign(
+    {enabled:false,address:'',pincode:'',date:'',timeSlot:''},
+    state.mehendiBooking
+  );
+  state.mehendiBooking.enabled = state.mehendiBooking.enabled === true;
+  ['address','pincode','date','timeSlot'].forEach(field => {
+    if(typeof state.mehendiBooking[field] !== 'string') state.mehendiBooking[field] = '';
+  });
+  return state.mehendiBooking;
+}
+function mehendiDateRange(){
+  const today = currentIndiaDateKey();
+  return {
+    min: today > MEHENDI_BOOKING_START_DATE ? today : MEHENDI_BOOKING_START_DATE,
+    max: MEHENDI_BOOKING_END_DATE,
+  };
+}
+function mehendiBookingError(){
+  const booking = mehendiBookingState();
+  if(!booking.enabled) return '';
+  if(!booking.address.trim()) return 'Enter the mehendi service address.';
+  const pin = String(booking.pincode || '').trim();
+  if(!/^\d{6}$/.test(pin)) return 'Enter a valid 6-digit mehendi service PIN code.';
+  if(!MEHENDI_SERVICE_PINS.includes(pin)) return 'Mehendi service is not available for this location.';
+  const dateRange = mehendiDateRange();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(booking.date) || booking.date < dateRange.min || booking.date > dateRange.max){
+    return 'Select an available mehendi booking date.';
+  }
+  if(!MEHENDI_TIME_SLOTS.includes(booking.timeSlot)) return 'Select a mehendi time slot.';
+  return '';
+}
+function updateMehendiBookingField(field, value){
+  const booking = mehendiBookingState();
+  if(!['address','pincode','date','timeSlot'].includes(field)) return;
+  booking[field] = value;
+  saveState();
+  if(field === 'pincode'){
+    const feedback = document.getElementById('mehendiPinFeedback');
+    if(feedback){
+      const pin = String(value || '').trim();
+      const city = MEHENDI_SERVICE_PINS.includes(pin) ? MEHENDI_SERVICE_CITIES[pin] : '';
+      feedback.textContent = city
+        ? `Mehendi service available in ${city}.`
+        : pin.length === 6
+          ? 'Mehendi service is not available for this location.'
+          : 'Service available only in Hanamkonda, Warangal and Kazipet.';
+      feedback.classList.toggle('unavailable', pin.length === 6 && !city);
+    }
+  }
+}
+function toggleMehendiBooking(enabled){
+  mehendiBookingState().enabled = !!enabled;
+  saveState();
+  renderCheckout();
+}
+function renderMehendiBooking(){
+  const container = document.getElementById('mehendiBookingOption');
+  if(!container) return;
+  const booking = mehendiBookingState();
+  const dateRange = mehendiDateRange();
+  const bookingPin = String(booking.pincode || '').trim();
+  const city = MEHENDI_SERVICE_PINS.includes(bookingPin) ? MEHENDI_SERVICE_CITIES[bookingPin] : '';
+  const slotOptionsHtml = MEHENDI_TIME_SLOTS.map(slot =>
+    `<option value="${escHtmlFrontend(slot)}" ${booking.timeSlot === slot ? 'selected' : ''}>${escHtmlFrontend(slot)}</option>`
+  ).join('');
+  const pinFeedback = city
+    ? `Mehendi service available in ${city}.`
+    : String(booking.pincode || '').trim().length === 6
+      ? 'Mehendi service is not available for this location.'
+      : 'Service available only in Hanamkonda, Warangal and Kazipet.';
+
+  container.innerHTML = `
+    <div class="checkout-section-heading">Free Mehendi Service</div>
+    <div class="checkout-gift-card mehendi-booking-card">
+      <div class="mehendi-booking-head">
+        <input id="mehendiBookingEnabled" type="checkbox" ${booking.enabled ? 'checked' : ''} onchange="toggleMehendiBooking(this.checked)">
+        <div>
+          <div class="mehendi-booking-title">Book free mehendi service at your doorstep</div>
+          <div class="mehendi-booking-copy">Available with every purchase. Please enter the service address, PIN, date and time.</div>
+        </div>
+      </div>
+      ${booking.enabled ? `
+        <div class="mehendi-booking-fields">
+          <div class="full">
+            <label for="mehendiServiceAddress">Mehendi service address</label>
+            <input id="mehendiServiceAddress" type="text" maxlength="300" autocomplete="street-address" placeholder="House No, Area, Landmark" value="${escHtmlFrontend(booking.address)}" oninput="updateMehendiBookingField('address',this.value)">
+          </div>
+          <div class="full">
+            <label for="mehendiServicePincode">Service PIN code</label>
+            <input id="mehendiServicePincode" type="text" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" placeholder="506001" value="${escHtmlFrontend(booking.pincode)}" oninput="updateMehendiBookingField('pincode',this.value)">
+            <div id="mehendiPinFeedback" class="mehendi-booking-availability ${booking.pincode && booking.pincode.length === 6 && !city ? 'unavailable' : ''}">${escHtmlFrontend(pinFeedback)}</div>
+          </div>
+          <div>
+            <label for="mehendiServiceDate">Select date</label>
+            <input id="mehendiServiceDate" type="date" min="${dateRange.min}" max="${dateRange.max}" value="${escHtmlFrontend(booking.date)}" onchange="updateMehendiBookingField('date',this.value)" ${dateRange.min > dateRange.max ? 'disabled' : ''}>
+          </div>
+          <div>
+            <label for="mehendiServiceTime">Select time slot</label>
+            <select id="mehendiServiceTime" onchange="updateMehendiBookingField('timeSlot',this.value)">
+              <option value="">Select a time</option>${slotOptionsHtml}
+            </select>
+          </div>
+        </div>
+        <div class="mehendi-booking-hint">${dateRange.min <= dateRange.max ? 'Bookings available October 6–20, 2026. Our team will contact you to confirm the service address and slot.' : 'Mehendi booking dates have ended for this offer.'}</div>
+      ` : ''}
+    </div>`;
+}
 function renderCheckout(){
   const el = document.getElementById('addrList');
   if(!el) return;
@@ -4415,6 +4561,7 @@ function renderCheckout(){
     }).join('');
   }
   document.getElementById('addrForm').style.display='none';
+  renderMehendiBooking();
   const productRows = items.map(p => {
     const productImage = p.images && p.images[0] && String(p.images[0]).trim();
     return `
@@ -4610,6 +4757,8 @@ async function goToPayment(){
   const items = checkoutItems();
   if(items.length===0){ toast('Your cart is empty'); return; }
   if(!state.selectedAddrId){ toast('Please select an address'); return; }
+  const mehendiError = mehendiBookingError();
+  if(mehendiError){ toast(mehendiError); return; }
   const addr = state.addresses.find(a=>a.id===state.selectedAddrId);
   if(usingLiveBackend){
     try{
@@ -4832,6 +4981,15 @@ async function submitOrder(){
   if(items.length===0){ toast('No items to order'); return; }
   const addr = state.addresses.find(a=>a.id===state.selectedAddrId);
   if(!addr){ toast('Please select an address'); return; }
+  const mehendiError = mehendiBookingError();
+  if(mehendiError){ toast(mehendiError); nav('checkout'); return; }
+  const bookingState = mehendiBookingState();
+  const mehendiBooking = bookingState.enabled ? {
+    address: bookingState.address.trim(),
+    pincode: String(bookingState.pincode || '').trim(),
+    date: bookingState.date,
+    timeSlot: bookingState.timeSlot,
+  } : null;
   let quote = null;
   if(usingLiveBackend){
     try{
@@ -4859,6 +5017,7 @@ async function submitOrder(){
         paymentMethod,
         giftWrap: !!state.giftWrap?.enabled,
         giftMessage: state.giftWrap?.message || '',
+        mehendiBooking,
         couponCode: state.appliedCoupon?.code || '',
         expectedTotal: checkoutTotal,
         expectedQuote: quote,
@@ -4885,11 +5044,13 @@ async function submitOrder(){
         giftWrap: ord.giftWrap || false,
         giftMessage: ord.giftMessage || '',
         giftWrapCost: ord.giftWrap ? Number(ord.giftWrapCost || 30) : 0,
+        mehendiBooking: ord.mehendiBooking || null,
       };
 
       state.orders.unshift(order);
       // clear local gift wrap state after placing an order so it doesn't persist for next user
       state.giftWrap = { enabled:false, message: '' };
+      state.mehendiBooking = {enabled:false,address:'',pincode:'',date:'',timeSlot:''};
       saveState(); updateBadges(); renderCheckout();
       lastOrderId = order.id;
 
@@ -4959,10 +5120,12 @@ async function submitOrder(){
     giftWrap: !!state.giftWrap?.enabled,
     giftMessage: state.giftWrap?.message || '',
     giftWrapCost: state.giftWrap?.enabled ? 30 : 0,
+    mehendiBooking,
   };
   state.orders.unshift(order);
   // clear local gift wrap state after placing an order in demo mode
   state.giftWrap = { enabled:false, message: '' };
+  state.mehendiBooking = {enabled:false,address:'',pincode:'',date:'',timeSlot:''};
   if(buyNowMode){ buyNowMode=false; buyNowItem=null; } else { state.cart = {}; }
   state.appliedCoupon = null;
   state.couponInput = '';

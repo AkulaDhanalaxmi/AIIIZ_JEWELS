@@ -1,7 +1,7 @@
 const OFFERS = Object.freeze({
   DUSSEHRA10: { percent: 10, minQty: 0, minSubtotal: 0 },
-  DUSSEHRA15: { percent: 15, minQty: 2, minSubtotal: 499 },
-  DUSSEHRA20: { percent: 20, minQty: 3, minSubtotal: 499 },
+  DUSSEHRA15: { percent: 15, minQty: 0, minSubtotal: 499 },
+  DUSSEHRA20: { percent: 20, minQty: 0, minSubtotal: 999 },
 });
 
 const DEFAULT_SALE_START_DATE = '2026-10-05';
@@ -96,10 +96,10 @@ function validateDussehraCoupon(couponCode, items, now = new Date()) {
     return { valid: false, message: 'Coupons cannot be applied to products in the Sale category.' };
   }
 
-  if (offer.minSubtotal > 0 && subtotal <= offer.minSubtotal) {
-    return { valid: false, message: `${code} requires a cart subtotal above ₹${offer.minSubtotal}.` };
+  if (offer.minSubtotal > 0 && subtotal < offer.minSubtotal) {
+    return { valid: false, message: `${code} requires a cart subtotal of at least ₹${offer.minSubtotal}.` };
   }
-  if (quantity < offer.minQty) {
+  if (offer.minQty > 0 && quantity < offer.minQty) {
     return { valid: false, message: `${code} requires at least ${offer.minQty} items. Your cart has ${quantity}.` };
   }
 

@@ -31,28 +31,34 @@ test('rejects an empty cart', () => {
   assert.match(result.message, /cart is empty/i);
 });
 
-test('rejects DUSSEHRA15 when subtotal is ₹400', () => {
-  const result = validateDussehraCoupon('DUSSEHRA15', itemsWithTotal(400, 2), saleDate);
+test('rejects DUSSEHRA15 when subtotal is below ₹499', () => {
+  const result = validateDussehraCoupon('DUSSEHRA15', itemsWithTotal(498), saleDate);
   assert.equal(result.valid, false);
-  assert.match(result.message, /above ₹499/i);
+  assert.match(result.message, /at least ₹499/i);
 });
 
-test('rejects DUSSEHRA15 at ₹500 with only one item', () => {
+test('applies DUSSEHRA15 at ₹499 with a single item', () => {
+  const result = validateDussehraCoupon('DUSSEHRA15', itemsWithTotal(499), saleDate);
+  assert.equal(result.valid, true);
+  assert.equal(result.discount, 74.85);
+});
+
+test('applies DUSSEHRA15 at ₹500 with one item', () => {
   const result = validateDussehraCoupon('DUSSEHRA15', itemsWithTotal(500), saleDate);
-  assert.equal(result.valid, false);
-  assert.match(result.message, /at least 2 items/i);
-});
-
-test('applies DUSSEHRA15 at ₹500 with two units', () => {
-  const result = validateDussehraCoupon('DUSSEHRA15', itemsWithTotal(500, 2), saleDate);
   assert.equal(result.valid, true);
   assert.equal(result.discount, 75);
 });
 
-test('applies DUSSEHRA20 at ₹500 with three units', () => {
-  const result = validateDussehraCoupon('DUSSEHRA20', itemsWithTotal(500, 3), saleDate);
+test('rejects DUSSEHRA20 when subtotal is below ₹999', () => {
+  const result = validateDussehraCoupon('DUSSEHRA20', itemsWithTotal(998), saleDate);
+  assert.equal(result.valid, false);
+  assert.match(result.message, /at least ₹999/i);
+});
+
+test('applies DUSSEHRA20 at ₹999 with a single item', () => {
+  const result = validateDussehraCoupon('DUSSEHRA20', itemsWithTotal(999), saleDate);
   assert.equal(result.valid, true);
-  assert.equal(result.discount, 100);
+  assert.equal(result.discount, 199.8);
 });
 
 test('applies DUSSEHRA10 at ₹1,000 with a ₹100 discount', () => {
@@ -111,10 +117,10 @@ test('coupon minimum subtotal and quantity count only non-Sale products', () => 
   assert.equal(result.discount, 75);
 });
 
-test('DUSSEHRA15 requires a subtotal strictly greater than ₹499', () => {
-  const result = validateDussehraCoupon('DUSSEHRA15', itemsWithTotal(499, 2), saleDate);
-  assert.equal(result.valid, false);
-  assert.match(result.message, /above ₹499/i);
+test('DUSSEHRA15 accepts a subtotal of exactly ₹499', () => {
+  const result = validateDussehraCoupon('DUSSEHRA15', itemsWithTotal(499, 1), saleDate);
+  assert.equal(result.valid, true);
+  assert.equal(result.discount, 74.85);
 });
 
 test('rejects invalid coupon codes', () => {
