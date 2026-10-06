@@ -2,6 +2,7 @@ const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 const Setting = require('../models/Setting');
+const { calculatePayableTotal, roundMoney, validateDussehraCoupon } = require('../services/dussehraCoupons');
 
 function generateOrderNumber() {
   return 'AIIZ' + Math.floor(100000 + Math.random() * 899999);
@@ -10,11 +11,12 @@ function generateOrderNumber() {
 const DEFAULT_DELIVERY_SETTINGS = {
   storeInfo: {
     name: 'Aiiz Store',
-    address: 'Main Store Address',
+    address: '5-1-119 Kumpalli, Bokkalgadda, Hanumakonda',
     pincode: '',
-    city: '',
-    state: '',
-    phone: '',
+    city: 'Hanumakonda',
+    district: 'Hanumakonda',
+    state: 'Telangana',
+    phone: '8880001886',
   },
   shipping: {
     samePIN: 30,
@@ -38,11 +40,28 @@ const DEFAULT_DELIVERY_SETTINGS = {
 
 async function getDeliverySettings() {
   const setting = await Setting.findOne({ key: 'delivery_settings' });
-  return setting && setting.value ? setting.value : DEFAULT_DELIVERY_SETTINGS;
+  const value = setting && setting.value ? setting.value : {};
+  const storeInfo = Object.assign({}, DEFAULT_DELIVERY_SETTINGS.storeInfo, value.storeInfo || {});
+  ['address', 'city', 'state'].forEach((key) => {
+    if (!normalizeText(storeInfo[key])) {
+      storeInfo[key] = DEFAULT_DELIVERY_SETTINGS.storeInfo[key];
+    }
+  });
+  return {
+    storeInfo,
+    shipping: Object.assign({}, DEFAULT_DELIVERY_SETTINGS.shipping, value.shipping || {}),
+    deliveryDays: Object.assign({}, DEFAULT_DELIVERY_SETTINGS.deliveryDays, value.deliveryDays || {}),
+    deliveryAvailability: Object.assign(
+      {},
+      DEFAULT_DELIVERY_SETTINGS.deliveryAvailability,
+      value.deliveryAvailability || {}
+    ),
+  };
 }
 
 function normalizeText(value) {
-  return String(value || '').trim().toLowerCase();
+  const normalized = String(value || '').trim().toLowerCase();
+  return normalized === 'hanamkonda' ? 'hanumakonda' : normalized;
 }
 
 function isDeliveryAllowed(address, availability) {
@@ -97,8 +116,50 @@ function getShippingInfo(address, subtotal, settings) {
   return { group, shipping, range, text, blocked: false };
 }
 
+function orderPricingBreakdown(items, totals, discount, couponCode) {
+  return {
+    items: items.map((item) => ({
+      productId: String(item.product),
+      price: Number(item.price),
+      qty: Number(item.qty),
+    })),
+    subtotal: totals.subtotal,
+    shipping: totals.shipping,
+    discount,
+    couponCode: couponCode || null,
+    giftWrapCost: totals.giftWrapCost,
+    total: totals.total,
+  };
+}
+
+function compareOrderPricing(expected, actual) {
+  if (!expected || typeof expected !== 'object') return [];
+  const mismatches = [];
+  ['subtotal', 'shipping', 'discount', 'giftWrapCost', 'total'].forEach((field) => {
+    const expectedValue = Number(expected[field]);
+    const actualValue = Number(actual[field]);
+    if (!Number.isFinite(expectedValue) || Math.abs(expectedValue - actualValue) >= 0.01) {
+      mismatches.push({ field, expected: expected[field] ?? null, actual: actualValue });
+    }
+  });
+
+  if (String(expected.couponCode || '').trim().toUpperCase() !==
+      String(actual.couponCode || '').trim().toUpperCase()) {
+    mismatches.push({ field: 'couponCode', expected: expected.couponCode || null, actual: actual.couponCode });
+  }
+
+  const itemSignature = (items) => (Array.isArray(items) ? items : [])
+    .map((item) => `${String(item.productId || '').toLowerCase()}:${Number(item.price)}:${Number(item.qty)}`)
+    .sort()
+    .join('|');
+  if (itemSignature(expected.items) !== itemSignature(actual.items)) {
+    mismatches.push({ field: 'items', expected: expected.items || [], actual: actual.items });
+  }
+  return mismatches;
+}
+
 async function calcTotals(items, address, giftWrap = false) {
-  const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
+  const subtotal = roundMoney(items.reduce((sum, i) => sum + i.price * i.qty, 0));
   const settings = await getDeliverySettings();
   const shippingInfo = getShippingInfo(address, subtotal, settings);
   const giftWrapCost = giftWrap ? 30 : 0;
@@ -106,52 +167,189 @@ async function calcTotals(items, address, giftWrap = false) {
     return { subtotal, shipping: 0, giftWrapCost, total: subtotal + giftWrapCost, deliveryBlocked: true, deliveryInfo: shippingInfo };
   }
   const shipping = shippingInfo.shipping;
-  const total = subtotal + shipping + giftWrapCost;
+  const total = calculatePayableTotal({ subtotal, shipping, giftWrapCost });
   return { subtotal, shipping, giftWrapCost, total, deliveryInfo: shippingInfo };
 }
 
+async function resolveOrderItems(requestItems) {
+  if (!Array.isArray(requestItems) || requestItems.length === 0) {
+    return { error: 'Cart is empty.' };
+  }
+
+  for (const item of requestItems) {
+    if (!item || !/^[a-f\d]{24}$/i.test(String(item.productId || '')) ||
+        !Number.isSafeInteger(Number(item.qty)) || Number(item.qty) < 1) {
+      return { error: 'Cart items are invalid. Please refresh your cart and try again.' };
+    }
+  }
+
+  const productIds = requestItems.map((item) => item.productId);
+  const products = await Product.find({ _id: { $in: productIds } })
+    .select('name price stock category')
+    .populate('category', 'name slug');
+  const productById = new Map(products.map((product) => [product._id.toString().toLowerCase(), product]));
+  const items = requestItems.map((item) => {
+    const product = productById.get(String(item.productId).toLowerCase());
+    if (!product || !Number.isFinite(Number(product.price)) || Number(product.price) < 0) return null;
+    return {
+      product: product._id,
+      name: product.name,
+      price: Number(product.price),
+      qty: Number(item.qty),
+      categorySlug: [product.category?.slug, product.category?.name]
+        .some((value) => String(value || '').trim().toLowerCase() === 'sale')
+        ? 'sale'
+        : String(product.category?.slug || '').trim().toLowerCase(),
+    };
+  });
+  if (items.some((item) => !item)) {
+    return { error: 'A product in your cart is no longer available. Please refresh your cart.' };
+  }
+  return { items };
+}
+
+exports.validateCoupon = async (req, res, next) => {
+  try {
+    const { couponCode, items } = req.body;
+    const resolved = await resolveOrderItems(items);
+    if (resolved.error) return res.status(400).json({ valid: false, message: resolved.error });
+
+    const result = validateDussehraCoupon(couponCode, resolved.items);
+    if (!result.valid) return res.status(400).json({ valid: false, message: result.message });
+    return res.json({
+      valid: true,
+      coupon: { code: result.code, percent: result.percent, discount: result.discount },
+      subtotal: result.subtotal,
+      quantity: result.quantity,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.quoteOrder = async (req, res, next) => {
+  try {
+    const { items: requestedItems, address, giftWrap, couponCode } = req.body;
+    if (!address) return res.status(400).json({ message: 'Delivery address is required.' });
+
+    const resolved = await resolveOrderItems(requestedItems);
+    if (resolved.error) return res.status(400).json({ message: resolved.error });
+
+    let coupon = null;
+    if (couponCode) {
+      coupon = validateDussehraCoupon(couponCode, resolved.items);
+      if (!coupon.valid) return res.status(400).json({ message: coupon.message });
+    }
+
+    const totals = await calcTotals(resolved.items, address, !!giftWrap);
+    if (totals.deliveryBlocked) {
+      return res.status(400).json({ message: 'Delivery is not available for this address.' });
+    }
+    const discount = coupon ? coupon.discount : 0;
+    const total = calculatePayableTotal({
+      subtotal: totals.subtotal,
+      discount,
+      shipping: totals.shipping,
+      giftWrapCost: totals.giftWrapCost,
+    });
+
+    return res.json({
+      items: resolved.items.map((item) => ({
+        productId: String(item.product),
+        price: item.price,
+        qty: item.qty,
+      })),
+      subtotal: totals.subtotal,
+      shipping: totals.shipping,
+      discount,
+      couponCode: coupon ? coupon.code : null,
+      giftWrapCost: totals.giftWrapCost,
+      total,
+      deliveryInfo: totals.deliveryInfo,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // POST /api/orders  { items?: [{productId, qty}], address, paymentMethod }
 // If `items` is omitted, the order is built from the user's current cart (checkout flow).
-exports.placeOrder = async (req, res) => {
+exports.placeOrder = async (req, res, next) => {
   console.time('placeOrder:overall');
   try {
-    const { items: directItems, address, paymentMethod, giftWrap, giftMessage } = req.body;
+    const {
+      items: directItems,
+      address,
+      paymentMethod,
+      giftWrap,
+      giftMessage,
+      couponCode,
+      expectedTotal,
+      expectedQuote,
+    } = req.body;
     if (!address || !paymentMethod) {
       return res.status(400).json({ message: 'Address and payment method are required' });
     }
 
-    let sourceItems = directItems;
-    if (!sourceItems) {
+    let requestedItems = directItems;
+    if (directItems === undefined) {
       console.time('placeOrder:load-cart');
-      const cart = await Cart.findOne({ user: req.user._id }).populate('items.product', 'name price stock');
+      const cart = await Cart.findOne({ user: req.user._id }).lean();
       console.timeEnd('placeOrder:load-cart');
       if (!cart || cart.items.length === 0) return res.status(400).json({ message: 'Cart is empty' });
-      sourceItems = cart.items.map((i) => ({ productId: i.product._id, qty: i.qty, product: i.product }));
-    } else {
-      const productIds = sourceItems.map((i) => i.productId);
-      console.time('placeOrder:load-products');
-      const products = await Product.find({ _id: { $in: productIds } }).select('name price stock');
-      console.timeEnd('placeOrder:load-products');
-      sourceItems = sourceItems.map((i) => ({
-        ...i,
-        product: products.find((p) => p._id.toString() === i.productId),
-      }));
+      requestedItems = cart.items.map((item) => ({ productId: String(item.product), qty: item.qty }));
     }
 
-    console.time('placeOrder:build-order-items');
-    const orderItems = sourceItems.map((i) => ({
-      product: i.product._id,
-      name: i.product.name,
-      price: i.product.price,
-      qty: i.qty,
-    }));
-    console.timeEnd('placeOrder:build-order-items');
+    const resolved = await resolveOrderItems(requestedItems);
+    if (resolved.error) return res.status(400).json({ message: resolved.error });
+    const orderItems = resolved.items;
+
+    let coupon = null;
+    if (couponCode != null && couponCode !== '') {
+      coupon = validateDussehraCoupon(couponCode, orderItems);
+      if (!coupon.valid) return res.status(400).json({ message: coupon.message });
+    }
 
     console.time('placeOrder:calc-totals');
     const totals = await calcTotals(orderItems, address, !!giftWrap);
     console.timeEnd('placeOrder:calc-totals');
     if (totals.deliveryBlocked) {
       return res.status(400).json({ message: 'Delivery is not available for this address' });
+    }
+    const discount = coupon ? coupon.discount : 0;
+    totals.total = calculatePayableTotal({
+      subtotal: totals.subtotal,
+      discount,
+      shipping: totals.shipping,
+      giftWrapCost: totals.giftWrapCost,
+    });
+    const actualQuote = orderPricingBreakdown(
+      orderItems,
+      totals,
+      discount,
+      coupon ? coupon.code : null
+    );
+    const quoteMismatches = compareOrderPricing(expectedQuote, actualQuote);
+    const expectedTotalMismatch = expectedTotal !== undefined &&
+      (!Number.isFinite(Number(expectedTotal)) ||
+        Math.abs(roundMoney(expectedTotal) - totals.total) >= 0.01);
+    if (expectedTotalMismatch || quoteMismatches.length > 0) {
+      if (expectedTotalMismatch && !quoteMismatches.some((mismatch) => mismatch.field === 'total')) {
+        quoteMismatches.push({
+          field: 'total',
+          expected: Number.isFinite(Number(expectedTotal)) ? roundMoney(expectedTotal) : expectedTotal,
+          actual: totals.total,
+        });
+      }
+      console.warn('Order quote changed before order creation', {
+        userId: String(req.user._id),
+        mismatches: quoteMismatches,
+      });
+      return res.status(409).json({
+        message: 'The order price changed before submission. Review the updated breakdown and place your order again.',
+        mismatches: quoteMismatches,
+        quote: Object.assign({}, actualQuote, { deliveryInfo: totals.deliveryInfo }),
+      });
     }
 
     console.time('placeOrder:create-order');
@@ -167,6 +365,8 @@ exports.placeOrder = async (req, res) => {
       giftWrap: !!giftWrap,
       giftMessage: giftMessage ? String(giftMessage).trim() : '',
       giftWrapCost: totals.giftWrapCost,
+      couponCode: coupon ? coupon.code : null,
+      discount,
       ...totals,
       status: 'confirmed',
       statusHistory: [{ status: 'confirmed' }],
@@ -179,13 +379,15 @@ exports.placeOrder = async (req, res) => {
     );
     console.timeEnd('placeOrder:decrement-stock');
 
-    if (!directItems) {
+    if (directItems === undefined) {
       console.time('placeOrder:clear-cart');
       await Cart.findOneAndUpdate({ user: req.user._id }, { items: [] });
       console.timeEnd('placeOrder:clear-cart');
     }
 
     res.status(201).json({ order });
+  } catch (error) {
+    next(error);
   } finally {
     console.timeEnd('placeOrder:overall');
   }

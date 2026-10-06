@@ -91,11 +91,18 @@ All request/response bodies are JSON. Protected routes need:
 ### Orders
 | Method | Route | Auth | Body |
 |---|---|---|---|
+| POST | /api/orders/coupons/validate | user | `{ couponCode, items: [{ productId, qty }] }` — validates a Dussehra offer using current product prices |
+| POST | /api/orders/quote | user | `{ items, address, giftWrap?, couponCode? }` — returns the server-calculated checkout subtotal, shipping, discount, and total |
 | POST | /api/orders | user | `{ address, paymentMethod, items? }` — omit `items` to checkout from the cart |
 | GET | /api/orders | user | your order history |
 | GET | /api/orders/:id | user/admin | single order (for tracking) |
 | GET | /api/orders/admin/all | admin | every order |
 | PUT | /api/orders/:id/status | admin | `{ status }` — confirmed → packed → shipped → delivered |
+
+Dussehra coupons are available from October 5 through October 20, 2026 (India time):
+`DUSSEHRA10` gives 10% off; `DUSSEHRA15` gives 15% off with at least 2 units and a subtotal above ₹499; `DUSSEHRA20` gives 20% off with at least 3 units and a subtotal above ₹499. The order endpoint recalculates the discount from the server-priced order items. Submitted discount and total fields are not used. Verify locally with `node --test test/dussehraCoupons.test.js`.
+
+For local testing with a different start date, set `DUSSEHRA_COUPON_START_DATE=2026-10-02` in `backend/.env` and restart the backend. Remove this override when no longer needed; without it (including production by default), coupons start on October 5. The October 20 end date remains enforced.
 
 ## Example: full checkout flow
 

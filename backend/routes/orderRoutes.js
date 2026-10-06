@@ -4,6 +4,8 @@ const ctrl = require('../controllers/orderController');
 const { protect, adminOnly } = require('../middleware/auth');
 
 router.use(protect);
+router.post('/coupons/validate', ctrl.validateCoupon);
+router.post('/quote', ctrl.quoteOrder);
 router.post('/', ctrl.placeOrder);
 router.get('/', ctrl.myOrders);
 router.get('/admin/all', adminOnly, ctrl.allOrders);

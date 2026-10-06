@@ -4,6 +4,7 @@ const Payment = require('../models/Payment');
 const WebhookEvent = require('../models/WebhookEvent');
 const razorpayService = require('../services/razorpayService');
 const logger = require('../utils/logger');
+const { validateStoredOrderTotals } = require('../services/dussehraCoupons');
 
 async function createPaymentOrder(req, res, next) {
   try {
@@ -18,6 +19,11 @@ async function createPaymentOrder(req, res, next) {
     if (order.paymentStatus === 'paid') {
       return res.status(409).json({ success: false, message: 'This order has already been paid.' });
     }
+    const orderTotals = validateStoredOrderTotals(order);
+    if (!orderTotals.valid) {
+      logger.error('Order total validation failed before payment creation', { orderId: order._id.toString() });
+      return res.status(409).json({ success: false, message: 'Order totals could not be verified. Please contact support.' });
+    }
 
     const existingPayment = await Payment.findOne({
       order: order._id,
@@ -25,6 +31,10 @@ async function createPaymentOrder(req, res, next) {
     }).sort({ createdAt: -1 });
 
     if (existingPayment) {
+      if (existingPayment.amount !== orderTotals.expectedAmountInSmallestUnit ||
+          existingPayment.currency !== (process.env.RAZORPAY_CURRENCY || 'INR')) {
+        return res.status(409).json({ success: false, message: 'The pending payment amount does not match this order. Please contact support.' });
+      }
       return res.status(200).json({
         success: true,
         message: 'Existing pending payment order reused.',
@@ -44,13 +54,21 @@ async function createPaymentOrder(req, res, next) {
     }
 
     const razorpayOrder = await razorpayService.createRazorpayOrder({
-      amountInRupees: order.total,
+      amountInRupees: orderTotals.expectedTotal,
       receipt: `receipt_order_${order._id}`,
       notes: {
         orderId: order._id.toString(),
         userId: req.user._id.toString(),
       },
     });
+    if (Number(razorpayOrder.amount) !== orderTotals.expectedAmountInSmallestUnit ||
+        razorpayOrder.currency !== (process.env.RAZORPAY_CURRENCY || 'INR')) {
+      logger.error('Razorpay created an order with a mismatched amount or currency', {
+        orderId: order._id.toString(),
+        razorpayOrderId: razorpayOrder.id,
+      });
+      return res.status(502).json({ success: false, message: 'Payment amount could not be verified. Please try again.' });
+    }
 
     const payment = await Payment.create({
       order: order._id,
@@ -102,6 +120,11 @@ async function verifyPayment(req, res, next) {
     if (!payment) {
       return res.status(404).json({ success: false, message: 'Payment record not found for this order.' });
     }
+    const orderTotals = validateStoredOrderTotals(order);
+    if (!orderTotals.valid || payment.amount !== orderTotals.expectedAmountInSmallestUnit) {
+      logger.error('Order/payment amount validation failed', { orderId: order._id.toString() });
+      return res.status(409).json({ success: false, message: 'Payment amount does not match the verified order total.' });
+    }
     const isValidSignature = razorpayService.verifyPaymentSignature({
       razorpayOrderId: razorpay_order_id,
       razorpayPaymentId: razorpay_payment_id,
@@ -130,6 +153,19 @@ async function verifyPayment(req, res, next) {
       return res.status(400).json({
         success: false,
         message: 'Payment has not been successfully captured yet.',
+      });
+    }
+    const expectedCurrency = process.env.RAZORPAY_CURRENCY || 'INR';
+    if (Number(razorpayPayment.amount) !== orderTotals.expectedAmountInSmallestUnit ||
+        razorpayPayment.currency !== expectedCurrency ||
+        payment.currency !== expectedCurrency) {
+      payment.status = 'FAILED';
+      payment.errorDescription = 'Payment amount or currency did not match the order';
+      payment.rawPayload = razorpayPayment;
+      await payment.save();
+      return res.status(400).json({
+        success: false,
+        message: 'Payment amount could not be verified against the order.',
       });
     }
 
@@ -264,22 +300,39 @@ async function handleWebhook(req, res, next) {
 }
 
 async function handlePaymentCaptured(event, fromOrderPaid = false) {
-  const paymentEntity = event.payload.payment.entity;
-  const razorpayOrderId = paymentEntity.order_id;
-  const razorpayPaymentId = paymentEntity.id;
+  const paymentEntity = fromOrderPaid
+    ? event.payload.order?.entity
+    : event.payload.payment?.entity;
+  if (!paymentEntity) {
+    logger.warn('Payment captured webhook did not contain a payment/order entity');
+    return;
+  }
+  const razorpayOrderId = fromOrderPaid ? paymentEntity.id : paymentEntity.order_id;
+  const razorpayPaymentId = fromOrderPaid ? null : paymentEntity.id;
   const payment = await Payment.findOne({ razorpayOrderId });
   if (!payment) {
     logger.warn('Webhook payment.captured for unknown razorpayOrderId', { razorpayOrderId });
     return;
   }
   if (payment.status === 'PAID' && payment.verified) return;
-  payment.razorpayPaymentId = razorpayPaymentId;
+  const order = await Order.findById(payment.order);
+  const orderTotals = order && validateStoredOrderTotals(order);
+  const expectedCurrency = process.env.RAZORPAY_CURRENCY || 'INR';
+  const capturedAmount = fromOrderPaid ? (paymentEntity.amount_paid ?? paymentEntity.amount) : paymentEntity.amount;
+  if (!orderTotals || !orderTotals.valid ||
+      Number(capturedAmount) !== orderTotals.expectedAmountInSmallestUnit ||
+      payment.amount !== orderTotals.expectedAmountInSmallestUnit ||
+      paymentEntity.currency !== expectedCurrency ||
+      payment.currency !== expectedCurrency) {
+    logger.error('Captured webhook amount did not match the verified order total', { razorpayOrderId });
+    return;
+  }
+  if (razorpayPaymentId) payment.razorpayPaymentId = razorpayPaymentId;
   payment.status = 'PAID';
   payment.verified = true;
-  payment.method = paymentEntity.method;
+  if (paymentEntity.method) payment.method = paymentEntity.method;
   payment.rawPayload = paymentEntity;
   await payment.save();
-  const order = await Order.findById(payment.order);
   if (order && order.paymentStatus !== 'paid') {
     order.paymentStatus = 'paid';
     order.paidAt = new Date();

@@ -56,6 +56,16 @@
   .card{ background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; margin-bottom:20px;}
   .card-head{ display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid #EEF0F4;}
   .card-head h3{ font-size:15px; font-weight:700; color:var(--navy-900);}
+  .promo-banner-list{ display:flex; flex-direction:column; gap:12px; padding:18px 20px; }
+  .promo-banner-item{ display:flex; align-items:center; gap:14px; padding:12px; border:1px solid #EEF0F4; border-radius:12px; }
+  .promo-banner-item img{ width:180px; max-height:100px; object-fit:contain; border-radius:8px; background:#F8F4EE; }
+  .promo-banner-meta{ flex:1; min-width:0; font-size:12px; color:var(--muted); }
+  .promo-banner-meta strong{ display:block; margin-bottom:5px; color:var(--navy-900); font-size:13px; overflow-wrap:anywhere; }
+  .promo-banner-controls{ display:flex; flex-wrap:wrap; justify-content:flex-end; align-items:center; gap:6px; }
+  .promo-banner-form{ display:grid; grid-template-columns:minmax(0,1fr) minmax(200px,280px); gap:20px; padding:20px; align-items:start; }
+  .promo-banner-form img{ display:block; width:100%; max-height:180px; object-fit:contain; border-radius:10px; background:#F8F4EE; }
+  .promo-banner-status{ padding:12px 20px 0; color:var(--muted); font-size:12px; }
+  @media(max-width:700px){ .promo-banner-item{ align-items:flex-start; flex-wrap:wrap; } .promo-banner-item img{ width:100%; max-height:180px; } .promo-banner-controls{ justify-content:flex-start; } .promo-banner-form{ grid-template-columns:1fr; } }
 
   table{ width:100%; border-collapse:collapse; }
   th{ text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); font-weight:700; padding:10px 20px; background:#FAFBFD; border-bottom:1px solid #EEF0F4;}
@@ -224,6 +234,35 @@
             <div style="border:1px solid #E0E4EC; border-radius:16px; overflow:hidden; background:#F8F4EE; min-height:220px; display:flex; align-items:center; justify-content:center;">
               <img id="bannerPreview" src="" alt="Banner preview" style="max-width:100%; max-height:100%; display:none; object-fit:contain;" />
               <div id="bannerPreviewPlaceholder" style="color:var(--muted); font-size:13px; text-align:center; padding:20px;">No banner selected yet.</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div><h3>Promotional Banners</h3><p style="margin-top:4px;color:var(--muted);font-size:12px;">Shown below the hero banner in the order listed. Disabled banners stay saved but are hidden from customers.</p></div>
+            </div>
+            <div id="promotionalBannerStatus" class="promo-banner-status" role="status" aria-live="polite"></div>
+            <div id="promotionalBannerList" class="promo-banner-list"></div>
+            <div class="card-head"><h3 id="promotionalBannerFormTitle">Add Promotional Banner</h3></div>
+            <div class="promo-banner-form">
+              <div>
+                <div class="field">
+                  <label for="promotionalBannerTitle">Banner title (optional)</label>
+                  <input id="promotionalBannerTitle" maxlength="120" placeholder="For admin reference" autocomplete="off">
+                </div>
+                <div class="field">
+                  <label for="promotionalBannerFile">Banner image</label>
+                  <input type="file" id="promotionalBannerFile" accept="image/jpeg,image/png,image/webp,image/gif" onchange="handlePromotionalBannerImageSelect(event)">
+                </div>
+                <input type="hidden" id="promotionalBannerImageUrl">
+                <div class="modal-actions" style="padding:0;">
+                  <button id="promotionalBannerCancel" class="btn btn-outline" onclick="cancelPromotionalBannerEdit()" style="display:none;">Cancel</button>
+                  <button id="promotionalBannerSave" class="btn btn-primary" onclick="savePromotionalBanner()">Add Banner</button>
+                </div>
+              </div>
+              <div>
+                <img id="promotionalBannerPreview" alt="Promotional banner preview" style="display:none;">
+                <div id="promotionalBannerPreviewPlaceholder" style="padding:36px 12px;border:1px dashed #D9DEE7;border-radius:10px;color:var(--muted);text-align:center;font-size:12px;">Image preview will appear here.</div>
+              </div>
             </div>
           </div>
         </div>
@@ -517,6 +556,7 @@
     <div class="field-row" style="gap:12px; margin-top:16px; justify-content:flex-end;">
       <div class="field" style="flex:0 0 180px"><label>Subtotal</label><div id="orderInfoSubtotal"></div></div>
       <div class="field" style="flex:0 0 140px"><label>Shipping</label><div id="orderInfoShipping"></div></div>
+      <div class="field" style="flex:0 0 140px"><label>Discount</label><div id="orderInfoDiscount"></div></div>
       <div class="field" style="flex:0 0 180px"><label>Total</label><div id="orderInfoTotal"></div></div>
     </div>
     <div class="field" style="margin-top:22px; padding:18px; border:1px solid #E0E4EC; border-radius:14px; background:#FBF8F4;">
@@ -591,6 +631,10 @@ let DATA = { categories:[], products:[], orders:[] };
 let selectedProdImageFile = null;
 let selectedCatImageFile = null;
 let selectedBannerImageFile = null;
+let selectedPromotionalBannerImageFile = null;
+let promotionalBannerPreviewObjectUrl = null;
+let promotionalBanners = [];
+let editingPromotionalBannerId = null;
 
 /* ===================== AUTHENTICATED FETCH HELPER ===================== */
 async function apiFetch(path, opts){
@@ -675,7 +719,18 @@ function adminOrderTotal(order){
     : (order.items || []).reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.qty) || 1), 0);
   const shipping = Number(order.shipping) || 0;
   const giftWrapCost = Number(order.giftWrapCost) || 0;
-  return subtotal + shipping + giftWrapCost;
+  const discount = Number(order.discount) || 0;
+  const hasPricingBreakdown = order.subtotal !== null && order.subtotal !== undefined ||
+    order.shipping !== null && order.shipping !== undefined ||
+    order.discount !== null && order.discount !== undefined ||
+    order.giftWrapCost !== null && order.giftWrapCost !== undefined;
+  if(!hasPricingBreakdown){
+    const savedTotal = Number(order.total);
+    if(order.total !== null && order.total !== undefined && Number.isFinite(savedTotal)){
+      return savedTotal;
+    }
+  }
+  return Math.round(Math.max(0, subtotal + shipping + giftWrapCost - discount) * 100) / 100;
 }
 function startOrdersPolling(){
   if(ordersPollInterval) return;
@@ -749,7 +804,7 @@ function showPage(name){
   if(window.location.hash !== '#'+target){
     window.history.replaceState(null, '', '#'+target);
   }
-  if(target==='banner'){ loadBannerSetting(); }
+  if(target==='banner'){ showBannerPage(); }
   if(target==='delivery'){ loadDeliverySettings(); }
   if(target==='transactions'){ loadTransactions(); }
   if(target==='stock'){ loadStockProducts(); }
@@ -1045,6 +1100,7 @@ async function openOrderModal(id){
   document.getElementById('orderInfoPhone').textContent = addr.phone || '—';
   document.getElementById('orderInfoSubtotal').textContent = `₹${Number(order.subtotal || 0).toLocaleString('en-IN')}`;
   document.getElementById('orderInfoShipping').textContent = `₹${Number(order.shipping || 0).toLocaleString('en-IN')}`;
+  document.getElementById('orderInfoDiscount').textContent = `−₹${Number(order.discount || 0).toLocaleString('en-IN')}${order.couponCode ? ` (${order.couponCode})` : ''}`;
   document.getElementById('orderInfoTotal').textContent = `₹${adminOrderTotal(order).toLocaleString('en-IN')}`;
   document.getElementById('orderInfoGiftWrap').textContent = order.giftWrap ? `Yes (₹${Number(order.giftWrapCost || 30).toLocaleString('en-IN')})` : 'No';
   document.getElementById('orderInfoGiftMessage').textContent = order.giftWrap ? (order.giftMessage || 'No message provided') : '—';
@@ -1556,7 +1612,191 @@ async function loadBannerSetting(){
 
 async function showBannerPage(){
   populateBannerTargetSelect();
-  await loadBannerSetting();
+  await Promise.all([loadBannerSetting(), loadPromotionalBanners()]);
+}
+
+function setPromotionalBannerPreview(src){
+  const img = document.getElementById('promotionalBannerPreview');
+  const placeholder = document.getElementById('promotionalBannerPreviewPlaceholder');
+  img.src = src || '';
+  img.style.display = src ? 'block' : 'none';
+  placeholder.style.display = src ? 'none' : 'block';
+}
+
+function resetPromotionalBannerForm(){
+  if(promotionalBannerPreviewObjectUrl){
+    URL.revokeObjectURL(promotionalBannerPreviewObjectUrl);
+    promotionalBannerPreviewObjectUrl = null;
+  }
+  editingPromotionalBannerId = null;
+  selectedPromotionalBannerImageFile = null;
+  document.getElementById('promotionalBannerTitle').value = '';
+  document.getElementById('promotionalBannerFile').value = '';
+  document.getElementById('promotionalBannerImageUrl').value = '';
+  document.getElementById('promotionalBannerFormTitle').textContent = 'Add Promotional Banner';
+  document.getElementById('promotionalBannerSave').textContent = 'Add Banner';
+  document.getElementById('promotionalBannerCancel').style.display = 'none';
+  setPromotionalBannerPreview('');
+}
+
+function handlePromotionalBannerImageSelect(event){
+  const file = event.target.files && event.target.files[0];
+  if(!file) return;
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  if(!allowedTypes.includes(file.type)){
+    event.target.value = '';
+    toast('Use a JPG, PNG, WEBP, or GIF image');
+    return;
+  }
+  if(file.size > 12 * 1024 * 1024){
+    event.target.value = '';
+    toast('Please choose an image under 12MB');
+    return;
+  }
+  if(promotionalBannerPreviewObjectUrl) URL.revokeObjectURL(promotionalBannerPreviewObjectUrl);
+  selectedPromotionalBannerImageFile = file;
+  promotionalBannerPreviewObjectUrl = URL.createObjectURL(file);
+  setPromotionalBannerPreview(promotionalBannerPreviewObjectUrl);
+}
+
+async function loadPromotionalBanners(){
+  const status = document.getElementById('promotionalBannerStatus');
+  try{
+    const data = await apiFetch('/settings/promotional/admin');
+    promotionalBanners = Array.isArray(data.banners) ? data.banners : [];
+    renderPromotionalBanners();
+    if(status) status.textContent = promotionalBanners.length ? '' : 'No promotional banners yet.';
+  }catch(error){
+    if(status) status.textContent = error.message || 'Could not load promotional banners.';
+    toast(error.message || 'Could not load promotional banners');
+  }
+}
+
+function renderPromotionalBanners(){
+  const list = document.getElementById('promotionalBannerList');
+  if(!list) return;
+  const ordered = [...promotionalBanners].sort((a, b) => Number(a.displayOrder) - Number(b.displayOrder));
+  list.innerHTML = ordered.map((banner, index) => `
+    <div class="promo-banner-item">
+      <img src="${escHtml(banner.image)}" alt="${escHtml(banner.title || `Promotional banner ${index + 1}`)}">
+      <div class="promo-banner-meta">
+        <strong>${escHtml(banner.title || `Promotional banner ${index + 1}`)}</strong>
+        <span>${banner.active ? 'Visible on homepage' : 'Disabled'}</span>
+      </div>
+      <div class="promo-banner-controls">
+        <button class="btn btn-outline btn-sm" onclick="editPromotionalBanner('${escHtml(banner.id)}')">Edit</button>
+        <button class="btn btn-outline btn-sm" onclick="togglePromotionalBanner('${escHtml(banner.id)}')">${banner.active ? 'Disable' : 'Enable'}</button>
+        <button class="icon-btn-sm" aria-label="Move banner up" title="Move up" onclick="movePromotionalBanner('${escHtml(banner.id)}',-1)" ${index === 0 ? 'disabled' : ''}>↑</button>
+        <button class="icon-btn-sm" aria-label="Move banner down" title="Move down" onclick="movePromotionalBanner('${escHtml(banner.id)}',1)" ${index === ordered.length - 1 ? 'disabled' : ''}>↓</button>
+        <button class="btn btn-danger btn-sm" onclick="deletePromotionalBanner('${escHtml(banner.id)}')">Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+function editPromotionalBanner(id){
+  const banner = promotionalBanners.find(item => item.id === id);
+  if(!banner) return;
+  resetPromotionalBannerForm();
+  editingPromotionalBannerId = banner.id;
+  document.getElementById('promotionalBannerTitle').value = banner.title || '';
+  document.getElementById('promotionalBannerImageUrl').value = banner.image;
+  document.getElementById('promotionalBannerFormTitle').textContent = 'Edit Promotional Banner';
+  document.getElementById('promotionalBannerSave').textContent = 'Save Changes';
+  document.getElementById('promotionalBannerCancel').style.display = 'inline-block';
+  setPromotionalBannerPreview(banner.image);
+  document.getElementById('promotionalBannerFormTitle').scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+function cancelPromotionalBannerEdit(){
+  resetPromotionalBannerForm();
+}
+
+async function savePromotionalBanner(){
+  const title = document.getElementById('promotionalBannerTitle').value.trim();
+  let image = document.getElementById('promotionalBannerImageUrl').value.trim();
+  const saveButton = document.getElementById('promotionalBannerSave');
+  if(title.length > 120){ toast('Banner title must be 120 characters or fewer'); return; }
+  saveButton.disabled = true;
+  try{
+    if(selectedPromotionalBannerImageFile){
+      const formData = new FormData();
+      formData.append('file', selectedPromotionalBannerImageFile);
+      formData.append('folder', 'promotional_banners');
+      const headers = adminToken ? { Authorization:'Bearer ' + adminToken } : {};
+      const uploadResponse = await fetch(`${API_BASE}/uploads`, { method:'POST', body:formData, headers });
+      const uploadData = await uploadResponse.json().catch(()=>({}));
+      if(!uploadResponse.ok) throw new Error(uploadData.message || 'Banner image upload failed');
+      image = uploadData.url || uploadData.secure_url || uploadData.raw?.secure_url || '';
+      if(!image) throw new Error('Image upload completed without returning an image URL');
+    }
+    const isEditing = !!editingPromotionalBannerId;
+    if(!image && !isEditing){ toast('Please choose a banner image first'); return; }
+    const body = { title };
+    if(image) body.image = image;
+    const endpoint = isEditing
+      ? `/settings/promotional/${encodeURIComponent(editingPromotionalBannerId)}`
+      : '/settings/promotional';
+    const data = await apiFetch(endpoint, {
+      method:isEditing ? 'PUT' : 'POST',
+      body:JSON.stringify(body),
+    });
+    promotionalBanners = data.banners || promotionalBanners;
+    renderPromotionalBanners();
+    resetPromotionalBannerForm();
+    document.getElementById('promotionalBannerStatus').textContent = '';
+    toast(isEditing ? 'Promotional banner updated' : 'Promotional banner added');
+  }catch(error){
+    toast(error.message || 'Could not save promotional banner');
+  }finally{
+    saveButton.disabled = false;
+  }
+}
+
+async function togglePromotionalBanner(id){
+  const banner = promotionalBanners.find(item => item.id === id);
+  if(!banner) return;
+  try{
+    const data = await apiFetch(`/settings/promotional/${encodeURIComponent(id)}`, {
+      method:'PUT',
+      body:JSON.stringify({ active:!banner.active }),
+    });
+    promotionalBanners = data.banners || promotionalBanners;
+    renderPromotionalBanners();
+    toast(banner.active ? 'Promotional banner disabled' : 'Promotional banner enabled');
+  }catch(error){
+    toast(error.message || 'Could not update banner visibility');
+  }
+}
+
+async function movePromotionalBanner(id, direction){
+  const ordered = [...promotionalBanners].sort((a, b) => Number(a.displayOrder) - Number(b.displayOrder));
+  const index = ordered.findIndex(item => item.id === id);
+  const targetIndex = index + direction;
+  if(index < 0 || targetIndex < 0 || targetIndex >= ordered.length) return;
+  [ordered[index], ordered[targetIndex]] = [ordered[targetIndex], ordered[index]];
+  try{
+    const data = await apiFetch('/settings/promotional/order', {
+      method:'PUT',
+      body:JSON.stringify({ ids:ordered.map(item => item.id) }),
+    });
+    promotionalBanners = data.banners || ordered;
+    renderPromotionalBanners();
+  }catch(error){
+    toast(error.message || 'Could not reorder promotional banners');
+  }
+}
+
+async function deletePromotionalBanner(id){
+  if(!confirm('Delete this promotional banner?')) return;
+  try{
+    const data = await apiFetch(`/settings/promotional/${encodeURIComponent(id)}`, { method:'DELETE' });
+    promotionalBanners = data.banners || promotionalBanners.filter(item => item.id !== id);
+    renderPromotionalBanners();
+    if(editingPromotionalBannerId === id) resetPromotionalBannerForm();
+    toast('Promotional banner deleted');
+  }catch(error){
+    toast(error.message || 'Could not delete promotional banner');
+  }
 }
 
 /* ===================== TRANSACTIONS ===================== */

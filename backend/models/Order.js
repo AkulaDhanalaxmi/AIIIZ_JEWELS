@@ -5,6 +5,7 @@ const orderItemSchema = new mongoose.Schema({
   name: String,
   price: Number,
   qty: { type: Number, required: true, min: 1 },
+  categorySlug: String,
 });
 
 const orderSchema = new mongoose.Schema(
@@ -33,6 +34,8 @@ const orderSchema = new mongoose.Schema(
     customerName: { type: String },
     customerEmail: { type: String },
     subtotal: { type: Number, required: true },
+    couponCode: { type: String, default: null },
+    discount: { type: Number, default: 0, min: 0 },
     shipping: { type: Number, default: 0 },
     tax: { type: Number, default: 0 },
     total: { type: Number, required: true },

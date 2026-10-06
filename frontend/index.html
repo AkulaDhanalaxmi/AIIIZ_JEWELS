@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aiiz — Fashion Jewels</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
 <style>
   :root{
     --navy-950:#081226;
@@ -305,6 +307,7 @@
   .home-search-results .section-head .view-all{ color:var(--gold-500); }
   .home-search-results .grid2{ gap:18px; }
   .screen#screen-home.search-active .hero,
+  .screen#screen-home.search-active .promotional-banners,
   .screen#screen-home.search-active .section {
     display:none;
   }
@@ -365,6 +368,9 @@
   .hero-dots{ position:absolute; left:20px; bottom:14px; display:flex; gap:5px; z-index:1; }
   .hero-dots span{ width:5px; height:5px; border-radius:50%; background:rgba(251,247,239,0.35); }
   .hero-dots span.active{ width:14px; border-radius:4px; background:var(--gold-400); }
+  .promotional-banners{ display:flex; flex-direction:column; gap:12px; margin:0 18px 18px; }
+  .promotional-banner{ display:block; overflow:hidden; border-radius:var(--radius-lg); background:#F8F4EE; }
+  .promotional-banner img{ display:block; width:100%; height:auto; }
   .section{ padding:0 24px 22px; }
   .section-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
   .section-head h3{ font-size:17px; letter-spacing:.5px; color:var(--navy-900); font-weight:700; }
@@ -862,9 +868,6 @@
   .radio{ width:18px; height:18px; border-radius:50%; border:2px solid #CFCFCF; flex-shrink:0; }
   .radio.on{ border-color:#E0A93A; position:relative; }
   .radio.on::after{ content: ""; position:absolute; inset:3px; background:#E0A93A; border-radius:50%; }
-  .coupon{ margin:16px 16px 0; border:1.5px dashed #C9A6E8; border-radius:10px; padding:12px 14px; display:flex; align-items:center; gap:8px; color:#8B4FD1; font-size:13.5px; font-weight:700; cursor:pointer; }
-  .coupon svg{ width:16px; height:16px; }
-  .coupon .chev{ margin-left:auto; width:14px; height:14px; }
   .cost-card{ margin:18px 16px 0; background:#FFFFFF; border:1px solid #ECECEC; border-radius:10px; padding:14px 16px; }
   .cost-row{ display:flex; justify-content:space-between; font-size:13.5px; color:#4A4A4A; padding:5px 0; }
   .divider{ border:none; border-top:1px solid #EEEEEE; margin:10px 0; }
@@ -999,22 +1002,6 @@
     background: #E0A93A;
     border-radius: 50%;
   }
-
-  .coupon {
-    margin: 16px 16px 0;
-    border: 1.5px dashed #C9A6E8;
-    border-radius: 10px;
-    padding: 12px 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #8B4FD1;
-    font-size: 13.5px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  .coupon svg { width: 16px; height: 16px; }
-  .coupon .chev { margin-left: auto; width: 14px; height: 14px; }
 
   .cost-card {
     margin: 18px 16px 0;
@@ -1219,6 +1206,157 @@
     position:absolute; width:260px; height:260px; border-radius:50%; background:radial-gradient(circle, rgba(227,197,126,0.18), transparent 65%);
     bottom:-100px; right:-80px; z-index:0; pointer-events:none;
   }
+  .screen#screen-checkout{ background:#FBF8F2; min-height:0; }
+  .checkout-header{
+    min-height:42px; padding:5px 14px; background:var(--navy-900); flex-shrink:0; border-radius:12px 12px 0 0;
+  }
+  .checkout-header .back{
+    width:30px; height:30px; display:flex; align-items:center; justify-content:flex-start;
+    color:#fff; font-size:25px; cursor:pointer;
+  }
+  .checkout-header h1{
+    margin:0 30px 0 0; color:#fff; font:600 15px 'Inter',sans-serif; letter-spacing:.1px;
+  }
+  .checkout-stepper{
+    display:flex; align-items:center; justify-content:center; gap:0; padding:6px 18px 7px;
+    background:#FBF8F2; flex-shrink:0;
+  }
+  .checkout-step{
+    width:62px; display:flex; flex-direction:column; align-items:center; gap:3px;
+    color:#89909B; font-size:9px; font-weight:600;
+  }
+  .checkout-step .dot{
+    width:22px; height:22px; display:flex; align-items:center; justify-content:center;
+    border:1px solid #D8DCE1; border-radius:50%; color:inherit; font-size:10px;
+  }
+  .checkout-step.done{ color:#9A6D17; }
+  .checkout-step.active{ color:#9A6D17; }
+  .checkout-step.active .dot,.checkout-step.done .dot{
+    color:var(--navy-950); border-color:var(--gold-500); background:var(--gold-500); font-weight:800;
+  }
+  .checkout-step-line{ flex:1; max-width:76px; height:1px; margin:0 3px 12px; background:#D8DCE1; }
+  .checkout-step-line.done{ background:var(--gold-500); }
+  .checkout-scroll{ flex:1; min-height:0; overflow-y:auto; padding:9px 12px 18px; }
+  .checkout-content{ width:100%; max-width:640px; margin:0 auto; display:flex !important; flex-direction:column; gap:9px; align-items:stretch; }
+  .checkout-main,.checkout-aside{ display:flex; flex-direction:column; gap:9px; width:100%; min-width:0; align-self:stretch; }
+  .checkout-section-heading{ padding:0 2px; color:var(--navy-900); font-size:12px; font-weight:750; letter-spacing:.1px; }
+  .checkout-address-card,.checkout-gift-card,.checkout-items-card,.checkout-price-card,.dussehra-coupons{
+    min-width:0; background:#fff; border:1px solid #EEE8DB; border-radius:16px; box-shadow:0 5px 18px rgba(10,31,61,.045);
+  }
+  .checkout-address-card{ padding:10px; cursor:pointer; }
+  .checkout-address-card.selected{ border-color:#E3C57E; background:#FFFEFB; }
+  .checkout-address-top,.checkout-address-actions{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .checkout-address-type{ color:var(--navy-900); font-size:12px; font-weight:750; display:flex; align-items:center; gap:7px; min-width:0; }
+  .checkout-address-type svg{ width:16px; height:16px; flex:none; }
+  .checkout-edit{ border:0; background:none; color:#9A6D17; font:650 12px 'Inter',sans-serif; cursor:pointer; padding:4px 0; }
+  .checkout-address-name{ margin-top:6px; color:var(--navy-900); font-size:11px; font-weight:750; overflow-wrap:anywhere; }
+  .checkout-address-phone,.checkout-address-line{ margin-top:2px; color:#596273; font-size:10px; line-height:1.35; overflow-wrap:anywhere; }
+  .checkout-address-line{ white-space:pre-line; }
+  .checkout-address-select{ margin-top:7px; min-height:27px; border:1px solid #E6D6AE; border-radius:8px; padding:0 8px; background:#FFF9EC; color:#795B20; font:650 9px 'Inter',sans-serif; cursor:pointer; }
+  .checkout-address-card.selected .checkout-address-select{ background:#EDF7EF; border-color:#D4E8D7; color:#34734D; }
+  .checkout-empty-address{ padding:16px; background:#fff; border:1px dashed #D8CBAF; border-radius:16px; color:#647084; font-size:12px; line-height:1.5; }
+  .checkout-empty-address .btn{ margin-top:10px; }
+  .checkout-gift-card{ padding:9px; background:#FFFDF9; }
+  .checkout-gift-top{ display:flex; align-items:flex-start; gap:8px; }
+  .checkout-gift-icon{ width:30px; height:30px; flex:0 0 30px; display:grid; place-items:center; border-radius:10px; background:#FFF1E9; color:#C66758; font-size:16px; }
+  .checkout-gift-icon svg{ width:18px; height:18px; }
+  .checkout-gift-copy{ flex:1; min-width:0; }
+  .checkout-gift-title{ color:var(--navy-900); font-size:12px; font-weight:750; }
+  .checkout-gift-desc{ margin-top:3px; color:#7A8290; font-size:9px; line-height:1.35; }
+  .checkout-gift-actions{ display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+  .checkout-gift-price{ color:var(--navy-900); font-size:12px; font-weight:750; white-space:nowrap; }
+  .checkout-gift-button{ min-height:25px; border:0; border-radius:7px; padding:0 10px; background:var(--gold-500); color:#fff; font:700 9px 'Inter',sans-serif; cursor:pointer; white-space:nowrap; }
+  .checkout-gift-button.selected{ border:1px solid #B6D9BF; background:#EFF8F1; color:#34734D; }
+  .checkout-gift-note{ width:100%; margin-top:12px; padding:10px; border:1px solid #EEE8DB; border-radius:10px; color:#586273; font-size:11px; line-height:1.5; }
+  .checkout-gift-note textarea{ width:100%; padding:10px; border:1px solid #E6E0D4; border-radius:8px; font:12px 'Inter',sans-serif; resize:vertical; }
+  .checkout-gift-note-actions{ display:flex; gap:8px; margin-top:8px; }
+  .checkout-items-card,.checkout-price-card{ padding:10px; }
+  .checkout-items-card .product-row{ gap:8px; padding:0 0 9px; margin:0 0 9px; border-bottom:1px solid #F1EEE8; }
+  .checkout-items-card .product-row:last-child{ margin:0; padding:0; border:0; }
+  .checkout-items-card .product-thumb{ width:42px; height:42px; flex:0 0 42px; border-radius:9px; }
+  .checkout-items-card .product-info{ min-width:0; }
+  .checkout-items-card .product-info .name{ color:#202B3D; font-size:10px; line-height:1.35; overflow-wrap:anywhere; }
+  .checkout-items-card .product-info .qty{ color:#7B8492; font-size:9px; }
+  .checkout-items-card .product-price{ color:var(--navy-900); font-size:10px; }
+  .checkout-items-empty{ padding:14px 0; color:#737E8E; font-size:12px; }
+  .dussehra-coupons{ margin:0; padding:13px; background:#FFFCFA; border-color:#F1E4DE; }
+  .dussehra-coupons-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:9px; }
+  .dussehra-coupons-title{ display:flex; align-items:center; gap:7px; color:var(--navy-900); font-size:12px; font-weight:750; }
+  .dussehra-coupons-title svg{ width:16px; height:16px; color:#C48469; flex:none; }
+  .dussehra-coupons-count{ color:#7A8290; font-size:10px; line-height:1.4; }
+  .dussehra-toggle{ border:0; background:transparent; color:#9A6D17; font:650 10px 'Inter',sans-serif; cursor:pointer; white-space:nowrap; padding:4px 0 4px 4px; }
+  .dussehra-offer{ display:flex; align-items:center; gap:9px; min-width:0; padding:10px; margin-top:7px; border:1px solid #F0E8E2; border-radius:11px; background:#fff; }
+  .dussehra-offer.applied{ border-color:#CBE3D0; background:#F7FBF7; }
+  .dussehra-offer.ineligible{ background:#FFFEFD; }
+  .dussehra-offer-icon{ width:30px; height:30px; flex:0 0 30px; display:grid; place-items:center; border-radius:9px; background:#FFF0E8; color:#B46C59; font-size:14px; }
+  .dussehra-offer.ineligible .dussehra-offer-icon{ background:#F4F1EF; color:#9A9290; }
+  .dussehra-offer-copy{ flex:1; min-width:0; }
+  .dussehra-offer-code{ color:#25324A; font-size:10px; line-height:1.4; font-weight:800; overflow-wrap:anywhere; }
+  .dussehra-offer-discount{ margin-left:4px; color:#B66B57; font-size:10px; font-weight:800; white-space:nowrap; }
+  .dussehra-offer-detail,.dussehra-offer-reason{ margin-top:3px; color:#76808E; font-size:9px; line-height:1.4; overflow-wrap:anywhere; }
+  .dussehra-offer-status{ margin-top:3px; color:#398255; font-size:9px; line-height:1.4; overflow-wrap:anywhere; }
+  .dussehra-offer.ineligible .dussehra-offer-status,.dussehra-offer-reason{ color:#9B625B; }
+  .dussehra-apply{ min-width:56px; flex:0 0 auto; min-height:30px; padding:0 9px; border:0; border-radius:8px; background:var(--gold-500); color:#fff; font:700 10px 'Inter',sans-serif; cursor:pointer; }
+  .dussehra-apply:hover:not(:disabled){ background:#A9771E; }
+  .dussehra-apply:disabled{ background:#E3E2E0; color:#777; cursor:not-allowed; }
+  .dussehra-remove{ border:1px solid #B6D9BF; background:#fff; color:#34734D; }
+  .dussehra-custom-code{ display:flex; gap:8px; margin-top:10px; }
+  .dussehra-custom-code input{ min-width:0; flex:1; height:36px; padding:0 10px; border:1px solid #E4DDD4; border-radius:8px; background:#fff; color:#283447; font:10px 'Inter',sans-serif; text-transform:uppercase; }
+  .dussehra-custom-code input::placeholder{ color:#959AA3; text-transform:none; }
+  .dussehra-custom-code .dussehra-apply{ min-height:36px; }
+  .dussehra-coupon-message{ min-height:0; margin-top:7px; color:#778090; font-size:10px; line-height:1.45; }
+  .dussehra-coupon-message.success{ color:#34734D; }
+  .dussehra-coupon-message.error{ color:#A8443F; }
+  .checkout-price-card .cost-row{ display:flex; align-items:flex-start; gap:12px; color:#687283; font-size:11px; line-height:1.5; padding:6px 0; }
+  .checkout-price-card .cost-row span:first-child{ min-width:0; }
+  .checkout-price-card .cost-row span:last-child{ flex:none; white-space:nowrap; text-align:right; color:#263348; }
+  .checkout-price-card .cost-row.discount-row span:last-child{ color:#34734D; }
+  .checkout-price-card .divider{ margin:7px 0; border-color:#EEEAE3; }
+  .checkout-price-card .cost-row.total{ color:var(--navy-900); font-size:14px; font-weight:800; }
+  .checkout-price-card .cost-row.total span:last-child{ color:var(--navy-900); font-size:15px; }
+  .checkout-price-heading{ display:flex; align-items:center; gap:8px; padding:0 2px; color:var(--navy-900); font-size:13px; font-weight:750; }
+  .checkout-price-heading svg{ width:16px; height:16px; color:#B98A2E; flex:none; }
+  .checkout-aside{ gap:10px; }
+  .delivery-banner{ margin:0; padding:12px 13px; border:1px solid #DCEBDD; border-radius:14px; background:#EFF8EF; gap:10px; }
+  .delivery-banner .title{ font-size:11px; color:#34734D; }
+  .delivery-banner .sub{ font-size:10px; color:#66816C; line-height:1.45; }
+  .checkout-cta-wrap{ position:sticky; z-index:5; bottom:0; margin-top:auto; padding:10px 16px max(12px, env(safe-area-inset-bottom)); background:rgba(255,255,255,.97); border-top:1px solid #EEE9E0; box-shadow:0 -5px 18px rgba(10,31,61,.055); }
+  .checkout-cta-wrap .cta-button{ max-width:860px; min-height:48px; height:auto; margin:0 auto; border-radius:11px; background:var(--gold-500); color:#fff; font-size:12px; letter-spacing:.45px; }
+  .checkout-cta-wrap .cta-button:hover:not(:disabled){ background:#AE812B; }
+  .checkout-cta-wrap .cta-button:disabled{ background:#D9D5CA; color:#77736B; cursor:not-allowed; }
+  #screen-checkout .form-box{ padding:14px; background:#fff; border:1px solid #EEE8DB; border-radius:16px; }
+  #phone:has(#screen-checkout.active){ height:100dvh; min-height:100dvh; overflow:hidden; }
+  #screen-checkout.active{ min-height:0; overflow:hidden; }
+  @media (max-width:600px){
+    .checkout-content{ flex-direction:column; gap:12px; }
+    .checkout-scroll{ padding:9px 12px 14px; }
+    .checkout-main,.checkout-aside{ gap:8px; }
+    .checkout-section-heading{ font-size:12px; }
+    .checkout-address-card,.checkout-gift-card,.checkout-items-card,.checkout-price-card,.dussehra-coupons{ border-radius:14px; }
+    .checkout-address-card{ padding:10px; }
+    .checkout-stepper{ padding:6px 18px 7px; }
+    .checkout-step{ width:62px; font-size:9px; }
+    .checkout-step-line{ margin-bottom:12px; }
+    .checkout-cta-wrap{ padding-left:12px; padding-right:12px; }
+  }
+  @media (min-width:761px){
+    #phone:has(#screen-checkout.active){ width:100%; max-width:480px; }
+    .checkout-scroll{ padding:22px 24px 26px; }
+    .checkout-main,.checkout-aside{ gap:15px; }
+    .checkout-aside{ gap:10px; }
+  }
+  @media (min-width:1020px){
+    #phone:has(#screen-checkout.active){ height:calc(100dvh - 48px); min-height:0; }
+  }
+  @media (max-width:360px){
+    .checkout-header{ padding-left:13px; padding-right:13px; }
+    .checkout-stepper{ padding-left:12px; padding-right:12px; }
+    .checkout-step{ width:58px; }
+    .dussehra-coupons{ padding:11px; }
+    .dussehra-offer{ gap:7px; padding:8px; }
+    .dussehra-apply{ min-width:50px; padding:0 7px; }
+    .checkout-items-card .product-thumb{ width:48px; height:48px; flex-basis:48px; }
+  }
 </style>
 <script async defer src="https://accounts.google.com/gsi/client"></script>
 </head>
@@ -1363,6 +1501,7 @@
           <path d="M64 130 L77 124 L64 142 Z" fill="#8A6A24" fill-opacity="0.35"/>
         </svg>
       </div>
+      <div class="promotional-banners" id="promotionalBanners" aria-label="Promotional banners" hidden></div>
 
       <div class="section" style="padding-bottom:8px;">
         <div class="section-head"><h3>Shop by Category</h3><div class="view-all" onclick="nav('categories')">View All ›</div></div>
@@ -1663,45 +1802,55 @@
 
   <!-- ============ CHECKOUT (address) ============ -->
   <div class="screen" id="screen-checkout">
-    <div class="header">
+    <div class="header checkout-header">
       <span class="back" onclick="goBack()">‹</span>
       <h1>Checkout</h1>
     </div>
 
-    <div class="stepper">
-      <div class="step done">
-        <div class="dot">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L4 6H2v2h1l2 10h14l2-10h1V6h-2l-2-4"/><circle cx="9" cy="20" r="1"/><circle cx="17" cy="20" r="1"/></svg>
-        </div>
-        <div class="label">Cart</div>
+    <div class="checkout-stepper" aria-label="Checkout progress">
+      <div class="checkout-step done">
+        <div class="dot">1</div>
+        <div>Cart</div>
       </div>
-      <div class="line gold"></div>
-      <div class="step active">
+      <div class="checkout-step-line done"></div>
+      <div class="checkout-step active" aria-current="step">
         <div class="dot">2</div>
-        <div class="label">Address</div>
+        <div>Address</div>
       </div>
-      <div class="line"></div>
-      <div class="step">
+      <div class="checkout-step-line"></div>
+      <div class="checkout-step">
         <div class="dot">3</div>
-        <div class="label">Payment</div>
+        <div>Payment</div>
       </div>
     </div>
 
-    <div class="section-title">Delivery Address</div>
-    <div id="addrList"></div>
-    <div class="form-box" id="addrForm" style="display:none; margin-bottom:20px;">
-      <input id="fName" placeholder="Full Name">
-      <input id="fPhone" placeholder="Phone Number">
-      <textarea id="fLine" placeholder="Full Address (House, Street, City, PIN)" rows="3"></textarea>
-      <button class="btn btn-solid btn-full" onclick="saveAddress()">Save Address</button>
+    <div class="checkout-scroll">
+      <div class="checkout-content">
+        <div class="checkout-main">
+          <div class="checkout-section-heading">Delivery Address</div>
+          <div id="addrList"></div>
+          <div class="form-box" id="addrForm" style="display:none;">
+            <input id="fName" placeholder="Full Name">
+            <input id="fPhone" placeholder="Phone Number">
+            <textarea id="fLine" placeholder="Full Address (House, Street, City, PIN)" rows="3"></textarea>
+            <button class="btn btn-solid btn-full" onclick="saveAddress()">Save Address</button>
+          </div>
+          <div id="giftWrapOption"></div>
+          <div class="checkout-section-heading" id="checkoutOrderHeading">Order Summary</div>
+          <div class="checkout-items-card" id="checkoutProducts"></div>
+        </div>
+        <div class="checkout-aside">
+          <div id="checkoutCoupon"></div>
+          <div class="checkout-price-heading">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 3h14v18l-2.5-1.8L14 21l-2-1.8L9.5 21 7 19.2 5 21z"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
+            Price Details
+          </div>
+          <div class="checkout-price-card" id="checkoutPriceSummary"></div>
+          <div id="checkoutDelivery"></div>
+        </div>
+      </div>
     </div>
-    <div id="giftWrapOption" style="margin:16px 0;"></div>
-
-    <div class="section-title">Order Summary</div>
-    <div class="order-card" id="checkoutSummary"></div>
-    <div id="checkoutDelivery"></div>
-
-    <div class="cta-wrap">
+    <div class="checkout-cta-wrap">
       <button class="cta-button" onclick="goToPayment()">CONTINUE TO PAYMENT →</button>
     </div>
   </div>
@@ -1780,8 +1929,11 @@
         <p>Thank you for shopping with Aiiz. Your order has been confirmed.</p>
         <div class="order-id" id="successOrderId"></div>
         <div class="success-summary">
-          <div class="summary-row"><span>Total</span><strong id="successTotalPaid">₹0</strong></div>
+          <div class="summary-row"><span>Subtotal</span><strong id="successSubtotal">₹0</strong></div>
+          <div class="summary-row"><span>Shipping</span><strong id="successShipping">₹0</strong></div>
+          <div class="summary-row"><span>Discount</span><strong id="successDiscount">−₹0</strong></div>
           <div class="summary-row"><span>Payment Method</span><strong id="successPaymentMethod">—</strong></div>
+          <div class="summary-row total"><span>Total</span><strong id="successTotalPaid">₹0</strong></div>
           <div class="summary-row total"><span>Estimated Delivery</span><strong id="successDeliveryEstimate">Aug 7 - Aug 9</strong></div>
         </div>
         <div class="success-actions">
@@ -2148,7 +2300,15 @@ let CATEGORIES = DEMO_CATEGORIES;
 let PRODUCTS = DEMO_PRODUCTS;
 let usingLiveBackend = false;
 let DELIVERY_SETTINGS = null;
+let checkoutServerQuote = null;
+let checkoutQuotePendingKey = '';
+let checkoutQuoteError = '';
+let checkoutQuoteErrorKey = '';
+const checkoutQuoteInFlight = new Map();
+let checkoutQuoteRequestId = 0;
+let placeOrderInFlight = false;
 let homeBannerSetting = { image:'', buttonText:'Explore Collection', targetType:'all', targetCategory:'all', targetUrl:'' };
+let homePromotionalBanners = [];
 const DEMO_REVIEWS = {};
 
 /* ===================== ICONS ===================== */
@@ -2206,13 +2366,27 @@ const localStore = {
 };
 
 /* ===================== STATE ===================== */
-let state = { cart:{}, wishlist:[], addresses:[], orders:[], selectedAddrId:null, selectedPayment:null, token:null, user:null, reviews:{} };
+let state = { cart:{}, wishlist:[], addresses:[], orders:[], selectedAddrId:null, selectedPayment:null, token:null, user:null, reviews:{}, appliedCoupon:null, couponInput:'' };
 let currentProductId = null, currentProductImageIndex = 0, currentCategory='all', lastOrderId=null, activeTab='home';
 let currentSearch = '', currentSort = 'default';
 let searchPromptActive = false;
 let buyNowMode = false, buyNowItem = null;
 let pendingAction = null;
 let giftWrapEditing = false;
+const DUSSEHRA_COUPONS = [
+  { code:'DUSSEHRA10', percent:10, detail:'Eligible cart items only · Sale category excluded' },
+  { code:'DUSSEHRA15', percent:15, detail:'Buy 2+ items · Cart subtotal above ₹499 · Sale category excluded' },
+  { code:'DUSSEHRA20', percent:20, detail:'Buy 3+ items · Cart subtotal above ₹499 · Sale category excluded' },
+];
+let couponEligibility = { signature:'', loading:false, offers:[] };
+let couponEligibilityRequest = 0;
+let couponExpanded = false;
+let couponSubmitting = '';
+let couponNotice = null;
+const HOME_PRODUCT_LIMIT = 14;
+let catalogLoadPromise = null;
+let fullCatalogPromise = null;
+let fullCatalogLoaded = false;
 
 /* ===================== CATALOGUE ===================== */
 function normalizeProduct(p){
@@ -2235,7 +2409,7 @@ async function fetchCatalog(){
   try{
     const [catRes, prodRes] = await Promise.all([
       fetch(`${API_BASE}/categories`).then(r=>r.json()),
-      fetch(`${API_BASE}/products?limit=200`).then(r=>r.json()),
+      fetch(`${API_BASE}/products?limit=${HOME_PRODUCT_LIMIT}`).then(r=>r.json()),
     ]);
     if(!catRes.categories || !prodRes.products) throw new Error('Unexpected response');
     CATEGORIES = catRes.categories.map(c=>({
@@ -2248,15 +2422,50 @@ async function fetchCatalog(){
     }));
     PRODUCTS = prodRes.products.map(normalizeProduct);
     usingLiveBackend = true;
+    return true;
   }catch(e){
     CATEGORIES = DEMO_CATEGORIES;
     PRODUCTS = DEMO_PRODUCTS;
     usingLiveBackend = false;
+    console.warn('Could not load the live catalogue; showing the local catalogue.', e);
+    return false;
   }
+}
+async function loadFullCatalog(){
+  if(fullCatalogLoaded) return true;
+  if(fullCatalogPromise) return fullCatalogPromise;
+  fullCatalogPromise = (async () => {
+    if(catalogLoadPromise) await catalogLoadPromise;
+    if(!usingLiveBackend) return false;
+    const response = await fetch(`${API_BASE}/products?limit=200`);
+    if(!response.ok) throw new Error(`Could not load the full catalogue (${response.status}).`);
+    const data = await response.json();
+    if(!Array.isArray(data.products)) throw new Error('Unexpected catalogue response.');
+    PRODUCTS = data.products.map(normalizeProduct);
+    fullCatalogLoaded = data.products.length >= Number(data.total || 0);
+    const route = parseRoute(location.hash);
+    if(route.screen === 'categories') renderAllCategories();
+    if(route.screen === 'productlist') renderProductList();
+    return true;
+  })().catch(error => {
+    console.warn('Could not load the full catalogue.', error);
+    return false;
+  }).finally(() => {
+    fullCatalogPromise = null;
+  });
+  return fullCatalogPromise;
 }
 
 const DEFAULT_DELIVERY_SETTINGS = {
-  storeInfo: { name:'Aiiz Store', address:'', pincode:'', city:'', state:'', phone:'' },
+  storeInfo: {
+    name:'Aiiz Store',
+    address:'5-1-119 Kumpalli, Bokkalgadda, Hanumakonda',
+    pincode:'',
+    city:'Hanumakonda',
+    district:'Hanumakonda',
+    state:'Telangana',
+    phone:'8880001886'
+  },
   shipping: { samePIN: 30, sameDistrict: 50, sameState: 70, differentState: 120, freeAbove: 999 },
   deliveryDays: {
     samePIN: { min: 1, max: 2 },
@@ -2296,16 +2505,21 @@ function parseAddressExtras(address){
 
   const parts = cleanedLine.split(',').map(p=>p.trim()).filter(Boolean);
   const normalizedParts = parts.map(p => p.toLowerCase());
-
+  let stateIndex = -1;
   if(!parsed.state){
-    const foundState = knownStates.find(state => normalizedParts.some(part => part === state || part.includes(state)));
+    const foundState = knownStates.find(state => {
+      stateIndex = normalizedParts.findIndex(part => part === state || part.includes(state));
+      return stateIndex !== -1;
+    });
     if(foundState){
       parsed.state = foundState.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     }
+  } else {
+    stateIndex = normalizedParts.findIndex(part => part === parsed.state.toLowerCase() || part.includes(parsed.state.toLowerCase()));
   }
 
   if(!parsed.city){
-    const cityIndex = parts.length - 2;
+    const cityIndex = stateIndex > 0 ? stateIndex - 1 : parts.length - 1;
     if(cityIndex >= 0){
       const candidate = parts[cityIndex];
       if(candidate && !/\d{6}/.test(candidate)){
@@ -2314,17 +2528,8 @@ function parseAddressExtras(address){
     }
   }
 
-  if(!parsed.state && parts.length > 0){
-    const lastPart = parts[parts.length-1];
-    if(lastPart && !/\d{6}/.test(lastPart)){
-      parsed.state = lastPart;
-      if(!parsed.city && parts.length > 1){
-        const candidateCity = parts[parts.length-2];
-        if(candidateCity && !/\d{6}/.test(candidateCity)){
-          parsed.city = candidateCity;
-        }
-      }
-    }
+  if(!parsed.state && /^50\d{4}$/.test(String(parsed.pincode || ''))){
+    parsed.state = 'Telangana';
   }
 
   parsed.pincode = parsed.pincode ? String(parsed.pincode).trim() : parsed.pincode;
@@ -2352,21 +2557,33 @@ function formatDeliveryRange(range){
   return `${range.min}–${range.max} days`;
 }
 
+function normalizeDeliveryLocation(value){
+  const normalized = String(value || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  return normalized === 'hanamkonda' ? 'hanumakonda' : normalized;
+}
+
 async function loadDeliverySettings(){
   DELIVERY_SETTINGS = DEFAULT_DELIVERY_SETTINGS;
-  if(!usingLiveBackend) return;
   try{
     const res = await fetch(`${API_BASE}/settings/delivery_settings`);
+    if(!res.ok) throw new Error(`Delivery settings request failed (${res.status}).`);
     const data = await res.json();
     const value = data && typeof data === 'object' ? (data.setting || data) : {};
+    const storeInfo = Object.assign({}, DEFAULT_DELIVERY_SETTINGS.storeInfo, value.storeInfo || {});
+    ['address', 'city', 'state'].forEach(key => {
+      if(!String(storeInfo[key] || '').trim()){
+        storeInfo[key] = DEFAULT_DELIVERY_SETTINGS.storeInfo[key];
+      }
+    });
     DELIVERY_SETTINGS = {
-      storeInfo: Object.assign({}, DEFAULT_DELIVERY_SETTINGS.storeInfo, value.storeInfo || {}),
+      storeInfo,
       shipping: Object.assign({}, DEFAULT_DELIVERY_SETTINGS.shipping, value.shipping || {}),
       deliveryDays: Object.assign({}, DEFAULT_DELIVERY_SETTINGS.deliveryDays, value.deliveryDays || {}),
       deliveryAvailability: Object.assign({}, DEFAULT_DELIVERY_SETTINGS.deliveryAvailability, value.deliveryAvailability || {}),
     };
   }catch(e){
     DELIVERY_SETTINGS = DEFAULT_DELIVERY_SETTINGS;
+    console.warn('Could not load delivery settings; using default delivery rates.', e);
   }
 }
 
@@ -2383,19 +2600,42 @@ async function loadState(){
   if(!state.giftWrap || typeof state.giftWrap !== 'object'){
     state.giftWrap = { enabled:false, message:'' };
   }
-  const catalogPromise = fetchCatalog();
-  const settingsPromise = Promise.all([loadDeliverySettings(), loadHomeBannerSetting()]);
-  await catalogPromise;
+  if(!state.appliedCoupon || typeof state.appliedCoupon !== 'object'){
+    state.appliedCoupon = null;
+  }
+  if(typeof state.couponInput !== 'string'){
+    state.couponInput = '';
+  }
+  catalogLoadPromise = fetchCatalog();
   renderAll();
   initGoogleSignIn();
-  await settingsPromise;
-  if(state.token){
-    const ok = await apiMe();
-    if(!ok){ state.token=null; state.user=null; }
-    saveState();
-  } else {
-    updateLandingAuthUI();
-  }
+  initRoute();
+
+  const settingsPromise = Promise.all([
+    loadDeliverySettings(),
+    loadHomeBannerSetting(),
+    loadHomePromotionalBanners(),
+  ]);
+  settingsPromise.then(() => {
+    const currentScreen = parseRoute(location.hash).screen;
+    if(currentScreen === 'cart') renderCart();
+    if(currentScreen === 'checkout') renderCheckout();
+    if(currentScreen === 'payment') renderPayment();
+  });
+
+  catalogLoadPromise.then(async (loaded) => {
+    if(!loaded) return;
+    renderAll();
+    const currentScreen = parseRoute(location.hash).screen;
+    if(currentScreen === 'cart') renderCart();
+    if(currentScreen === 'checkout') renderCheckout();
+    if(currentScreen === 'payment') renderPayment();
+    if(state.token){
+      const ok = await apiMe();
+      if(!ok){ state.token=null; state.user=null; }
+      await saveState();
+    }
+  });
 }
 async function saveState(){
   try{ await localStore.set('aiiz-state', JSON.stringify(state)); }catch(e){}
@@ -2421,6 +2661,18 @@ async function apiLogin(email, password){
   if(!res.ok) throw new Error(data.message || 'Invalid email or password');
   return data;
 }
+function adoptUserAddresses(user){
+  const source = Array.isArray(user?.addresses) ? user.addresses : [];
+  const addresses = source.map(address => ({
+    ...address,
+    id:String(address.id || address._id || ''),
+  })).filter(address => address.id);
+  if(!addresses.length) return;
+  state.addresses = addresses;
+  if(!addresses.some(address => address.id === state.selectedAddrId)){
+    state.selectedAddrId = (addresses.find(address => address.isDefault) || addresses[0]).id;
+  }
+}
 async function apiMe(){
   const token = getActiveAuthToken();
   try{
@@ -2428,6 +2680,7 @@ async function apiMe(){
     if(!res.ok) return false;
     const data = await res.json();
     state.user = data.user;
+    adoptUserAddresses(data.user);
     return true;
   }catch(e){ return false; }
 }
@@ -2468,7 +2721,12 @@ async function apiFetch(path, opts={}){
   if(opts.body && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
   const res = await fetch(`${API_BASE}${path}`, Object.assign({}, opts, { headers }));
   const data = await res.json().catch(()=>({}));
-  if(!res.ok) throw new Error(data.message || 'Could not reach the backend');
+  if(!res.ok){
+    const error = new Error(data.message || 'Could not reach the backend');
+    error.status = res.status;
+    error.data = data;
+    throw error;
+  }
   return data;
 }
 
@@ -2669,6 +2927,7 @@ function onAuthSuccess(data, welcomeMsg){
     state.addresses = [];
     state.selectedAddrId = null;
   }
+  adoptUserAddresses(data.user);
 
   saveState();
   toast(welcomeMsg);
@@ -2894,6 +3153,7 @@ function nav(screen, params, opts){
     currentSort = params.sort || 'default';
     searchPromptActive = params.showSearchPrompt === true;
     renderProductList();
+    loadFullCatalog();
   }
   if(screen==='product'){ currentProductId = params.id; pdQty=1; renderProductDetail(); setupProductDetailScroll(); }
   if(screen==='wishlist'){ renderWishlist(); }
@@ -2915,7 +3175,7 @@ function nav(screen, params, opts){
    if(screen==='success'){ renderSuccessScreen(params.orderId || lastOrderId); }
   if(screen==='orders'){ loadMyOrders().then(()=>renderOrders()); }
   if(screen==='return-request'){ initReturnRequest(params.orderId); }
-  if(screen==='categories'){ renderAllCategories(); }
+  if(screen==='categories'){ renderAllCategories(); loadFullCatalog(); }
   if(screen==='profile'){ renderProfile(); }
   if(screen==='auth'){ setupAuthScreen(params.mode || 'login', params, params.message); }
 }
@@ -3542,14 +3802,18 @@ function emptyStateHtml(title, sub){
 function addToCart(id, qty, showMessage=true){
   qty = qty||1;
   state.cart[id] = (state.cart[id]||0) + qty;
+  state.appliedCoupon = null;
+  couponNotice = null;
   saveState(); updateBadges();
   if(showMessage){ toast('Added to cart'); }
 }
 function setCartQty(id, qty){
   if(qty<=0){ delete state.cart[id]; } else { state.cart[id]=qty; }
+  state.appliedCoupon = null;
+  couponNotice = null;
   saveState(); updateBadges(); renderCart();
 }
-function removeFromCart(id){ delete state.cart[id]; saveState(); updateBadges(); renderCart(); }
+function removeFromCart(id){ delete state.cart[id]; state.appliedCoupon = null; couponNotice = null; saveState(); updateBadges(); renderCart(); }
 function findProductById(id){
   if(id==null) return null;
   const normalizedId = String(id);
@@ -3566,6 +3830,21 @@ function cartItemsDetailed(){
     const parsedQty = Number(qty) || 1;
     return { ...p, id: p.id || id, qty: parsedQty, price: Number(p.price) || 0 };
   }).filter(Boolean);
+}
+function getSelectedDeliveryAddress(){
+  let address = state.addresses.find(item=>item.id===state.selectedAddrId);
+  if(!address && state.addresses.length){
+    address = state.addresses.find(item=>item.isDefault) || state.addresses[0];
+    state.selectedAddrId = address.id;
+    saveState();
+  }
+  return address || null;
+}
+function deliveryDestinationLabel(address){
+  if(!address) return '';
+  const parsed = parseAddressExtras(address);
+  return [parsed.city, parsed.state, parsed.pincode].filter(Boolean).join(', ') ||
+    stripParsedPartsFromLine(parsed);
 }
 function formatDeliveryDate(date){
   return date.toLocaleDateString('en-IN',{month:'short',day:'numeric'});
@@ -3623,11 +3902,11 @@ function getShippingDetails(address, subtotal){
 
   const storeInfo = settings.storeInfo || DEFAULT_DELIVERY_SETTINGS.storeInfo;
   const storePin = String(storeInfo.pincode || '').trim();
-  const storeCity = String(storeInfo.city || '').trim().toLowerCase();
-  const storeState = String(storeInfo.state || '').trim().toLowerCase();
+  const storeCity = normalizeDeliveryLocation(storeInfo.city);
+  const storeState = normalizeDeliveryLocation(storeInfo.state);
   const addrPin = String(parsed.pincode || '').trim();
-  const addrCity = String(parsed.city || '').trim().toLowerCase();
-  const addrState = String(parsed.state || '').trim().toLowerCase();
+  const addrCity = normalizeDeliveryLocation(parsed.city);
+  const addrState = normalizeDeliveryLocation(parsed.state);
 
   const samePIN = addrPin && storePin && addrPin === storePin;
   const sameDistrict = addrCity && storeCity && addrCity === storeCity;
@@ -3641,22 +3920,6 @@ function getShippingDetails(address, subtotal){
     group = 'sameState';
   }
 
-  console.log('DEBUG shipping compare', {
-    storePincode: storePin,
-    customerPincode: addrPin,
-    storeCity,
-    customerCity: addrCity,
-    storeState,
-    customerState: addrState,
-    samePIN,
-    sameDistrict,
-    sameState,
-    selectedGroup: group,
-    parsedAddress: parsed,
-    rawAddress: address,
-    settingsLoaded: DELIVERY_SETTINGS !== null,
-  });
-
   const rates = settings.shipping || DEFAULT_DELIVERY_SETTINGS.shipping;
   const ranges = settings.deliveryDays || DEFAULT_DELIVERY_SETTINGS.deliveryDays;
   const freeAbove = Number(rates.freeAbove ?? DEFAULT_DELIVERY_SETTINGS.shipping.freeAbove);
@@ -3666,13 +3929,276 @@ function getShippingDetails(address, subtotal){
   return { group, shipping, range, text, blocked:false };
 }
 function cartTotals(items, address, giftWrap = {enabled:false, message:''}){
-  const subtotal = (items || []).reduce((s,i)=>s + (Number(i.price)||0) * (Number(i.qty)||1), 0);
+  const subtotal = roundCheckoutMoney((items || []).reduce((s,i)=>s + (Number(i.price)||0) * (Number(i.qty)||1), 0));
   const parsed = address ? parseAddressExtras(address) : null;
   const shippingInfo = parsed ? getShippingDetails(parsed, subtotal) : null;
-  const shipping = shippingInfo ? shippingInfo.shipping : 0;
+  const shipping = roundCheckoutMoney(shippingInfo ? shippingInfo.shipping : 0);
   const giftWrapCost = giftWrap && giftWrap.enabled ? 30 : 0;
-  const total = subtotal + shipping + giftWrapCost;
+  const total = roundCheckoutMoney(subtotal + shipping + giftWrapCost);
   return {subtotal, shipping, giftWrapCost, total, deliveryInfo: shippingInfo};
+}
+function getCheckoutPricing(items, address){
+  const quote = getCurrentCheckoutQuote(items, address);
+  if(quote) return {...quote, quote};
+  const totals = cartTotals(items, address, state.giftWrap);
+  const discount = appliedCouponDiscount(totals.subtotal);
+  return {
+    ...totals,
+    discount,
+    total:computeOrderPayableTotal({
+      subtotal:totals.subtotal,
+      shipping:totals.shipping,
+      discount,
+      giftWrapCost:totals.giftWrapCost,
+    }),
+    quote:null,
+  };
+}
+function roundCheckoutMoney(value){
+  const amount = Number(value);
+  return Number.isFinite(amount) ? Math.round((amount + Number.EPSILON) * 100) / 100 : 0;
+}
+function appliedCouponDiscount(subtotal){
+  if(!state.appliedCoupon) return 0;
+  const discount = Number(state.appliedCoupon.discount) || 0;
+  return roundCheckoutMoney(Math.max(0, Math.min(Number(subtotal) || 0, discount)));
+}
+function couponItemsSignature(items){
+  return (items || []).map(item =>
+    `${item.id}:${Number(item.qty) || 0}:${Number(item.price) || 0}`
+  ).sort().join('|');
+}
+function orderItemsPayload(items){
+  return (items || []).map(item => ({
+    productId:String(item.id || item._id || item.product || ''),
+    qty:Number(item.qty),
+  }));
+}
+function buildOrderAddress(address){
+  const parsed = parseAddressExtras(address || {});
+  return {
+    name:parsed.name,
+    phone:parsed.phone,
+    line:stripParsedPartsFromLine(parsed),
+    city:parsed.city || '',
+    state:parsed.state || '',
+    pincode:parsed.pincode || '',
+  };
+}
+function checkoutQuoteKey(items, address){
+  return JSON.stringify({
+    items:couponItemsSignature(items),
+    address:address ? buildOrderAddress(address) : null,
+    giftWrap:!!state.giftWrap?.enabled,
+    couponCode:state.appliedCoupon?.code || '',
+  });
+}
+function getCurrentCheckoutQuote(items, address){
+  const key = checkoutQuoteKey(items, address);
+  return checkoutServerQuote?.key === key ? checkoutServerQuote.data : null;
+}
+async function fetchCheckoutQuote(items, address, force = false){
+  if(!usingLiveBackend) return null;
+  if(!state.token) throw new Error('Please sign in to calculate your delivery charge.');
+  if(!address) throw new Error('Please select a delivery address.');
+  const key = checkoutQuoteKey(items, address);
+  const inFlight = checkoutQuoteInFlight.get(key);
+  if(inFlight) return inFlight;
+  if(!force && checkoutServerQuote?.key === key) return checkoutServerQuote.data;
+  const requestId = ++checkoutQuoteRequestId;
+  checkoutQuotePendingKey = key;
+  checkoutQuoteError = '';
+  checkoutQuoteErrorKey = '';
+  checkoutServerQuote = null;
+  const request = apiFetch('/orders/quote', {
+    method:'POST',
+    body:JSON.stringify({
+    items:orderItemsPayload(items),
+    address:buildOrderAddress(address),
+    giftWrap:!!state.giftWrap?.enabled,
+    couponCode:state.appliedCoupon?.code || '',
+    }),
+  }).then(data=>{
+    if(requestId === checkoutQuoteRequestId){
+    checkoutServerQuote = {key, data};
+    checkoutQuotePendingKey = '';
+    }
+    return data;
+  }).catch(error=>{
+    if(requestId === checkoutQuoteRequestId){
+    checkoutQuoteError = error.message || 'Could not calculate order total.';
+    checkoutQuoteErrorKey = key;
+    checkoutQuotePendingKey = '';
+    }
+    throw error;
+  }).finally(()=>{
+    if(checkoutQuoteInFlight.get(key) === request) checkoutQuoteInFlight.delete(key);
+  });
+  checkoutQuoteInFlight.set(key, request);
+  return request;
+}
+function requestCheckoutQuote(items, address){
+  if(!usingLiveBackend || !address || !items.length || !state.token) return;
+  const key = checkoutQuoteKey(items, address);
+  if(checkoutServerQuote?.key === key || checkoutQuoteInFlight.has(key) || checkoutQuoteErrorKey === key) return;
+  fetchCheckoutQuote(items, address).then(()=>{
+    const cartScreen = document.getElementById('screen-cart');
+    const checkoutScreen = document.getElementById('screen-checkout');
+    const paymentScreen = document.getElementById('screen-payment');
+    if(cartScreen?.classList.contains('active')) renderCart();
+    if(checkoutScreen?.classList.contains('active')) renderCheckout();
+    if(paymentScreen?.classList.contains('active')) renderPayment();
+  }).catch(()=>{
+    const cartScreen = document.getElementById('screen-cart');
+    const checkoutScreen = document.getElementById('screen-checkout');
+    const paymentScreen = document.getElementById('screen-payment');
+    if(cartScreen?.classList.contains('active')) renderCart();
+    if(checkoutScreen?.classList.contains('active')) renderCheckout();
+    if(paymentScreen?.classList.contains('active')) renderPayment();
+  });
+}
+function requestCouponEligibility(items){
+  const signature = couponItemsSignature(items);
+  if(couponEligibility.signature === signature) return;
+  couponEligibilityRequest += 1;
+  const requestId = couponEligibilityRequest;
+  if(!usingLiveBackend || !state.token){
+    couponEligibility = {
+      signature,
+      loading:false,
+      offers:DUSSEHRA_COUPONS.map(offer => ({
+        ...offer,
+        status:'unavailable',
+        message:usingLiveBackend ? 'Sign in to check coupon eligibility.' : 'Coupons need a connection to the store backend.',
+      })),
+    };
+    return;
+  }
+
+  couponEligibility = {
+    signature,
+    loading:true,
+    offers:DUSSEHRA_COUPONS.map(offer => ({...offer, status:'checking', message:''})),
+  };
+  Promise.all(DUSSEHRA_COUPONS.map(async offer => {
+    try{
+      const data = await apiFetch('/orders/coupons/validate', {
+        method:'POST',
+        body:JSON.stringify({
+          couponCode:offer.code,
+          items:orderItemsPayload(items),
+        }),
+      });
+      return {
+        ...offer,
+        status:'eligible',
+        percent:Number(data.coupon?.percent) || offer.percent,
+        discount:Number(data.coupon?.discount) || 0,
+        message:'Applicable to your cart.',
+      };
+    }catch(error){
+      const isValidationFailure = Number(error.status) === 400;
+      return {
+        ...offer,
+        status:isValidationFailure ? 'ineligible' : 'unavailable',
+        message:error.message || 'Could not check this coupon right now.',
+      };
+    }
+  })).then(offers => {
+    if(requestId !== couponEligibilityRequest || signature !== couponItemsSignature(checkoutItems())) return;
+    couponEligibility = {signature, loading:false, offers};
+    const invalidApplied = state.appliedCoupon && offers.find(offer =>
+      offer.code === state.appliedCoupon.code && offer.status === 'ineligible'
+    );
+    if(invalidApplied){
+      state.appliedCoupon = null;
+      couponNotice = {type:'error', message:`${invalidApplied.code} is no longer valid: ${invalidApplied.message}`};
+      saveState();
+      renderCheckout();
+      renderPayment();
+      return;
+    }
+    renderCheckoutCoupon(checkoutItems());
+  });
+}
+function renderCheckoutCoupon(items){
+  const container = document.getElementById('checkoutCoupon');
+  if(!container) return;
+  const subtotal = (items || []).reduce((sum, item) =>
+    sum + (Number(item.price) || 0) * (Number(item.qty) || 0), 0
+  );
+  requestCouponEligibility(items);
+  container.innerHTML = couponSectionHtml(subtotal, items);
+}
+function couponSectionHtml(subtotal, items){
+  const applied = state.appliedCoupon;
+  const offers = couponEligibility.signature === couponItemsSignature(items) ? couponEligibility.offers : [];
+  const eligibleOffers = offers.filter(offer => offer.status === 'eligible').length;
+  const shownOffers = couponExpanded || eligibleOffers === 0
+    ? (couponExpanded ? offers : offers.slice(0, 1))
+    : offers.filter(offer => offer.status === 'eligible');
+  const appliedOffer = offers.find(offer => applied && offer.code === applied.code);
+  if(appliedOffer && !shownOffers.includes(appliedOffer)) shownOffers.unshift(appliedOffer);
+  const offerCards = shownOffers.map(offer => {
+    const isApplied = applied && applied.code === offer.code;
+    const eligible = offer.status === 'eligible';
+    const checking = offer.status === 'checking';
+    const buttonLabel = isApplied
+      ? 'Remove'
+      : couponSubmitting === offer.code
+        ? 'Checking…'
+        : eligible ? 'Apply' : checking ? 'Checking…' : 'Unavailable';
+    const buttonClass = isApplied ? 'dussehra-apply dussehra-remove' : 'dussehra-apply';
+    const status = isApplied
+      ? `Applied · ${formatCheckoutMoney(appliedCouponDiscount(subtotal))} discount`
+      : eligible
+        ? offer.message
+        : checking
+          ? 'Checking eligibility against your cart…'
+          : offer.message;
+    return `
+      <div class="dussehra-offer ${eligible ? '' : 'ineligible'} ${isApplied ? 'applied' : ''}">
+        <div class="dussehra-offer-icon" aria-hidden="true">${eligible || isApplied ? '✓' : '×'}</div>
+        <div class="dussehra-offer-copy">
+          <div class="dussehra-offer-code">${escHtmlFrontend(offer.code)}<span class="dussehra-offer-discount">${Number(offer.percent) || 0}% OFF</span></div>
+          <div class="dussehra-offer-detail">${escHtmlFrontend(offer.detail)}</div>
+          <div class="${eligible || isApplied ? 'dussehra-offer-status' : 'dussehra-offer-reason'}">${escHtmlFrontend(status || '')}</div>
+        </div>
+        <button type="button" class="${buttonClass}" onclick="${isApplied ? 'removeDussehraCoupon()' : `applyDussehraCoupon('${offer.code}')`}" ${!eligible && !isApplied || couponSubmitting ? 'disabled' : ''}>${buttonLabel}</button>
+      </div>`;
+  }).join('');
+  const countLabel = couponEligibility.loading
+    ? 'Checking eligible coupons…'
+    : `${eligibleOffers} eligible ${eligibleOffers === 1 ? 'coupon' : 'coupons'} for your cart`;
+  const notice = couponNotice
+    ? `<div id="dussehraCouponMessage" class="dussehra-coupon-message ${couponNotice.type}" role="status" aria-live="polite">${escHtmlFrontend(couponNotice.message)}</div>`
+    : '<div id="dussehraCouponMessage" class="dussehra-coupon-message" role="status" aria-live="polite"></div>';
+  const toggle = offers.length > 1
+    ? `<button type="button" class="dussehra-toggle" onclick="toggleCouponList()">${couponExpanded ? 'View Less' : 'View All'}</button>`
+    : '';
+  const couponMessage = couponNotice || (!usingLiveBackend
+    ? {type:'error', message:'Coupons require a connection to the store backend.'}
+    : !state.token
+      ? {type:'error', message:'Please sign in to validate a coupon.'}
+      : null);
+  return `
+    <div class="dussehra-coupons">
+      <div class="dussehra-coupons-head">
+        <div>
+          <div class="dussehra-coupons-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1"/></svg>Dussehra Sale</div>
+          <div class="dussehra-coupons-count">${countLabel}</div>
+        </div>
+        ${toggle}
+      </div>
+      ${offerCards}
+      <div class="dussehra-custom-code">
+        <input id="dussehraCouponInput" value="${escHtmlFrontend(state.couponInput || '')}" placeholder="Enter coupon code" autocomplete="off" aria-label="Enter coupon code" oninput="state.couponInput=this.value" onkeydown="if(event.key==='Enter'){event.preventDefault();applyDussehraCoupon(document.getElementById('dussehraCouponInput').value);}">
+        <button type="button" class="dussehra-apply" onclick="applyDussehraCoupon(document.getElementById('dussehraCouponInput').value)" ${couponSubmitting ? 'disabled' : ''}>${couponSubmitting && couponSubmitting === String(state.couponInput || '').trim().toUpperCase() ? 'Checking…' : 'Apply'}</button>
+      </div>
+      ${couponMessage
+        ? `<div id="dussehraCouponMessage" class="dussehra-coupon-message ${couponMessage.type}" role="status" aria-live="polite">${escHtmlFrontend(couponMessage.message)}</div>`
+        : notice}
+    </div>`;
 }
 function renderCart(){
   buyNowMode = false;
@@ -3707,12 +4233,38 @@ function renderCart(){
       </div>
     </div>`;
   }).join('');
-  const selectedAddr = state.addresses.find(a=>a.id===state.selectedAddrId) || (state.addresses.length ? state.addresses[0] : null);
+  const selectedAddr = getSelectedDeliveryAddress();
   const hasSavedAddress = state.addresses.length > 0;
-  const t = cartTotals(items, selectedAddr, state.giftWrap);
-  const shippingLabel = selectedAddr ? (t.shipping===0 ? 'FREE' : '₹'+t.shipping) : 'Available at checkout';
-  const totalLabel = selectedAddr ? `₹${t.total.toLocaleString('en-IN')}` : `₹${t.subtotal.toLocaleString('en-IN')} + shipping`;
-  const deliveryText = selectedAddr && t.deliveryInfo ? t.deliveryInfo.text : (hasSavedAddress ? 'Saved address available. Confirm at checkout.' : 'Delivery charge available at checkout');
+  const t = getCheckoutPricing(items, selectedAddr);
+  requestCheckoutQuote(items, selectedAddr);
+  const quote = t.quote;
+  const quoteKey = checkoutQuoteKey(items, selectedAddr);
+  const quotePending = usingLiveBackend && !!selectedAddr && !!state.token &&
+    !quote && checkoutQuotePendingKey === quoteKey;
+  const quoteError = usingLiveBackend && !!selectedAddr && !!state.token &&
+    !quote && checkoutQuoteErrorKey === quoteKey ? checkoutQuoteError : '';
+  const quoteNeedsAuth = usingLiveBackend && !!selectedAddr && !state.token;
+  const subtotal = t.subtotal;
+  const shipping = t.shipping;
+  const discount = t.discount;
+  const giftWrapCost = t.giftWrapCost;
+  const payableTotal = t.total;
+  const pricingNotice = quotePending
+    ? 'Confirming final delivery charge…'
+    : quoteError
+      ? 'Could not confirm the final delivery charge. Try again at checkout.'
+      : quoteNeedsAuth
+        ? 'Sign in to confirm the final delivery charge.'
+        : '';
+  const totalLabel = selectedAddr
+    ? formatCheckoutMoney(payableTotal)
+    : `${formatCheckoutMoney(payableTotal)} + shipping`;
+  const shippingLabel = selectedAddr
+    ? shipping===0 ? 'FREE' : formatCheckoutMoney(shipping)
+    : 'Available at checkout';
+  const deliveryText = quote
+    ? quote.deliveryInfo?.text || ''
+    : (selectedAddr && t.deliveryInfo ? t.deliveryInfo.text : (hasSavedAddress ? 'Saved address available. Confirm at checkout.' : 'Delivery charge available at checkout'));
   // Determine if any cart row has stock problems and disable checkout accordingly
   const hasStockProblem = items.some(p => {
     const stock = (p.stock == null) ? null : Number(p.stock);
@@ -3724,10 +4276,15 @@ function renderCart(){
       <div style="font-weight:700; font-size:14px; margin-bottom:12px; color:#081226;">ORDER SUMMARY</div>
       
       <div style="border:1px solid #E5D9C8; border-radius:12px; padding:16px; background:#FDFBF8; margin-bottom:14px;">
-        <div class="cost-row"><span>Subtotal</span><span>₹${t.subtotal.toLocaleString('en-IN')}</span></div>
-        <div class="cost-row"><span>Delivery Charge</span><span>${selectedAddr ? (t.shipping===0 ? 'FREE' : '₹'+t.shipping.toLocaleString('en-IN')) : 'Available at checkout'}</span></div>
+        <div class="cost-row"><span>Subtotal</span><span>${formatCheckoutMoney(subtotal)}</span></div>
+        ${selectedAddr ? `<div class="cost-row"><span>Delivery to</span><span>${escHtmlFrontend(deliveryDestinationLabel(selectedAddr))}</span></div>` : ''}
+        <div class="cost-row"><span>Delivery Charge</span><span>${shippingLabel}</span></div>
+        ${discount > 0 ? `<div class="cost-row" style="color:#276749;"><span>Dussehra discount</span><span>−${formatCheckoutMoney(discount)}</span></div>` : ''}
+        ${giftWrapCost > 0 ? `<div class="cost-row"><span>Gift wrap</span><span>${formatCheckoutMoney(giftWrapCost)}</span></div>` : ''}
         <hr class="divider" style="margin:10px 0;">
-        <div class="cost-row total"><span>Total</span><span>${selectedAddr ? `₹${t.total.toLocaleString('en-IN')}` : `₹${t.subtotal.toLocaleString('en-IN')} + shipping`}</span></div>
+        <div class="cost-row total"><span>Total</span><span>${totalLabel}</span></div>
+        ${pricingNotice ? `<div style="font-size:11px;color:#7C889B;margin-top:8px;">${pricingNotice}</div>` : ''}
+        ${quoteError ? `<div class="delivery-banner" role="alert" style="color:#A8443F;">${escHtmlFrontend(quoteError)}</div>` : ''}
       </div>
 
       <div style="background:#F0F5E8; border-left:4px solid #4AA052; padding:12px; border-radius:6px; margin-bottom:14px; font-size:13px;">
@@ -3756,11 +4313,16 @@ function checkoutItems(){
 }
 
 /* ===================== CHECKOUT ===================== */
+function computeOrderPayableTotal({ subtotal = 0, shipping = 0, discount = 0, giftWrapCost = 0 } = {}){
+  return roundCheckoutMoney(Math.max(0, Number(subtotal || 0) + Number(shipping || 0) + Number(giftWrapCost || 0) - Number(discount || 0)));
+}
+function formatCheckoutMoney(value){
+  return `₹${roundCheckoutMoney(value).toLocaleString('en-IN', {maximumFractionDigits:2})}`;
+}
 function renderCheckout(){
   const el = document.getElementById('addrList');
-  const selectedAddr = state.addresses.find(a=>a.id===state.selectedAddrId);
+  if(!el) return;
   let items = checkoutItems();
-  // Defensive fallback: if mapping failed for any reason, build items from state.cart directly
   if(!items || items.length===0){
     const keys = Object.keys(state.cart||{});
     if(keys.length>0){
@@ -3770,38 +4332,47 @@ function renderCheckout(){
       }).filter(Boolean);
     }
   }
-  const t = cartTotals(items, selectedAddr, state.giftWrap);
+  const selectedAddr = getSelectedDeliveryAddress();
+  const t = getCheckoutPricing(items, selectedAddr);
+  requestCheckoutQuote(items, selectedAddr);
+  const quote = t.quote;
+  const pricing = quote || t;
+  const discount = t.discount;
+  const payableTotal = t.total;
+  const quotePending = usingLiveBackend && !!selectedAddr && !quote && checkoutQuotePendingKey === checkoutQuoteKey(items, selectedAddr);
+  const quoteErrorKey = checkoutQuoteKey(items, selectedAddr);
+  const quoteError = usingLiveBackend && !!selectedAddr && !quote && checkoutQuoteErrorKey === quoteErrorKey ? checkoutQuoteError : '';
+  const quotedPrices = new Map((quote?.items || []).map(item => [String(item.productId), Number(item.price)]));
+  const giftWrapPrice = cartTotals(items, selectedAddr, {enabled:true, message:''}).giftWrapCost;
+  const giftEnabled = !!state.giftWrap?.enabled;
   const giftWrapHtml = `
-  <div style="border:1px solid #E5D9C8; border-radius:18px; padding:16px; background:#FEF8F2; margin:0 16px 18px;">
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
-      <div>
-        <div style="font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px;"><span style="font-size:18px;">🎁</span>Gift wrap (optional)</div>
-        <div style="font-size:12px; color:#5A6B7A;">Add a gift note and we’ll wrap your order beautifully. Message is optional.</div>
+  <div class="checkout-gift-card">
+    <div class="checkout-gift-top">
+      <div class="checkout-gift-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 10h18v11H3zM2 7h20v3H2zM12 7v14"/><path d="M12 7H7.8a2.3 2.3 0 1 1 2.3-2.3C10.1 6 12 7 12 7ZM12 7h4.2a2.3 2.3 0 1 0-2.3-2.3C13.9 6 12 7 12 7Z"/></svg></div>
+      <div class="checkout-gift-copy">
+        <div class="checkout-gift-title">Gift wrap (optional)</div>
+        <div class="checkout-gift-desc">Add a gift note and we’ll wrap your order beautifully.</div>
       </div>
-      <div style="text-align:right; display:flex; flex-direction:column; gap:10px; align-items:flex-end;">
-        <div style="font-weight:700;">₹30</div>
-        <div style="display:flex; gap:14px; align-items:center;">
-          ${state.giftWrap.enabled
-            ? `<button class="btn btn-outline btn-sm" onclick="openGiftMessageEditor()">Message</button>`
-            : `<button class="btn btn-solid btn-sm" onclick="addGiftWrap()">Add</button>`}
-          ${(state.giftWrap.enabled || giftWrapEditing) ? `<span onclick="removeGiftWrap()" style="color:#C43A3A; font-weight:700; font-size:13px; cursor:pointer;">Remove</span>` : ''}
-        </div>
+      <div class="checkout-gift-actions">
+        <div class="checkout-gift-price">${formatCheckoutMoney(giftWrapPrice)}</div>
+        ${giftEnabled
+          ? `<button class="checkout-gift-button selected" onclick="openGiftMessageEditor()">Added · Edit note</button>`
+          : `<button class="checkout-gift-button" onclick="addGiftWrap()">Add</button>`}
+        ${giftEnabled ? `<button class="checkout-edit" onclick="removeGiftWrap()">Remove</button>` : ''}
       </div>
     </div>
 
     ${giftWrapEditing ? `
-      <div style="margin-top:14px;">
-        <label style="display:block; margin-bottom:8px; font-weight:600; font-size:12px; color:#4B5566;">Gift message (optional)</label>
-        <textarea id="giftMessageInput" rows="3" placeholder="Write your gift message here..."
-          style="width:100%; padding:12px 14px; border:1px solid #E5DAC0; border-radius:10px; font-size:13px; font-family:'Inter',sans-serif; outline:none; resize:vertical; background:#fff;"
-        >${escHtmlFrontend(state.giftWrap.message || '')}</textarea>
-        <div style="display:flex; gap:10px; margin-top:10px;">
+      <div class="checkout-gift-note">
+        <label for="giftMessageInput">Gift message (optional)</label>
+        <textarea id="giftMessageInput" rows="3" placeholder="Write your gift message here...">${escHtmlFrontend(state.giftWrap?.message || '')}</textarea>
+        <div class="checkout-gift-note-actions">
           <button class="btn btn-solid" onclick="saveGiftWrapMessage()">Save</button>
           <button class="btn btn-outline" onclick="cancelGiftWrapEditor()">Cancel</button>
         </div>
       </div>
-    ` : (state.giftWrap.enabled ? `
-      <div style="margin-top:10px; font-size:13px; color:#3E4A67; background:#fff; border:1px solid #EEE3C9; border-radius:10px; padding:10px 12px;">
+    ` : (giftEnabled ? `
+      <div class="checkout-gift-note">
         ${state.giftWrap.message ? escHtmlFrontend(state.giftWrap.message) : 'Gift wrap added without a message.'}
       </div>
     ` : '')}
@@ -3809,79 +4380,82 @@ function renderCheckout(){
   document.getElementById('giftWrapOption').innerHTML = giftWrapHtml;
   if (state.addresses.length === 0) {
     el.innerHTML = `
-      <div class="empty-state" style="padding:18px 16px; border:1px dashed #D7C49F; border-radius:18px; background:#FFF9F0; margin-bottom:18px; text-align:center; color:#5A4A28;">
-        <div style="font-weight:700; margin-bottom:8px;">No delivery address added yet</div>
-        <div style="font-size:13px; margin-bottom:16px;">Add an address now to calculate delivery and continue to payment.</div>
-        <button class="btn btn-solid btn-full" style="max-width:260px; margin:0 auto;" onclick="showAddrForm()">Add Delivery Address</button>
+      <div class="checkout-empty-address">
+        <div><strong>No delivery address available</strong></div>
+        <div>Add a delivery address to calculate shipping and continue to payment.</div>
+        <button class="btn btn-solid" onclick="showAddrForm()">Add delivery address</button>
       </div>`;
   } else {
-    el.innerHTML = state.addresses.map(a=>{
-      const isSelected = state.selectedAddrId===a.id;
+    el.innerHTML = state.addresses.map(address=>{
+      const isSelected = state.selectedAddrId===address.id;
+      const parsedAddress = parseAddressExtras(address);
+      const fullAddress = [
+        stripParsedPartsFromLine(parsedAddress),
+        parsedAddress.city,
+        parsedAddress.state,
+        parsedAddress.pincode,
+      ].filter(Boolean).join(', ');
+      const type = address.type || address.addressType || address.label || 'Saved address';
       return `
-      <div class="address-card" onclick="selectAddress('${a.id}')">
-        <div class="address-top">
-          <div class="home">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#101A3D" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>
-            Home
+      <div class="checkout-address-card ${isSelected ? 'selected' : ''}" ${isSelected ? '' : `onclick="selectAddress('${escHtmlFrontend(address.id)}')"`}>
+        <div class="checkout-address-top">
+          <div class="checkout-address-type">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9 21v-7h6v7"/></svg>
+            ${escHtmlFrontend(type)}
           </div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <div class="edit-link" onclick="event.stopPropagation(); editAddress('${a.id}')">
-              Edit
-              <svg viewBox="0 0 24 24" fill="none" stroke="#C9922B" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>
-            </div>
-            ${isSelected ? '' : `<div class="edit-link" onclick="event.stopPropagation(); selectAddress('${a.id}');">Use</div>`}
-          </div>
+          <button class="checkout-edit" onclick="event.stopPropagation(); editAddress('${escHtmlFrontend(address.id)}')">Edit</button>
         </div>
-        <div class="addr-name">${a.name}</div>
-        <div class="addr-phone">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014 2h3a2 2 0 012 1.7c.1.9.3 1.8.6 2.7a2 2 0 01-.4 2.1L8 9.9a16 16 0 006 6l1.5-1.2a2 2 0 012.1-.4c.9.3 1.8.5 2.7.6a2 2 0 011.7 2z"/></svg>
-          ${a.phone}
-        </div>
-        <div class="addr-line">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          ${a.line}
-        </div>
-        ${isSelected ? '<div class="delivery-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#5C531F" stroke-width="2.5"><path d="M3 12h2l2-4h10l2 4h2"/><path d="M7 18h10"/><circle cx="7.5" cy="18.5" r="1.5"/><circle cx="16.5" cy="18.5" r="1.5"/></svg>Delivery</div>' : ''}
+        <div class="checkout-address-name">${escHtmlFrontend(address.name || '')}</div>
+        <div class="checkout-address-phone">${escHtmlFrontend(address.phone || '')}</div>
+        <div class="checkout-address-line">${escHtmlFrontend(fullAddress || address.line || '')}</div>
+        <button type="button" class="checkout-address-select" onclick="event.stopPropagation(); ${isSelected ? '' : `selectAddress('${escHtmlFrontend(address.id)}')`}" ${isSelected ? 'aria-pressed="true"' : ''}>
+          ${isSelected ? 'Delivering to this address ✓' : 'Deliver to this address'}
+        </button>
       </div>`;
     }).join('');
   }
   document.getElementById('addrForm').style.display='none';
   const productRows = items.map(p => {
-    const productImage = p.images && p.images[0] && p.images[0].trim();
+    const productImage = p.images && p.images[0] && String(p.images[0]).trim();
     return `
       <div class="product-row">
-        <div class="product-thumb">${productImage ? '<img src="' + productImage + '"/>' : '<svg viewBox="0 0 24 24" fill="none" stroke="#B08B3A" stroke-width="1.5"><circle cx="12" cy="9" r="4"/><path d="M9 13l-2 8h10l-2-8"/></svg>'}</div>
+        <div class="product-thumb">${productImage ? `<img src="${escHtmlFrontend(productImage)}" alt="${escHtmlFrontend(p.name || 'Product')}">` : '<svg viewBox="0 0 24 24" fill="none" stroke="#B08B3A" stroke-width="1.5"><circle cx="12" cy="9" r="4"/><path d="M9 13l-2 8h10l-2-8"/></svg>'}</div>
         <div class="product-info">
-          <div class="name">${p.name || 'Order item'}</div>
+          <div class="name">${escHtmlFrontend(p.name || 'Order item')}</div>
           <div class="qty">Qty: ${p.qty || 1}</div>
         </div>
-        <div class="product-price">₹${p.qty ? (p.price * p.qty).toLocaleString('en-IN') : '0'}</div>
+        <div class="product-price">${formatCheckoutMoney((quotedPrices.get(String(p.id)) ?? p.price) * (p.qty || 1))}</div>
       </div>`;
   }).join('');
-  document.getElementById('checkoutSummary').innerHTML = `
-      ${productRows}
-
-      <hr class="divider">
-
-      <div class="cost-row"><span>Subtotal</span><span>₹${t.subtotal.toLocaleString('en-IN')}</span></div>
-      <div class="cost-row"><span>Shipping</span><span>₹${t.shipping===0 ? '0' : t.shipping.toLocaleString('en-IN')}</span></div>
-      ${state.giftWrap.enabled ? `<div class="cost-row"><span>Gift wrap</span><span>₹${t.giftWrapCost.toLocaleString('en-IN')}</span></div>` : ''}
-      <hr class="divider">
-
-      <div class="cost-row total"><span>Total</span><span>₹${t.total.toLocaleString('en-IN')}</span></div>
-    `;
-  if(selectedAddr && t.deliveryInfo){
-    if(t.deliveryInfo.blocked){
-      document.getElementById('checkoutDelivery').innerHTML = `<div class="delivery-banner" style="background:#FDE8E6; border-color:#F5C6CB;"><svg viewBox="0 0 24 24" fill="none" stroke="#C43A3A" stroke-width="2"><path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M15 9l-6 6"/><path d="M9 9l6 6"/></svg><div><div class="title">Delivery unavailable for this address</div><div class="sub">Please choose another address or contact support.</div></div></div>`;
-      const button = document.querySelector('#screen-checkout .cta-button'); if(button) button.disabled = true;
+  const checkoutItemCount = items.reduce((count, item) => count + (Number(item.qty) || 0), 0);
+  const orderHeading = document.getElementById('checkoutOrderHeading');
+  if(orderHeading){
+    orderHeading.textContent = `Order Summary (${checkoutItemCount} ${checkoutItemCount === 1 ? 'item' : 'items'})`;
+  }
+  document.getElementById('checkoutProducts').innerHTML = productRows || '<div class="checkout-items-empty">Your cart is empty.</div>';
+  renderCheckoutCoupon(items);
+  document.getElementById('checkoutPriceSummary').innerHTML = `
+    <div class="cost-row"><span>Subtotal</span><span>${formatCheckoutMoney(pricing.subtotal)}</span></div>
+    ${selectedAddr ? `<div class="cost-row"><span>Delivery to</span><span>${escHtmlFrontend(deliveryDestinationLabel(selectedAddr))}</span></div>` : ''}
+    <div class="cost-row"><span>Shipping</span><span>${formatCheckoutMoney(pricing.shipping)}</span></div>
+    ${discount > 0 ? `<div class="cost-row discount-row"><span>Discount · ${escHtmlFrontend(state.appliedCoupon.code)}</span><span>−${formatCheckoutMoney(discount)}</span></div>` : ''}
+    ${giftEnabled ? `<div class="cost-row"><span>Gift wrap</span><span>${formatCheckoutMoney(quote ? pricing.giftWrapCost : t.giftWrapCost)}</span></div>` : ''}
+    <hr class="divider">
+    <div class="cost-row total"><span>Total</span><span>${formatCheckoutMoney(payableTotal)}</span></div>
+    ${quotePending ? '<div style="font-size:11px;color:#7C889B;">Confirming final amount…</div>' : ''}
+    ${quoteError ? `<div class="delivery-banner" role="alert" style="color:#A8443F;">${escHtmlFrontend(quoteError)}</div>` : ''}
+  `;
+  if(selectedAddr && pricing.deliveryInfo){
+    if(pricing.deliveryInfo.blocked){
+      document.getElementById('checkoutDelivery').innerHTML = `<div class="delivery-banner" style="background:#FDE8E6;border-color:#F5C6CB;"><svg viewBox="0 0 24 24" fill="none" stroke="#C43A3A" stroke-width="2"><path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg><div><div class="title" style="color:#A8443F;">Delivery unavailable for this address</div><div class="sub" style="color:#9B625B;">Please choose another address to continue.</div></div></div>`;
     } else {
-      document.getElementById('checkoutDelivery').innerHTML = `<div class="delivery-banner"><svg viewBox="0 0 24 24" fill="none" stroke="#4B7A1E" stroke-width="2"><rect x="1" y="7" width="14" height="9"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="18" cy="19" r="1.6"/></svg><div><div class="title">${t.deliveryInfo.text}</div><div class="sub">${t.shipping===0 ? 'Free delivery' : 'Shipping ₹'+t.shipping}</div></div></div>`;
-      const button = document.querySelector('#screen-checkout .cta-button'); if(button) button.disabled = false;
+      document.getElementById('checkoutDelivery').innerHTML = `<div class="delivery-banner"><svg viewBox="0 0 24 24" fill="none" stroke="#4B7A1E" stroke-width="2"><rect x="1" y="7" width="14" height="9"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="18" cy="19" r="1.6"/></svg><div><div class="title">${escHtmlFrontend(pricing.deliveryInfo.text)}</div><div class="sub">${quotePending ? 'Confirming final delivery charge' : (pricing.shipping===0 ? 'Free delivery' : `Shipping ${formatCheckoutMoney(pricing.shipping)}`)}</div></div></div>`;
     }
   } else {
-    document.getElementById('checkoutDelivery').innerHTML = `<div class="delivery-banner"><svg viewBox="0 0 24 24" fill="none" stroke="#4B7A1E" stroke-width="2"><rect x="1" y="7" width="14" height="9"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="18" cy="19" r="1.6"/></svg><div><div class="title">Select an address to see delivery details</div><div class="sub">Delivery is calculated for your selected address in Hanamkonda, Telangana.</div></div></div>`;
-    const button = document.querySelector('#screen-checkout .cta-button'); if(button) button.disabled = false;
+    document.getElementById('checkoutDelivery').innerHTML = `<div class="delivery-banner"><svg viewBox="0 0 24 24" fill="none" stroke="#4B7A1E" stroke-width="2"><rect x="1" y="7" width="14" height="9"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="18" cy="19" r="1.6"/></svg><div><div class="title">Estimated delivery shown after address selection</div><div class="sub">Choose a saved address to calculate delivery and shipping.</div></div></div>`;
   }
+  const continueButton = document.querySelector('#screen-checkout .cta-button');
+  if(continueButton) continueButton.disabled = !items.length || !selectedAddr || !!pricing.deliveryInfo?.blocked || quotePending;
 }
 
 function editAddress(id){
@@ -3899,7 +4473,7 @@ function saveAddress(){
   const editId = form.dataset.editId;
   if(editId){
     const idx = state.addresses.findIndex(x=>x.id===editId);
-    if(idx>-1){ state.addresses[idx] = { id: editId, name, phone, line }; state.selectedAddrId = editId; }
+    if(idx>-1){ state.addresses[idx] = { ...state.addresses[idx], id:editId, name, phone, line }; state.selectedAddrId = editId; }
     delete form.dataset.editId;
   }else{
     const id = 'a'+(state.addresses.length+1)+Date.now()%1000;
@@ -3945,13 +4519,111 @@ function removeGiftWrap(){
   giftWrapEditing = false;
   saveState(); renderCheckout();
 }
-function goToPayment(){
+async function applyDussehraCoupon(selectedCode){
+  const couponCode = String(selectedCode || '').trim();
+  if(!couponCode){
+    couponNotice = {type:'error', message:'Enter a coupon code.'};
+    renderCheckoutCoupon(checkoutItems());
+    return;
+  }
+  if(!usingLiveBackend){
+    couponNotice = {type:'error', message:'Coupons require a connection to the store backend.'};
+    renderCheckoutCoupon(checkoutItems());
+    return;
+  }
+  if(!state.token){
+    couponNotice = {type:'error', message:'Please sign in to validate this coupon.'};
+    renderCheckoutCoupon(checkoutItems());
+    return;
+  }
+  const items = checkoutItems();
+  if(!items.length){
+    couponNotice = {type:'error', message:'Your cart is empty.'};
+    renderCheckoutCoupon(items);
+    return;
+  }
+  const requestedSignature = couponItemsSignature(items);
+  couponSubmitting = couponCode.toUpperCase();
+  couponNotice = {type:'loading', message:`Checking ${couponCode.toUpperCase()} with the store…`};
+  renderCheckoutCoupon(items);
+  try{
+    const data = await apiFetch('/orders/coupons/validate', {
+      method:'POST',
+      body:JSON.stringify({
+        couponCode,
+        items:orderItemsPayload(items),
+      }),
+    });
+    if(requestedSignature !== couponItemsSignature(checkoutItems())){
+      throw new Error('Your cart changed while the coupon was checking. Please try again.');
+    }
+    state.appliedCoupon = {
+      code:data.coupon.code,
+      discount:roundCheckoutMoney(data.coupon.discount),
+      subtotal:Number(data.subtotal),
+    };
+    state.couponInput = data.coupon.code;
+    couponNotice = {type:'success', message:`${data.coupon.code} applied. You save ${formatCheckoutMoney(data.coupon.discount)}.`};
+    await saveState();
+    renderCheckout();
+    renderPayment();
+  }catch(err){
+    couponNotice = {type:'error', message:err.message || 'Could not validate coupon.'};
+    if(Number(err.status) === 400){
+      const rejectedCode = couponCode.toUpperCase();
+      couponEligibility = {
+        ...couponEligibility,
+        loading:false,
+        offers:couponEligibility.offers.map(offer => offer.code === rejectedCode
+          ? {...offer, status:'ineligible', message:err.message || 'This coupon is not available for your cart.'}
+          : offer),
+      };
+      if(state.appliedCoupon?.code === rejectedCode){
+        state.appliedCoupon = null;
+        saveState();
+        renderCheckout();
+        renderPayment();
+      } else {
+        renderCheckoutCoupon(checkoutItems());
+      }
+    } else {
+      renderCheckoutCoupon(checkoutItems());
+    }
+  }finally{
+    couponSubmitting = '';
+    renderCheckoutCoupon(checkoutItems());
+  }
+}
+function toggleCouponList(){
+  couponExpanded = !couponExpanded;
+  renderCheckoutCoupon(checkoutItems());
+}
+function removeDussehraCoupon(){
+  state.appliedCoupon = null;
+  state.couponInput = '';
+  couponNotice = null;
+  saveState();
+  renderCheckout();
+  renderPayment();
+}
+async function goToPayment(){
   const items = checkoutItems();
   if(items.length===0){ toast('Your cart is empty'); return; }
   if(!state.selectedAddrId){ toast('Please select an address'); return; }
   const addr = state.addresses.find(a=>a.id===state.selectedAddrId);
+  if(usingLiveBackend){
+    try{
+      await fetchCheckoutQuote(items, addr);
+      renderCheckout();
+    }catch(error){
+      renderCheckout();
+      toast(error.message || 'Could not calculate your order total.');
+      return;
+    }
+  }
   const t = cartTotals(items, addr, state.giftWrap);
-  if(t.deliveryInfo && t.deliveryInfo.blocked){
+  const quote = getCurrentCheckoutQuote(items, addr);
+  if((quote && quote.deliveryInfo?.blocked) || (!quote && t.deliveryInfo?.blocked)){
     toast('Delivery is not available for this address. Please choose another address.');
     return;
   }
@@ -4011,15 +4683,28 @@ function renderPayment(){
     }
   }).join('');
   const items = checkoutItems();
-  const selectedAddr = state.addresses.find(a=>a.id===state.selectedAddrId);
-  const t = cartTotals(items, selectedAddr, state.giftWrap);
-  const item = items[0];
+  const selectedAddr = getSelectedDeliveryAddress();
+  requestCheckoutQuote(items, selectedAddr);
+  const t = getCheckoutPricing(items, selectedAddr);
+  const quote = t.quote;
+  const pricing = quote || t;
+  const discount = t.discount;
+  const payableTotal = t.total;
+  const quotePending = usingLiveBackend && !!selectedAddr && !quote && checkoutQuotePendingKey === checkoutQuoteKey(items, selectedAddr);
+  const quoteKey = checkoutQuoteKey(items, selectedAddr);
+  const quoteError = usingLiveBackend && !!selectedAddr && !quote && checkoutQuoteErrorKey === quoteKey ? checkoutQuoteError : '';
   document.getElementById('paymentSummary').innerHTML = `
-    <div class="cost-row"><span>Items (${(items && items.length>0) ? items.reduce((sum,p)=>sum+p.qty,0) : (Object.values(state.cart||{}).reduce((s,n)=>s+(n||0),0))})</span><span>₹${t.subtotal.toLocaleString('en-IN')}</span></div>
-    <div class="cost-row"><span>Shipping</span><span>${t.shipping===0?'₹0':'₹'+t.shipping}</span></div>
-    ${state.giftWrap.enabled ? `<div class="cost-row"><span>Gift wrap</span><span>₹${t.giftWrapCost.toLocaleString('en-IN')}</span></div>` : ''}
+    <div class="cost-row"><span>Items (${(items && items.length>0) ? items.reduce((sum,p)=>sum+p.qty,0) : (Object.values(state.cart||{}).reduce((s,n)=>s+(n||0),0))})</span><span>${formatCheckoutMoney(pricing.subtotal)}</span></div>
+    ${selectedAddr ? `<div class="cost-row"><span>Delivery to</span><span>${escHtmlFrontend(deliveryDestinationLabel(selectedAddr))}</span></div>` : ''}
+    ${discount > 0 ? `<div class="cost-row" style="color:#276749;"><span>Dussehra discount (${escHtmlFrontend(state.appliedCoupon.code)})</span><span>−${formatCheckoutMoney(discount)}</span></div>` : ''}
+    <div class="cost-row"><span>Shipping</span><span>${formatCheckoutMoney(pricing.shipping)}</span></div>
+    ${state.giftWrap.enabled ? `<div class="cost-row"><span>Gift wrap</span><span>${formatCheckoutMoney(quote ? pricing.giftWrapCost : t.giftWrapCost)}</span></div>` : ''}
     <hr class="divider">
-    <div class="cost-row total"><span>Total Payable</span><span>₹${t.total.toLocaleString('en-IN')}</span></div>`;
+    <div class="cost-row total"><span>Total Payable</span><span>${formatCheckoutMoney(payableTotal)}</span></div>
+    ${quotePending ? '<div style="font-size:11px;color:#7C889B;">Confirming final amount…</div>' : ''}
+    ${quoteError ? `<div role="alert" style="color:#A8443F;">${escHtmlFrontend(quoteError)}</div>` : ''}`;
+  const placeButton = document.querySelector('#screen-payment .cta-button');
+  if(placeButton) placeButton.disabled = placeOrderInFlight || quotePending || (!!quoteError && usingLiveBackend);
 }
 function selectPayment(id){
   const method = paymentMethods.find(m => m.id === id);
@@ -4123,38 +4808,63 @@ async function openRazorpayCheckout(order, checkoutData){
 }
 
 async function placeOrder(){
+  if(placeOrderInFlight) return;
+  placeOrderInFlight = true;
+  const placeButton = document.querySelector('#screen-payment .cta-button');
+  if(placeButton){
+    placeButton.disabled = true;
+    placeButton.textContent = 'PLACING ORDER…';
+  }
+  try{
+    await submitOrder();
+  }finally{
+    placeOrderInFlight = false;
+    const activePaymentButton = document.querySelector('#screen-payment .cta-button');
+    if(activePaymentButton){
+      activePaymentButton.textContent = 'PLACE ORDER →';
+      renderPayment();
+    }
+  }
+}
+
+async function submitOrder(){
   const items = checkoutItems();
   if(items.length===0){ toast('No items to order'); return; }
   const addr = state.addresses.find(a=>a.id===state.selectedAddrId);
   if(!addr){ toast('Please select an address'); return; }
+  let quote = null;
+  if(usingLiveBackend){
+    try{
+      quote = await fetchCheckoutQuote(items, addr, true);
+    }catch(error){
+      renderCheckout();
+      renderPayment();
+      toast(error.message || 'Could not calculate your order total.');
+      return;
+    }
+  }
   const t = cartTotals(items, addr, state.giftWrap);
+  const discount = quote ? Number(quote.discount) || 0 : appliedCouponDiscount(t.subtotal);
+  const checkoutTotal = quote
+    ? Number(quote.total)
+    : computeOrderPayableTotal({ subtotal: t.subtotal, shipping: t.shipping, discount, giftWrapCost: t.giftWrapCost });
   const paymentMethod = state.selectedPayment || 'cod';
 
   if(usingLiveBackend){
     if(!state.token){ requireAuth(() => placeOrder()); return; }
     try{
-      const parsedAddr = parseAddressExtras(addr);
-      const cleanedLine = stripParsedPartsFromLine(parsedAddr);
       const body = {
-        items: items.map(i => ({ productId: i.id, qty: i.qty })),
-        address: {
-          name: parsedAddr.name,
-          phone: parsedAddr.phone,
-          line: cleanedLine,
-          city: parsedAddr.city || '',
-          state: parsedAddr.state || '',
-          pincode: parsedAddr.pincode || '',
-        },
+        items: orderItemsPayload(items),
+        address: buildOrderAddress(addr),
         paymentMethod,
         giftWrap: !!state.giftWrap?.enabled,
         giftMessage: state.giftWrap?.message || '',
+        couponCode: state.appliedCoupon?.code || '',
+        expectedTotal: checkoutTotal,
+        expectedQuote: quote,
       };
       const data = await apiFetch('/orders', { method:'POST', body: JSON.stringify(body) });
       const ord = data.order;
-
-      if(ord.total != null && Math.abs(Number(ord.total) - t.total) > 0.5){
-        console.warn('Order total mismatch — checkout showed ₹'+t.total+', backend calculated ₹'+ord.total);
-      }
 
       const order = {
         id: ord._id,
@@ -4165,6 +4875,8 @@ async function placeOrder(){
         total: Number(ord.total),
         subtotal: Number(ord.subtotal || 0),
         shipping: Number(ord.shipping || 0),
+        couponCode: ord.couponCode || null,
+        discount: Number(ord.discount || 0),
         address: ord.address,
         payment: ord.paymentMethod,
         paymentStatus: ord.paymentStatus || 'pending',
@@ -4188,6 +4900,9 @@ async function placeOrder(){
           order.paymentStatus = 'paid';
           order.status = 'confirmed';
           if(buyNowMode){ buyNowMode=false; buyNowItem=null; } else { state.cart = {}; }
+          state.appliedCoupon = null;
+          state.couponInput = '';
+          couponNotice = null;
           saveState(); updateBadges();
         } catch(err){
           order.paymentStatus = 'failed';
@@ -4197,6 +4912,9 @@ async function placeOrder(){
         }
       } else {
         if(buyNowMode){ buyNowMode=false; buyNowItem=null; } else { state.cart = {}; }
+        state.appliedCoupon = null;
+        state.couponInput = '';
+        couponNotice = null;
         saveState(); updateBadges();
       }
 
@@ -4204,6 +4922,30 @@ async function placeOrder(){
       nav('success', {orderId: order.id});
       return;
     }catch(err){
+      if(Number(err.status) === 409 && err.data?.quote){
+        checkoutServerQuote = {
+          key:checkoutQuoteKey(items, addr),
+          data:err.data.quote,
+        };
+        checkoutQuotePendingKey = '';
+        checkoutQuoteError = '';
+        checkoutQuoteErrorKey = '';
+        renderCheckout();
+        renderPayment();
+        const changedFields = (err.data.mismatches || []).map(mismatch => mismatch.field).join(', ');
+        toast(changedFields
+          ? `Updated price differs in: ${changedFields}. Review the breakdown and place your order again.`
+          : 'The price changed. Review the updated breakdown and place your order again.');
+        return;
+      }
+      if(Number(err.status) === 400 && state.appliedCoupon && /coupon|dussehra/i.test(err.message || '')){
+        const message = err.message || 'The applied coupon is no longer valid.';
+        state.appliedCoupon = null;
+        couponNotice = {type:'error', message};
+        saveState();
+        renderCheckout();
+        renderPayment();
+      }
       toast(err.message || 'Could not place order');
       return;
     }
@@ -4211,17 +4953,20 @@ async function placeOrder(){
 
   const orderId = 'AIIZ' + Math.floor(100000+Math.random()*899999);
   const order = {
-    id: orderId, items, total: t.total, address: addr, payment: paymentMethod,
+    id: orderId, items, total: checkoutTotal, subtotal:t.subtotal, shipping:t.shipping,
+    discount, couponCode:state.appliedCoupon?.code || null, address: addr, payment: paymentMethod,
     date: new Date().toISOString(), status: 'confirmed',
     giftWrap: !!state.giftWrap?.enabled,
     giftMessage: state.giftWrap?.message || '',
     giftWrapCost: state.giftWrap?.enabled ? 30 : 0,
   };
   state.orders.unshift(order);
-   order.total = t.total;
   // clear local gift wrap state after placing an order in demo mode
   state.giftWrap = { enabled:false, message: '' };
   if(buyNowMode){ buyNowMode=false; buyNowItem=null; } else { state.cart = {}; }
+  state.appliedCoupon = null;
+  state.couponInput = '';
+  couponNotice = null;
   saveState(); updateBadges(); renderCheckout();
   lastOrderId = orderId;
   nav('home', {}, {replace:true});
@@ -4279,6 +5024,8 @@ async function loadMyOrders(){
       total: o.total,
       subtotal: o.subtotal,
       shipping: o.shipping,
+      discount: o.discount,
+      couponCode: o.couponCode || null,
       giftWrapCost: o.giftWrapCost,
       date: o.createdAt || o.date || new Date().toISOString(),
       status: o.status || 'confirmed',
@@ -4303,25 +5050,52 @@ function findOrderByRouteId(orderId){
   if(!requestedId) return null;
   return state.orders.find(order => String(order.id || '') === requestedId || String(order.orderNumber || '') === requestedId) || null;
 }
+function getOrderPayableTotal(order, subtotal){
+  const shipping = Number(order?.shipping) || 0;
+  const giftWrapCost = Number(order?.giftWrapCost) || 0;
+  const discount = Number(order?.discount) || 0;
+  const hasPricingBreakdown = order?.subtotal !== null && order?.subtotal !== undefined ||
+    order?.shipping !== null && order?.shipping !== undefined ||
+    order?.discount !== null && order?.discount !== undefined ||
+    order?.giftWrapCost !== null && order?.giftWrapCost !== undefined;
+  if(!hasPricingBreakdown){
+    const savedTotal = Number(order?.total);
+    if(order?.total !== null && order?.total !== undefined && Number.isFinite(savedTotal)){
+      return savedTotal;
+    }
+  }
+  return computeOrderPayableTotal({
+    subtotal: Number.isFinite(Number(subtotal)) ? Number(subtotal) : 0,
+    shipping,
+    discount,
+    giftWrapCost,
+  });
+}
 function renderSuccessScreen(orderId){
   const o = findOrderByRouteId(orderId);
   if(!o){
     document.getElementById('successOrderId').textContent = '';
+    document.getElementById('successSubtotal').textContent = '₹0';
+    document.getElementById('successShipping').textContent = '₹0';
+    document.getElementById('successDiscount').textContent = '−₹0';
     document.getElementById('successTotalPaid').textContent = '₹0';
     document.getElementById('successPaymentMethod').textContent = '—';
     document.getElementById('successDeliveryEstimate').textContent = '—';
     return;
   }
   document.getElementById('successOrderId').textContent = 'Order No. ' + (o.orderNumber || o.id || '');
-  const successSubtotal = Number.isFinite(Number(o.subtotal))
+  const subtotal = Number.isFinite(Number(o.subtotal))
     ? Number(o.subtotal)
     : (o.items || []).reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.qty) || 1), 0);
-  const successShipping = Number.isFinite(Number(o.shipping)) ? Number(o.shipping) : 0;
-  const successGiftWrap = Number.isFinite(Number(o.giftWrapCost)) ? Number(o.giftWrapCost) : 0;
-  const successTotal = successSubtotal + successShipping + successGiftWrap;
-  document.getElementById('successTotalPaid').textContent = '₹' + successTotal.toLocaleString('en-IN');
+  const shipping = Number.isFinite(Number(o.shipping)) ? Number(o.shipping) : 0;
+  const discount = Number.isFinite(Number(o.discount)) ? Number(o.discount) : 0;
+  const giftWrapCost = Number.isFinite(Number(o.giftWrapCost)) ? Number(o.giftWrapCost) : 0;
+  const successTotal = getOrderPayableTotal(o, subtotal);
+  document.getElementById('successSubtotal').textContent = formatCheckoutMoney(subtotal);
+  document.getElementById('successShipping').textContent = formatCheckoutMoney(shipping);
+  document.getElementById('successDiscount').textContent = `−${formatCheckoutMoney(discount)}`;
+  document.getElementById('successTotalPaid').textContent = formatCheckoutMoney(successTotal);
   document.getElementById('successPaymentMethod').textContent = formatPaymentMethodLabel(o.payment);
-  const subtotal = (o.items || []).reduce((s,i)=>s+(i.price||0)*(i.qty||1), 0);
   const deliveryInfo = o.address ? getShippingDetails(o.address, subtotal) : null;
   document.getElementById('successDeliveryEstimate').textContent = deliveryInfo ? deliveryInfo.text : 'Estimated Delivery unavailable';
   lastOrderId = o.id;
@@ -4350,7 +5124,8 @@ function renderTracking(orderId){
   const subtotal = Number.isFinite(Number(o.subtotal)) ? Number(o.subtotal) : itemSubtotal;
   const shipping = Number.isFinite(Number(o.shipping)) ? Number(o.shipping) : 0;
   const giftWrapCost = Number.isFinite(Number(o.giftWrapCost)) ? Number(o.giftWrapCost) : 0;
-  const total = subtotal + shipping + giftWrapCost;
+  const discount = Math.max(0, Math.min(subtotal, Number(o.discount) || 0));
+  const total = getOrderPayableTotal(o, subtotal);
   const steps = ['confirmed','packed','shipped','delivered'];
   const stepMeta = {
     confirmed:{title:'Order Confirmed', sub:'We\'ve received your order'},
@@ -4400,11 +5175,12 @@ function renderTracking(orderId){
       ${deliveryDate ? `<div class="summary-row"><span>Estimated Delivery</span><span>${deliveryDate.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span></div>` : (deliveryEstimate ? `<div class="summary-row"><span>Estimated Delivery</span><span>${deliveryEstimate}</span></div>` : '')}
       ${deliveryState ? `<div class="summary-row"><span>Delivery Status</span><span>${deliveryState}</span></div>` : ''}
       ${deliveryNote ? `<div class="summary-row"><span style="font-weight:700;">Order delay due to</span><span style="color:var(--muted);">${deliveryNote}</span></div>` : ''}
-      ${o.items.map(p=>`<div class="summary-row"><span>${p.name} × ${p.qty}</span><span>₹${(p.price*p.qty).toLocaleString('en-IN')}</span></div>`).join('')}
-      <div class="summary-row"><span>Subtotal</span><span>₹${subtotal.toLocaleString('en-IN')}</span></div>
-      <div class="summary-row"><span>Shipping</span><span>₹${shipping.toLocaleString('en-IN')}</span></div>
-      ${giftWrapCost > 0 ? `<div class="summary-row"><span>Gift wrap</span><span>₹${giftWrapCost.toLocaleString('en-IN')}</span></div>` : ''}
-      <div class="summary-row total"><span>Total Paid</span><span>₹${total.toLocaleString('en-IN')}</span></div>
+      ${o.items.map(p=>`<div class="summary-row"><span>${p.name} × ${p.qty}</span><span>${formatCheckoutMoney((Number(p.price)||0)*(Number(p.qty)||1))}</span></div>`).join('')}
+      <div class="summary-row"><span>Subtotal</span><span>${formatCheckoutMoney(subtotal)}</span></div>
+      <div class="summary-row"><span>Shipping</span><span>${formatCheckoutMoney(shipping)}</span></div>
+      ${discount > 0 ? `<div class="summary-row" style="color:#276749;"><span>Discount${o.couponCode ? ` · ${escHtmlFrontend(o.couponCode)}` : ''}</span><span>−${formatCheckoutMoney(discount)}</span></div>` : ''}
+      ${giftWrapCost > 0 ? `<div class="summary-row"><span>Gift wrap</span><span>${formatCheckoutMoney(giftWrapCost)}</span></div>` : ''}
+      <div class="summary-row total"><span>Total Paid</span><span>${formatCheckoutMoney(total)}</span></div>
     </div>
     ${curIdx<steps.length-1 ? `<div style="padding:16px 18px 24px; text-align:center; color:var(--muted); font-weight:600; font-size:13px;">Status: ${statusLabel(o.status)}</div>` : `<div style="padding:16px 18px 24px; text-align:center; color:var(--ok); font-weight:700; font-size:12.5px;">Delivered successfully 🎉</div>`}
   `;
@@ -4498,6 +5274,34 @@ function applyHomeBanner(){
   }
 }
 
+function renderHomePromotionalBanners(){
+  const container = document.getElementById('promotionalBanners');
+  if(!container) return;
+  const banners = homePromotionalBanners
+    .filter(banner => banner && banner.active !== false && typeof banner.image === 'string' && banner.image)
+    .sort((a, b) => Number(a.displayOrder) - Number(b.displayOrder));
+  container.innerHTML = banners.map((banner, index) => `
+    <div class="promotional-banner">
+      <img src="${escHtmlFrontend(banner.image)}" alt="${escHtmlFrontend(banner.title || `Promotional banner ${index + 1}`)}" loading="lazy" decoding="async">
+    </div>`).join('');
+  container.hidden = banners.length === 0;
+}
+
+async function loadHomePromotionalBanners(){
+  const container = document.getElementById('promotionalBanners');
+  if(!container) return;
+  try{
+    const response = await fetch(`${API_BASE}/settings/promotional`);
+    const data = await response.json().catch(()=>({}));
+    if(!response.ok) throw new Error(data.message || 'Could not load promotional banners');
+    homePromotionalBanners = Array.isArray(data.banners) ? data.banners : [];
+  }catch(error){
+    homePromotionalBanners = [];
+    console.warn('Could not load promotional banners', error);
+  }
+  renderHomePromotionalBanners();
+}
+
 async function loadHomeBannerSetting(){
   try{
     const res = await fetch(`${API_BASE}/settings/home_banner`);
@@ -4559,10 +5363,9 @@ function disableSoonButtons(){
   }catch(e){ console.warn('disableSoonButtons failed', e); }
 }
 disableSoonButtons();
-loadState().then(() => {
-  initRoute();
-}).catch(err => {
+loadState().catch(err => {
   console.error('Startup failed', err);
+  renderAll();
   initRoute();
 });
 </script>
