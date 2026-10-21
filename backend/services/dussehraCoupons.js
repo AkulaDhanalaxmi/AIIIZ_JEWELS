@@ -1,11 +1,16 @@
 const OFFERS = Object.freeze({
-  DUSSEHRA10: { percent: 10, minQty: 0, minSubtotal: 0 },
-  DUSSEHRA15: { percent: 15, minQty: 0, minSubtotal: 499 },
-  DUSSEHRA20: { percent: 20, minQty: 0, minSubtotal: 999 },
+  DIWALI10: { percent: 10, minQty: 0, minSubtotal: 0 },
+  DIWALI15: { percent: 15, minQty: 0, minSubtotal: 499 },
+  DIWALI20: { percent: 20, minQty: 0, minSubtotal: 999 },
 });
 
 const DEFAULT_SALE_START_DATE = '2026-10-05';
-const SALE_END_DATE = '2026-10-20';
+const SALE_END_DATE = '2026-11-08';
+const LEGACY_OFFERS = Object.freeze({
+  DUSSEHRA10: 'DIWALI10',
+  DUSSEHRA15: 'DIWALI15',
+  DUSSEHRA20: 'DIWALI20',
+});
 
 function roundMoney(value) {
   return Math.round((Number(value) + Number.EPSILON) * 100) / 100;
@@ -25,7 +30,7 @@ function getSaleStartDate() {
     parsedDate.toISOString().slice(0, 10) !== configuredDate ||
     configuredDate > SALE_END_DATE
   ) {
-    throw new Error('DUSSEHRA_COUPON_START_DATE must be a valid date on or before 2026-10-20.');
+    throw new Error('DUSSEHRA_COUPON_START_DATE must be a valid date on or before 2026-11-08.');
   }
 
   return configuredDate;
@@ -52,9 +57,9 @@ function validateDussehraCoupon(couponCode, items, now = new Date()) {
   }
 
   const code = couponCode.trim().toUpperCase();
-  const matchingCodes = code.match(/DUSSEHRA(?:10|15|20)/g) || [];
+  const matchingCodes = code.match(/(?:DIWALI|DUSSEHRA)(?:10|15|20)/g) || [];
   if (matchingCodes.length > 1) {
-    return { valid: false, message: 'Only one Dussehra coupon can be applied per order.' };
+    return { valid: false, message: 'Only one Diwali coupon can be applied per order.' };
   }
 
   const offer = OFFERS[code];
@@ -74,7 +79,7 @@ function validateDussehraCoupon(couponCode, items, now = new Date()) {
       });
     return {
       valid: false,
-      message: `Dussehra coupons are valid from ${startLabel} to October 20, 2026 (IST).`,
+      message: `Diwali coupons are valid from ${startLabel} to November 8, 2026 (IST).`,
     };
   }
 
@@ -136,7 +141,9 @@ function validateStoredOrderTotals(order) {
 
   let discount = 0;
   if (order.couponCode) {
-    const coupon = validateDussehraCoupon(order.couponCode, items, order.createdAt || new Date());
+    const storedCode = String(order.couponCode).trim().toUpperCase();
+    const couponCode = LEGACY_OFFERS[storedCode] || storedCode;
+    const coupon = validateDussehraCoupon(couponCode, items, order.createdAt || new Date());
     if (!coupon.valid) return { valid: false, message: 'The saved order coupon is invalid.' };
     discount = coupon.discount;
   }

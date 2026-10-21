@@ -91,7 +91,7 @@ All request/response bodies are JSON. Protected routes need:
 ### Orders
 | Method | Route | Auth | Body |
 |---|---|---|---|
-| POST | /api/orders/coupons/validate | user | `{ couponCode, items: [{ productId, qty }] }` — validates a Dussehra offer using current product prices |
+| POST | /api/orders/coupons/validate | user | `{ couponCode, items: [{ productId, qty }] }` — validates a Diwali offer using current product prices |
 | POST | /api/orders/quote | user | `{ items, address, giftWrap?, couponCode? }` — returns the server-calculated checkout subtotal, shipping, discount, and total |
 | POST | /api/orders | user | `{ address, paymentMethod, items?, mehendiBooking? }` — omit `items` to checkout from the cart; optional free mehendi booking accepts `{ address, pincode, date, timeSlot }` |
 | GET | /api/orders | user | your order history |
@@ -99,8 +99,8 @@ All request/response bodies are JSON. Protected routes need:
 | GET | /api/orders/admin/all | admin | every order |
 | PUT | /api/orders/:id/status | admin | `{ status }` — confirmed → packed → shipped → delivered |
 
-Dussehra coupons are available from October 5 through October 20, 2026 (India time):
-`DUSSEHRA10` gives 10% off on every valid order; `DUSSEHRA15` gives 15% off when the eligible subtotal is ₹499 or more; `DUSSEHRA20` gives 20% off when the eligible subtotal is ₹999 or more. The order endpoint recalculates the discount from the server-priced order items. Submitted discount and total fields are not used. Verify locally with `node --test test/dussehraCoupons.test.js`.
+Diwali coupons are available from October 5 through November 8, 2026 (India time):
+`DIWALI10` gives 10% off on every valid order; `DIWALI15` gives 15% off when the eligible subtotal is ₹499 or more; `DIWALI20` gives 20% off when the eligible subtotal is ₹999 or more. The order endpoint recalculates the discount from the server-priced order items. Submitted discount and total fields are not used. Verify locally with `node --test test/dussehraCoupons.test.js`.
 
 Optional free mehendi bookings are available from October 6 through October 20, 2026, in Hanamkonda (506001), Warangal (506002), and Kazipet (506003). The order endpoint validates the service PIN, address, date, and selected time slot and saves the booking with the order for the admin panel.
 

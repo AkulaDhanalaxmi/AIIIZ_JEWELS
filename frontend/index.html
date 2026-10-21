@@ -2386,9 +2386,9 @@ let buyNowMode = false, buyNowItem = null;
 let pendingAction = null;
 let giftWrapEditing = false;
 const DUSSEHRA_COUPONS = [
-  { code:'DUSSEHRA10', percent:10, detail:'Eligible cart items only · Sale category excluded' },
-  { code:'DUSSEHRA15', percent:15, detail:'Eligible subtotal ₹499+ · Sale category excluded' },
-  { code:'DUSSEHRA20', percent:20, detail:'Eligible subtotal ₹999+ · Sale category excluded' },
+  { code:'DIWALI10', percent:10, detail:'Eligible cart items only · Sale category excluded' },
+  { code:'DIWALI15', percent:15, detail:'Eligible subtotal ₹499+ · Sale category excluded' },
+  { code:'DIWALI20', percent:20, detail:'Eligible subtotal ₹999+ · Sale category excluded' },
 ];
 const MEHENDI_SERVICE_PINS = Object.freeze(['506001','506002','506003']);
 const MEHENDI_SERVICE_CITIES = Object.freeze({
@@ -2410,7 +2410,10 @@ let couponExpanded = false;
 let couponSubmitting = '';
 let couponNotice = null;
 const HOME_PRODUCT_LIMIT = 14;
+const CATALOG_CACHE_KEY = `aiiz-catalog-v1:${API_BASE}`;
+const CATALOG_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 let catalogLoadPromise = null;
+let catalogLoading = false;
 let fullCatalogPromise = null;
 let fullCatalogLoaded = false;
 
@@ -2431,6 +2434,51 @@ function normalizeProduct(p){
     rating: p.rating || 0, numReviews: p.numReviews || 0,
   };
 }
+function restoreCachedCatalog(){
+  let serialized;
+  try{
+    serialized = window.localStorage.getItem(CATALOG_CACHE_KEY);
+  }catch(error){
+    console.warn('Could not read the cached catalogue.', error);
+    return false;
+  }
+  if(!serialized) return false;
+
+  try{
+    const cached = JSON.parse(serialized);
+    const valid = cached
+      && Number.isFinite(cached.savedAt)
+      && Date.now() - cached.savedAt <= CATALOG_CACHE_TTL_MS
+      && Array.isArray(cached.categories)
+      && cached.categories.every(category => category && typeof category.id === 'string')
+      && Array.isArray(cached.products)
+      && cached.products.every(product => product && typeof product.id === 'string');
+    if(!valid) return false;
+
+    CATEGORIES = cached.categories;
+    PRODUCTS = cached.products.map(normalizeProduct);
+    usingLiveBackend = true;
+    return true;
+  }catch(error){
+    console.warn('Could not restore the cached catalogue.', error);
+    return false;
+  }
+}
+function cacheLiveCatalog(){
+  const products = PRODUCTS.map(product => ({
+    ...product,
+    images: (product.images || []).filter(image => typeof image === 'string' && image.trim()),
+  }));
+  try{
+    window.localStorage.setItem(CATALOG_CACHE_KEY, JSON.stringify({
+      savedAt: Date.now(),
+      categories: CATEGORIES,
+      products,
+    }));
+  }catch(error){
+    console.warn('Could not cache the live catalogue.', error);
+  }
+}
 async function fetchCatalog(){
   try{
     const [catRes, prodRes] = await Promise.all([
@@ -2448,12 +2496,14 @@ async function fetchCatalog(){
     }));
     PRODUCTS = prodRes.products.map(normalizeProduct);
     usingLiveBackend = true;
+    cacheLiveCatalog();
     return true;
   }catch(e){
-    CATEGORIES = DEMO_CATEGORIES;
-    PRODUCTS = DEMO_PRODUCTS;
-    usingLiveBackend = false;
-    console.warn('Could not load the live catalogue; showing the local catalogue.', e);
+    if(!usingLiveBackend){
+      CATEGORIES = DEMO_CATEGORIES;
+      PRODUCTS = DEMO_PRODUCTS;
+    }
+    console.warn('Could not load the live catalogue; keeping the cached catalogue when available.', e);
     return false;
   }
 }
@@ -2632,6 +2682,8 @@ async function loadState(){
   if(typeof state.couponInput !== 'string'){
     state.couponInput = '';
   }
+  restoreCachedCatalog();
+  catalogLoading = !usingLiveBackend;
   catalogLoadPromise = fetchCatalog();
   renderAll();
   initGoogleSignIn();
@@ -2650,9 +2702,12 @@ async function loadState(){
   });
 
   catalogLoadPromise.then(async (loaded) => {
-    if(!loaded) return;
+    catalogLoading = false;
     renderAll();
     const currentScreen = parseRoute(location.hash).screen;
+    if(currentScreen === 'productlist') renderProductList();
+    if(currentScreen === 'categories') renderAllCategories();
+    if(!loaded) return;
     if(currentScreen === 'cart') renderCart();
     if(currentScreen === 'checkout') renderCheckout();
     if(currentScreen === 'payment') renderPayment();
@@ -3332,6 +3387,10 @@ let homeSort = 'default';
 function setHomeSort(val){ homeSort = val || 'default'; renderNewArrivals(); }
 function renderNewArrivals(){
   const el = document.getElementById('newArrivals');
+  if(catalogLoading && !usingLiveBackend){
+    el.innerHTML = `<div role="status" style="grid-column:1/-1;padding:32px 12px;text-align:center;color:var(--muted);">Loading products and images...</div>`;
+    return;
+  }
   let items = PRODUCTS.slice();
   if(homeSort==='price_asc') items.sort((a,b)=>a.price - b.price);
   else if(homeSort==='price_desc') items.sort((a,b)=>b.price - a.price);
@@ -3424,6 +3483,11 @@ function setCategoryFilter(id){ currentCategory = id; renderProductList(); }
 function setSortFilter(id){ currentSort = id; renderProductList(); }
 function onPlSearchInput(val){ currentSearch = val; searchPromptActive = false; renderPlGrid(true); }
 function renderPlGrid(skipHeader){
+  if(catalogLoading && !usingLiveBackend){
+    document.getElementById('plResultCount').textContent = '';
+    document.getElementById('plGrid').innerHTML = `<div role="status" style="grid-column:1/-1;padding:32px 12px;text-align:center;color:var(--muted);">Loading products and images...</div>`;
+    return;
+  }
   if(searchPromptActive && !currentSearch.trim()){
     document.getElementById('plResultCount').textContent = '';
     document.getElementById('plGrid').innerHTML = `<div style="grid-column:1/-1;">${emptyStateHtml('Search for jewellery','Type any keyword to discover jewellery, collections, occasions and more.')}</div>`;
@@ -4213,7 +4277,7 @@ function couponSectionHtml(subtotal, items){
     <div class="dussehra-coupons">
       <div class="dussehra-coupons-head">
         <div>
-          <div class="dussehra-coupons-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1"/></svg>Dussehra Sale</div>
+          <div class="dussehra-coupons-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1"/></svg>Diwali Sale</div>
           <div class="dussehra-coupons-count">${countLabel}</div>
         </div>
         ${toggle}
@@ -4307,7 +4371,7 @@ function renderCart(){
         <div class="cost-row"><span>Subtotal</span><span>${formatCheckoutMoney(subtotal)}</span></div>
         ${selectedAddr ? `<div class="cost-row"><span>Delivery to</span><span>${escHtmlFrontend(deliveryDestinationLabel(selectedAddr))}</span></div>` : ''}
         <div class="cost-row"><span>Delivery Charge</span><span>${shippingLabel}</span></div>
-        ${discount > 0 ? `<div class="cost-row" style="color:#276749;"><span>Dussehra discount</span><span>−${formatCheckoutMoney(discount)}</span></div>` : ''}
+        ${discount > 0 ? `<div class="cost-row" style="color:#276749;"><span>Diwali discount</span><span>−${formatCheckoutMoney(discount)}</span></div>` : ''}
         ${giftWrapCost > 0 ? `<div class="cost-row"><span>Gift wrap</span><span>${formatCheckoutMoney(giftWrapCost)}</span></div>` : ''}
         <hr class="divider" style="margin:10px 0;">
         <div class="cost-row total"><span>Total</span><span>${totalLabel}</span></div>
@@ -4845,7 +4909,7 @@ function renderPayment(){
   document.getElementById('paymentSummary').innerHTML = `
     <div class="cost-row"><span>Items (${(items && items.length>0) ? items.reduce((sum,p)=>sum+p.qty,0) : (Object.values(state.cart||{}).reduce((s,n)=>s+(n||0),0))})</span><span>${formatCheckoutMoney(pricing.subtotal)}</span></div>
     ${selectedAddr ? `<div class="cost-row"><span>Delivery to</span><span>${escHtmlFrontend(deliveryDestinationLabel(selectedAddr))}</span></div>` : ''}
-    ${discount > 0 ? `<div class="cost-row" style="color:#276749;"><span>Dussehra discount (${escHtmlFrontend(state.appliedCoupon.code)})</span><span>−${formatCheckoutMoney(discount)}</span></div>` : ''}
+    ${discount > 0 ? `<div class="cost-row" style="color:#276749;"><span>Diwali discount (${escHtmlFrontend(state.appliedCoupon.code)})</span><span>−${formatCheckoutMoney(discount)}</span></div>` : ''}
     <div class="cost-row"><span>Shipping</span><span>${formatCheckoutMoney(pricing.shipping)}</span></div>
     ${state.giftWrap.enabled ? `<div class="cost-row"><span>Gift wrap</span><span>${formatCheckoutMoney(quote ? pricing.giftWrapCost : t.giftWrapCost)}</span></div>` : ''}
     <hr class="divider">
@@ -5099,7 +5163,7 @@ async function submitOrder(){
           : 'The price changed. Review the updated breakdown and place your order again.');
         return;
       }
-      if(Number(err.status) === 400 && state.appliedCoupon && /coupon|dussehra/i.test(err.message || '')){
+      if(Number(err.status) === 400 && state.appliedCoupon && /coupon|dussehra|diwali/i.test(err.message || '')){
         const message = err.message || 'The applied coupon is no longer valid.';
         state.appliedCoupon = null;
         couponNotice = {type:'error', message};

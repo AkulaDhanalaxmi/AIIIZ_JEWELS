@@ -1,7 +1,6 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const Category = require('./models/Category');
-
 async function run(){
   try{
     const uri = process.env.MONGO_URI;

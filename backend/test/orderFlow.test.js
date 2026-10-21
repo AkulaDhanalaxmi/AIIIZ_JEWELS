@@ -108,7 +108,7 @@ function checkoutBody(overrides = {}) {
     },
     paymentMethod: 'cod',
     giftWrap: false,
-    couponCode: 'DUSSEHRA10',
+    couponCode: 'DIWALI10',
     ...overrides,
   };
 }
@@ -123,17 +123,17 @@ function withCouponStartDate(t, callback) {
   return callback();
 }
 
-test('coupon validation accepts the frontend productId/qty payload for DUSSEHRA10', async (t) => {
+test('coupon validation accepts the frontend productId/qty payload for DIWALI10', async (t) => {
   withOrderMocks(t, { price: 858 });
   await withCouponStartDate(t, async () => {
     const res = mockResponse();
     await orderController.validateCoupon(request({
-      couponCode: 'DUSSEHRA10',
+      couponCode: 'DIWALI10',
       items: [{ productId: PRODUCT_ID, qty: 1 }],
     }), res, (error) => { throw error; });
 
     assert.equal(res.statusCode, 200);
-    assert.equal(res.body.coupon.code, 'DUSSEHRA10');
+    assert.equal(res.body.coupon.code, 'DIWALI10');
     assert.equal(res.body.subtotal, 858);
     assert.equal(res.body.coupon.discount, 85.8);
   });
@@ -144,7 +144,7 @@ test('coupon validation rejects a cart containing only products assigned to the 
   await withCouponStartDate(t, async () => {
     const res = mockResponse();
     await orderController.validateCoupon(request({
-      couponCode: 'DUSSEHRA10',
+      couponCode: 'DIWALI10',
       items: [{ productId: PRODUCT_ID, qty: 1 }],
     }), res, (error) => { throw error; });
 
@@ -188,7 +188,7 @@ test('order creation persists a valid mehendi booking for the admin order API', 
         subtotal: 858,
         shipping: 70,
         discount: 85.8,
-        couponCode: 'DUSSEHRA10',
+        couponCode: 'DIWALI10',
         giftWrapCost: 0,
         total: 842.2,
       },
@@ -227,7 +227,7 @@ test('shipping quote applies configured same-PIN, same-district, same-state, and
   }
 });
 
-test('server quote produces ₹842.20 for ₹858 subtotal, ₹70 shipping, and DUSSEHRA10', async (t) => {
+test('server quote produces ₹842.20 for ₹858 subtotal, ₹70 shipping, and DIWALI10', async (t) => {
   withOrderMocks(t, { price: 858 });
   await withCouponStartDate(t, async () => {
     const res = mockResponse();
@@ -269,7 +269,7 @@ test('expected quote detects shipping and discount changes even when the payable
       subtotal: 858,
       shipping: 50,
       discount: 65.8,
-      couponCode: 'DUSSEHRA10',
+      couponCode: 'DIWALI10',
       giftWrapCost: 0,
       total: 842.2,
     };
