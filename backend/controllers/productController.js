@@ -3,6 +3,7 @@ const Product = require('../models/Product');
 
 // GET /api/products?category=rings&search=ring&minPrice=1000&maxPrice=50000&page=1&limit=20
 exports.list = async (req, res) => {
+  res.set('Cache-Control', 'public, max-age=30, s-maxage=60, stale-while-revalidate=120');
   console.log('[Product API] request reached /api/products', {
     method: req.method,
     query: req.query,
@@ -23,19 +24,18 @@ exports.list = async (req, res) => {
 
   // Only return the fields needed for the product listing page.
   // This avoids sending the full images array and other large fields.
-  console.time('Product.find');
-  const products = await Product.find(filter)
-    .select('name category price mrp material finish size stoneType color style occasion packageIncludes care weight description images stock rating numReviews')
-    .slice('images', 1)
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(Number(limit))
-    .lean();
-  console.timeEnd('Product.find');
-
-  console.time('Product.countDocuments');
-  const total = await Product.countDocuments(filter);
-  console.timeEnd('Product.countDocuments');
+  console.time('Product.listQueries');
+  const [products, total] = await Promise.all([
+    Product.find(filter)
+      .select('name category price mrp material finish size stoneType color style occasion packageIncludes care weight description images stock rating numReviews')
+      .slice('images', 1)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit))
+      .lean(),
+    Product.countDocuments(filter),
+  ]);
+  console.timeEnd('Product.listQueries');
 
   console.log('[Product API] query result', {
     productsReturned: products.length,

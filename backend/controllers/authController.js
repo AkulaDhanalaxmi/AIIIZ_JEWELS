@@ -152,6 +152,10 @@ exports.google = async (req, res) => {
     if (!idToken) {
       return res.status(400).json({ message: 'ID token is required' });
     }
+    if (!process.env.GOOGLE_CLIENT_ID) {
+      console.error('[Google auth] GOOGLE_CLIENT_ID is not configured');
+      return res.status(503).json({ message: 'Google sign-in is temporarily unavailable' });
+    }
 
     // Verify the token server-side using google-auth-library
     const { OAuth2Client } = require('google-auth-library');

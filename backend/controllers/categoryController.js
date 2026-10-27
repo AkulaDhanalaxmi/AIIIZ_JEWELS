@@ -6,6 +6,7 @@ const slugify = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replac
 
 // GET /api/categories
 exports.list = async (req, res) => {
+  res.set('Cache-Control', 'public, max-age=30, s-maxage=60, stale-while-revalidate=120');
   const categories = await Category.find().sort({ name: 1 }).lean();
   res.json({ categories });
 };

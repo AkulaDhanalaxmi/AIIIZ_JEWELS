@@ -2812,6 +2812,7 @@ async function apiFetch(path, opts={}){
 }
 
 let googleInitialized = false;
+let googleButtonRendered = false;
 let googleInitRetryTimer = null;
 function initGoogleSignIn(){
   const container = document.getElementById('googleSignInDiv');
@@ -2842,7 +2843,7 @@ function initGoogleSignIn(){
     });
     googleInitialized = true;
   }
-  if(container.children.length > 0) return;
+  if(googleButtonRendered) return;
   container.innerHTML = '';
   google.accounts.id.renderButton(container, {
     theme:'outline',
@@ -2851,6 +2852,7 @@ function initGoogleSignIn(){
     text:'signin_with',
     shape:'pill',
   });
+  googleButtonRendered = true;
 }
 
 async function handleGoogleCredential(response){
