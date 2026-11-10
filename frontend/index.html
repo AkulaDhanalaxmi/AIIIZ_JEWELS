@@ -847,8 +847,6 @@
   .payment-card-item .payment-product-info .product-name{ font-size:14px; font-weight:700; color:var(--navy-950); line-height:1.3; }
   .payment-card-item .payment-product-info .product-meta{ font-size:12.5px; color:var(--muted); }
   .payment-card-item .product-price{ font-size:14px; font-weight:700; color:var(--navy-950); }
-  .apply-coupon{ margin:10px 18px 10px; padding:14px 16px; border:1.5px dashed #C9BB94; border-radius:16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; background:#fff; }
-  .apply-coupon:hover{ background:#FFF8E3; }
   .pay-option{ display:flex; align-items:center; gap:14px; margin:0 18px 12px; background:#fff; border:1.5px solid #EAE7D0; border-radius:18px; padding:14px 16px; cursor:pointer; box-shadow:0 8px 22px rgba(10,31,61,.06); }
   .pay-option:hover{ border-color:var(--gold-200); }
   .pay-option .pay-icon{ width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center; background:#F8F0DD; font-size:18px; }
@@ -1240,7 +1238,7 @@
   .checkout-content{ width:100%; max-width:640px; margin:0 auto; display:flex !important; flex-direction:column; gap:9px; align-items:stretch; }
   .checkout-main,.checkout-aside{ display:flex; flex-direction:column; gap:9px; width:100%; min-width:0; align-self:stretch; }
   .checkout-section-heading{ padding:0 2px; color:var(--navy-900); font-size:12px; font-weight:750; letter-spacing:.1px; }
-  .checkout-address-card,.checkout-gift-card,.checkout-items-card,.checkout-price-card,.dussehra-coupons{
+  .checkout-address-card,.checkout-gift-card,.checkout-items-card,.checkout-price-card{
     min-width:0; background:#fff; border:1px solid #EEE8DB; border-radius:16px; box-shadow:0 5px 18px rgba(10,31,61,.045);
   }
   .checkout-address-card{ padding:10px; cursor:pointer; }
@@ -1256,17 +1254,6 @@
   .checkout-address-card.selected .checkout-address-select{ background:#EDF7EF; border-color:#D4E8D7; color:#34734D; }
   .checkout-empty-address{ padding:16px; background:#fff; border:1px dashed #D8CBAF; border-radius:16px; color:#647084; font-size:12px; line-height:1.5; }
   .checkout-empty-address .btn{ margin-top:10px; }
-  .mehendi-booking-card{ padding:12px; background:#FFFCF8; }
-  .mehendi-booking-head{ display:flex; align-items:flex-start; gap:10px; }
-  .mehendi-booking-head input{ width:18px; height:18px; accent-color:#B8872B; margin:2px 0 0; }
-  .mehendi-booking-title{ color:var(--navy-900); font-size:13px; font-weight:800; }
-  .mehendi-booking-copy,.mehendi-booking-hint{ margin-top:4px; color:#707989; font-size:10px; line-height:1.45; }
-  .mehendi-booking-fields{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
-  .mehendi-booking-fields .full{ grid-column:1 / -1; }
-  .mehendi-booking-fields label{ display:block; margin-bottom:5px; color:var(--navy-900); font-size:10px; font-weight:750; }
-  .mehendi-booking-fields input,.mehendi-booking-fields select{ box-sizing:border-box; width:100%; min-height:39px; padding:8px 10px; border:1px solid #E2DDCF; border-radius:9px; background:#fff; color:var(--navy-900); font:11px 'Inter',sans-serif; }
-  .mehendi-booking-availability{ min-height:14px; margin-top:5px; color:#34734D; font-size:10px; }
-  .mehendi-booking-availability.unavailable{ color:#A8443F; }
   .checkout-gift-card{ padding:9px; background:#FFFDF9; }
   .checkout-gift-top{ display:flex; align-items:flex-start; gap:8px; }
   .checkout-gift-icon{ width:30px; height:30px; flex:0 0 30px; display:grid; place-items:center; border-radius:10px; background:#FFF1E9; color:#C66758; font-size:16px; }
@@ -1290,38 +1277,9 @@
   .checkout-items-card .product-info .qty{ color:#7B8492; font-size:9px; }
   .checkout-items-card .product-price{ color:var(--navy-900); font-size:10px; }
   .checkout-items-empty{ padding:14px 0; color:#737E8E; font-size:12px; }
-  .dussehra-coupons{ margin:0; padding:13px; background:#FFFCFA; border-color:#F1E4DE; }
-  .dussehra-coupons-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:9px; }
-  .dussehra-coupons-title{ display:flex; align-items:center; gap:7px; color:var(--navy-900); font-size:12px; font-weight:750; }
-  .dussehra-coupons-title svg{ width:16px; height:16px; color:#C48469; flex:none; }
-  .dussehra-coupons-count{ color:#7A8290; font-size:10px; line-height:1.4; }
-  .dussehra-toggle{ border:0; background:transparent; color:#9A6D17; font:650 10px 'Inter',sans-serif; cursor:pointer; white-space:nowrap; padding:4px 0 4px 4px; }
-  .dussehra-offer{ display:flex; align-items:center; gap:9px; min-width:0; padding:10px; margin-top:7px; border:1px solid #F0E8E2; border-radius:11px; background:#fff; }
-  .dussehra-offer.applied{ border-color:#CBE3D0; background:#F7FBF7; }
-  .dussehra-offer.ineligible{ background:#FFFEFD; }
-  .dussehra-offer-icon{ width:30px; height:30px; flex:0 0 30px; display:grid; place-items:center; border-radius:9px; background:#FFF0E8; color:#B46C59; font-size:14px; }
-  .dussehra-offer.ineligible .dussehra-offer-icon{ background:#F4F1EF; color:#9A9290; }
-  .dussehra-offer-copy{ flex:1; min-width:0; }
-  .dussehra-offer-code{ color:#25324A; font-size:10px; line-height:1.4; font-weight:800; overflow-wrap:anywhere; }
-  .dussehra-offer-discount{ margin-left:4px; color:#B66B57; font-size:10px; font-weight:800; white-space:nowrap; }
-  .dussehra-offer-detail,.dussehra-offer-reason{ margin-top:3px; color:#76808E; font-size:9px; line-height:1.4; overflow-wrap:anywhere; }
-  .dussehra-offer-status{ margin-top:3px; color:#398255; font-size:9px; line-height:1.4; overflow-wrap:anywhere; }
-  .dussehra-offer.ineligible .dussehra-offer-status,.dussehra-offer-reason{ color:#9B625B; }
-  .dussehra-apply{ min-width:56px; flex:0 0 auto; min-height:30px; padding:0 9px; border:0; border-radius:8px; background:var(--gold-500); color:#fff; font:700 10px 'Inter',sans-serif; cursor:pointer; }
-  .dussehra-apply:hover:not(:disabled){ background:#A9771E; }
-  .dussehra-apply:disabled{ background:#E3E2E0; color:#777; cursor:not-allowed; }
-  .dussehra-remove{ border:1px solid #B6D9BF; background:#fff; color:#34734D; }
-  .dussehra-custom-code{ display:flex; gap:8px; margin-top:10px; }
-  .dussehra-custom-code input{ min-width:0; flex:1; height:36px; padding:0 10px; border:1px solid #E4DDD4; border-radius:8px; background:#fff; color:#283447; font:10px 'Inter',sans-serif; text-transform:uppercase; }
-  .dussehra-custom-code input::placeholder{ color:#959AA3; text-transform:none; }
-  .dussehra-custom-code .dussehra-apply{ min-height:36px; }
-  .dussehra-coupon-message{ min-height:0; margin-top:7px; color:#778090; font-size:10px; line-height:1.45; }
-  .dussehra-coupon-message.success{ color:#34734D; }
-  .dussehra-coupon-message.error{ color:#A8443F; }
   .checkout-price-card .cost-row{ display:flex; align-items:flex-start; gap:12px; color:#687283; font-size:11px; line-height:1.5; padding:6px 0; }
   .checkout-price-card .cost-row span:first-child{ min-width:0; }
   .checkout-price-card .cost-row span:last-child{ flex:none; white-space:nowrap; text-align:right; color:#263348; }
-  .checkout-price-card .cost-row.discount-row span:last-child{ color:#34734D; }
   .checkout-price-card .divider{ margin:7px 0; border-color:#EEEAE3; }
   .checkout-price-card .cost-row.total{ color:var(--navy-900); font-size:14px; font-weight:800; }
   .checkout-price-card .cost-row.total span:last-child{ color:var(--navy-900); font-size:15px; }
@@ -1343,7 +1301,7 @@
     .checkout-scroll{ padding:9px 12px 14px; }
     .checkout-main,.checkout-aside{ gap:8px; }
     .checkout-section-heading{ font-size:12px; }
-    .checkout-address-card,.checkout-gift-card,.checkout-items-card,.checkout-price-card,.dussehra-coupons{ border-radius:14px; }
+    .checkout-address-card,.checkout-gift-card,.checkout-items-card,.checkout-price-card{ border-radius:14px; }
     .checkout-address-card{ padding:10px; }
     .checkout-stepper{ padding:6px 18px 7px; }
     .checkout-step{ width:62px; font-size:9px; }
@@ -1363,9 +1321,6 @@
     .checkout-header{ padding-left:13px; padding-right:13px; }
     .checkout-stepper{ padding-left:12px; padding-right:12px; }
     .checkout-step{ width:58px; }
-    .dussehra-coupons{ padding:11px; }
-    .dussehra-offer{ gap:7px; padding:8px; }
-    .dussehra-apply{ min-width:50px; padding:0 7px; }
     .checkout-items-card .product-thumb{ width:48px; height:48px; flex-basis:48px; }
   }
 </style>
@@ -1840,7 +1795,6 @@
         <div class="checkout-main">
           <div class="checkout-section-heading">Delivery Address</div>
           <div id="addrList"></div>
-          <div id="mehendiBookingOption"></div>
           <div class="form-box" id="addrForm" style="display:none;">
             <input id="fName" placeholder="Full Name">
             <input id="fPhone" placeholder="Phone Number">
@@ -1852,7 +1806,6 @@
           <div class="checkout-items-card" id="checkoutProducts"></div>
         </div>
         <div class="checkout-aside">
-          <div id="checkoutCoupon"></div>
           <div class="checkout-price-heading">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 3h14v18l-2.5-1.8L14 21l-2-1.8L9.5 21 7 19.2 5 21z"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
             Price Details
@@ -1900,7 +1853,6 @@
     <div class="section-title">Select Payment Method</div>
 
     <div class="options" id="payList"></div>
-    <!-- Apply Coupon removed per request -->
 
     <div class="cost-card" id="paymentSummary"></div>
 
@@ -2378,37 +2330,13 @@ const localStore = {
 };
 
 /* ===================== STATE ===================== */
-let state = { cart:{}, wishlist:[], addresses:[], orders:[], selectedAddrId:null, selectedPayment:null, token:null, user:null, reviews:{}, appliedCoupon:null, couponInput:'', mehendiBooking:{enabled:false,address:'',pincode:'',date:'',timeSlot:''} };
+let state = { cart:{}, wishlist:[], addresses:[], orders:[], selectedAddrId:null, selectedPayment:null, token:null, user:null, reviews:{} };
 let currentProductId = null, currentProductImageIndex = 0, currentCategory='all', lastOrderId=null, activeTab='home';
 let currentSearch = '', currentSort = 'default';
 let searchPromptActive = false;
 let buyNowMode = false, buyNowItem = null;
 let pendingAction = null;
 let giftWrapEditing = false;
-const DUSSEHRA_COUPONS = [
-  { code:'DIWALI10', percent:10, detail:'Eligible cart items only · Sale category excluded' },
-  { code:'DIWALI15', percent:15, detail:'Eligible subtotal ₹499+ · Sale category excluded' },
-  { code:'DIWALI20', percent:20, detail:'Eligible subtotal ₹999+ · Sale category excluded' },
-];
-const MEHENDI_SERVICE_PINS = Object.freeze(['506001','506002','506003']);
-const MEHENDI_SERVICE_CITIES = Object.freeze({
-  '506001':'Hanamkonda',
-  '506002':'Warangal',
-  '506003':'Kazipet',
-});
-const MEHENDI_BOOKING_START_DATE = '2026-10-06';
-const MEHENDI_BOOKING_END_DATE = '2026-10-20';
-const MEHENDI_TIME_SLOTS = [
-  '10:00 AM – 12:00 PM',
-  '12:00 PM – 2:00 PM',
-  '2:00 PM – 4:00 PM',
-  '4:00 PM – 6:00 PM',
-];
-let couponEligibility = { signature:'', loading:false, offers:[] };
-let couponEligibilityRequest = 0;
-let couponExpanded = false;
-let couponSubmitting = '';
-let couponNotice = null;
 const HOME_PRODUCT_LIMIT = 14;
 const CATALOG_CACHE_KEY = `aiiz-catalog-v1:${API_BASE}`;
 const CATALOG_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
@@ -2676,12 +2604,10 @@ async function loadState(){
   if(!state.giftWrap || typeof state.giftWrap !== 'object'){
     state.giftWrap = { enabled:false, message:'' };
   }
-  if(!state.appliedCoupon || typeof state.appliedCoupon !== 'object'){
-    state.appliedCoupon = null;
-  }
-  if(typeof state.couponInput !== 'string'){
-    state.couponInput = '';
-  }
+  delete state.appliedCoupon;
+  delete state.couponInput;
+  delete state.mehendiBooking;
+  await saveState();
   restoreCachedCatalog();
   catalogLoading = !usingLiveBackend;
   catalogLoadPromise = fetchCatalog();
@@ -3009,7 +2935,6 @@ function onAuthSuccess(data, welcomeMsg){
     state.orders = [];
     state.addresses = [];
     state.selectedAddrId = null;
-    state.mehendiBooking = {enabled:false,address:'',pincode:'',date:'',timeSlot:''};
   }
   adoptUserAddresses(data.user);
 
@@ -3038,7 +2963,6 @@ function logout(){
   state.orders = [];
   state.addresses = [];
   state.selectedAddrId = null;
-  state.mehendiBooking = {enabled:false,address:'',pincode:'',date:'',timeSlot:''};
   saveState();
   toast('You have been logged out');
   nav('home');
@@ -3896,18 +3820,14 @@ function emptyStateHtml(title, sub){
 function addToCart(id, qty, showMessage=true){
   qty = qty||1;
   state.cart[id] = (state.cart[id]||0) + qty;
-  state.appliedCoupon = null;
-  couponNotice = null;
   saveState(); updateBadges();
   if(showMessage){ toast('Added to cart'); }
 }
 function setCartQty(id, qty){
   if(qty<=0){ delete state.cart[id]; } else { state.cart[id]=qty; }
-  state.appliedCoupon = null;
-  couponNotice = null;
   saveState(); updateBadges(); renderCart();
 }
-function removeFromCart(id){ delete state.cart[id]; state.appliedCoupon = null; couponNotice = null; saveState(); updateBadges(); renderCart(); }
+function removeFromCart(id){ delete state.cart[id]; saveState(); updateBadges(); renderCart(); }
 function findProductById(id){
   if(id==null) return null;
   const normalizedId = String(id);
@@ -4034,30 +3954,13 @@ function cartTotals(items, address, giftWrap = {enabled:false, message:''}){
 function getCheckoutPricing(items, address){
   const quote = getCurrentCheckoutQuote(items, address);
   if(quote) return {...quote, quote};
-  const totals = cartTotals(items, address, state.giftWrap);
-  const discount = appliedCouponDiscount(totals.subtotal);
-  return {
-    ...totals,
-    discount,
-    total:computeOrderPayableTotal({
-      subtotal:totals.subtotal,
-      shipping:totals.shipping,
-      discount,
-      giftWrapCost:totals.giftWrapCost,
-    }),
-    quote:null,
-  };
+  return {...cartTotals(items, address, state.giftWrap), discount:0, quote:null};
 }
 function roundCheckoutMoney(value){
   const amount = Number(value);
   return Number.isFinite(amount) ? Math.round((amount + Number.EPSILON) * 100) / 100 : 0;
 }
-function appliedCouponDiscount(subtotal){
-  if(!state.appliedCoupon) return 0;
-  const discount = Number(state.appliedCoupon.discount) || 0;
-  return roundCheckoutMoney(Math.max(0, Math.min(Number(subtotal) || 0, discount)));
-}
-function couponItemsSignature(items){
+function checkoutItemsSignature(items){
   return (items || []).map(item =>
     `${item.id}:${Number(item.qty) || 0}:${Number(item.price) || 0}`
   ).sort().join('|');
@@ -4081,10 +3984,9 @@ function buildOrderAddress(address){
 }
 function checkoutQuoteKey(items, address){
   return JSON.stringify({
-    items:couponItemsSignature(items),
+    items:checkoutItemsSignature(items),
     address:address ? buildOrderAddress(address) : null,
     giftWrap:!!state.giftWrap?.enabled,
-    couponCode:state.appliedCoupon?.code || '',
   });
 }
 function getCurrentCheckoutQuote(items, address){
@@ -4110,7 +4012,6 @@ async function fetchCheckoutQuote(items, address, force = false){
     items:orderItemsPayload(items),
     address:buildOrderAddress(address),
     giftWrap:!!state.giftWrap?.enabled,
-    couponCode:state.appliedCoupon?.code || '',
     }),
   }).then(data=>{
     if(requestId === checkoutQuoteRequestId){
@@ -4150,149 +4051,6 @@ function requestCheckoutQuote(items, address){
     if(checkoutScreen?.classList.contains('active')) renderCheckout();
     if(paymentScreen?.classList.contains('active')) renderPayment();
   });
-}
-function requestCouponEligibility(items){
-  const signature = couponItemsSignature(items);
-  if(couponEligibility.signature === signature) return;
-  couponEligibilityRequest += 1;
-  const requestId = couponEligibilityRequest;
-  if(!usingLiveBackend || !state.token){
-    couponEligibility = {
-      signature,
-      loading:false,
-      offers:DUSSEHRA_COUPONS.map(offer => ({
-        ...offer,
-        status:'unavailable',
-        message:usingLiveBackend ? 'Sign in to check coupon eligibility.' : 'Coupons need a connection to the store backend.',
-      })),
-    };
-    return;
-  }
-
-  couponEligibility = {
-    signature,
-    loading:true,
-    offers:DUSSEHRA_COUPONS.map(offer => ({...offer, status:'checking', message:''})),
-  };
-  Promise.all(DUSSEHRA_COUPONS.map(async offer => {
-    try{
-      const data = await apiFetch('/orders/coupons/validate', {
-        method:'POST',
-        body:JSON.stringify({
-          couponCode:offer.code,
-          items:orderItemsPayload(items),
-        }),
-      });
-      return {
-        ...offer,
-        status:'eligible',
-        percent:Number(data.coupon?.percent) || offer.percent,
-        discount:Number(data.coupon?.discount) || 0,
-        message:'Applicable to your cart.',
-      };
-    }catch(error){
-      const isValidationFailure = Number(error.status) === 400;
-      return {
-        ...offer,
-        status:isValidationFailure ? 'ineligible' : 'unavailable',
-        message:error.message || 'Could not check this coupon right now.',
-      };
-    }
-  })).then(offers => {
-    if(requestId !== couponEligibilityRequest || signature !== couponItemsSignature(checkoutItems())) return;
-    couponEligibility = {signature, loading:false, offers};
-    const invalidApplied = state.appliedCoupon && offers.find(offer =>
-      offer.code === state.appliedCoupon.code && offer.status === 'ineligible'
-    );
-    if(invalidApplied){
-      state.appliedCoupon = null;
-      couponNotice = {type:'error', message:`${invalidApplied.code} is no longer valid: ${invalidApplied.message}`};
-      saveState();
-      renderCheckout();
-      renderPayment();
-      return;
-    }
-    renderCheckoutCoupon(checkoutItems());
-  });
-}
-function renderCheckoutCoupon(items){
-  const container = document.getElementById('checkoutCoupon');
-  if(!container) return;
-  const subtotal = (items || []).reduce((sum, item) =>
-    sum + (Number(item.price) || 0) * (Number(item.qty) || 0), 0
-  );
-  requestCouponEligibility(items);
-  container.innerHTML = couponSectionHtml(subtotal, items);
-}
-function couponSectionHtml(subtotal, items){
-  const applied = state.appliedCoupon;
-  const offers = couponEligibility.signature === couponItemsSignature(items) ? couponEligibility.offers : [];
-  const eligibleOffers = offers.filter(offer => offer.status === 'eligible').length;
-  const shownOffers = couponExpanded || eligibleOffers === 0
-    ? (couponExpanded ? offers : offers.slice(0, 1))
-    : offers.filter(offer => offer.status === 'eligible');
-  const appliedOffer = offers.find(offer => applied && offer.code === applied.code);
-  if(appliedOffer && !shownOffers.includes(appliedOffer)) shownOffers.unshift(appliedOffer);
-  const offerCards = shownOffers.map(offer => {
-    const isApplied = applied && applied.code === offer.code;
-    const eligible = offer.status === 'eligible';
-    const checking = offer.status === 'checking';
-    const buttonLabel = isApplied
-      ? 'Remove'
-      : couponSubmitting === offer.code
-        ? 'Checking…'
-        : eligible ? 'Apply' : checking ? 'Checking…' : 'Unavailable';
-    const buttonClass = isApplied ? 'dussehra-apply dussehra-remove' : 'dussehra-apply';
-    const status = isApplied
-      ? `Applied · ${formatCheckoutMoney(appliedCouponDiscount(subtotal))} discount`
-      : eligible
-        ? offer.message
-        : checking
-          ? 'Checking eligibility against your cart…'
-          : offer.message;
-    return `
-      <div class="dussehra-offer ${eligible ? '' : 'ineligible'} ${isApplied ? 'applied' : ''}">
-        <div class="dussehra-offer-icon" aria-hidden="true">${eligible || isApplied ? '✓' : '×'}</div>
-        <div class="dussehra-offer-copy">
-          <div class="dussehra-offer-code">${escHtmlFrontend(offer.code)}<span class="dussehra-offer-discount">${Number(offer.percent) || 0}% OFF</span></div>
-          <div class="dussehra-offer-detail">${escHtmlFrontend(offer.detail)}</div>
-          <div class="${eligible || isApplied ? 'dussehra-offer-status' : 'dussehra-offer-reason'}">${escHtmlFrontend(status || '')}</div>
-        </div>
-        <button type="button" class="${buttonClass}" onclick="${isApplied ? 'removeDussehraCoupon()' : `applyDussehraCoupon('${offer.code}')`}" ${!eligible && !isApplied || couponSubmitting ? 'disabled' : ''}>${buttonLabel}</button>
-      </div>`;
-  }).join('');
-  const countLabel = couponEligibility.loading
-    ? 'Checking eligible coupons…'
-    : `${eligibleOffers} eligible ${eligibleOffers === 1 ? 'coupon' : 'coupons'} for your cart`;
-  const notice = couponNotice
-    ? `<div id="dussehraCouponMessage" class="dussehra-coupon-message ${couponNotice.type}" role="status" aria-live="polite">${escHtmlFrontend(couponNotice.message)}</div>`
-    : '<div id="dussehraCouponMessage" class="dussehra-coupon-message" role="status" aria-live="polite"></div>';
-  const toggle = offers.length > 1
-    ? `<button type="button" class="dussehra-toggle" onclick="toggleCouponList()">${couponExpanded ? 'View Less' : 'View All'}</button>`
-    : '';
-  const couponMessage = couponNotice || (!usingLiveBackend
-    ? {type:'error', message:'Coupons require a connection to the store backend.'}
-    : !state.token
-      ? {type:'error', message:'Please sign in to validate a coupon.'}
-      : null);
-  return `
-    <div class="dussehra-coupons">
-      <div class="dussehra-coupons-head">
-        <div>
-          <div class="dussehra-coupons-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1"/></svg>Diwali Sale</div>
-          <div class="dussehra-coupons-count">${countLabel}</div>
-        </div>
-        ${toggle}
-      </div>
-      ${offerCards}
-      <div class="dussehra-custom-code">
-        <input id="dussehraCouponInput" value="${escHtmlFrontend(state.couponInput || '')}" placeholder="Enter coupon code" autocomplete="off" aria-label="Enter coupon code" oninput="state.couponInput=this.value" onkeydown="if(event.key==='Enter'){event.preventDefault();applyDussehraCoupon(document.getElementById('dussehraCouponInput').value);}">
-        <button type="button" class="dussehra-apply" onclick="applyDussehraCoupon(document.getElementById('dussehraCouponInput').value)" ${couponSubmitting ? 'disabled' : ''}>${couponSubmitting && couponSubmitting === String(state.couponInput || '').trim().toUpperCase() ? 'Checking…' : 'Apply'}</button>
-      </div>
-      ${couponMessage
-        ? `<div id="dussehraCouponMessage" class="dussehra-coupon-message ${couponMessage.type}" role="status" aria-live="polite">${escHtmlFrontend(couponMessage.message)}</div>`
-        : notice}
-    </div>`;
 }
 function renderCart(){
   buyNowMode = false;
@@ -4340,7 +4098,6 @@ function renderCart(){
   const quoteNeedsAuth = usingLiveBackend && !!selectedAddr && !state.token;
   const subtotal = t.subtotal;
   const shipping = t.shipping;
-  const discount = t.discount;
   const giftWrapCost = t.giftWrapCost;
   const payableTotal = t.total;
   const pricingNotice = quotePending
@@ -4373,7 +4130,6 @@ function renderCart(){
         <div class="cost-row"><span>Subtotal</span><span>${formatCheckoutMoney(subtotal)}</span></div>
         ${selectedAddr ? `<div class="cost-row"><span>Delivery to</span><span>${escHtmlFrontend(deliveryDestinationLabel(selectedAddr))}</span></div>` : ''}
         <div class="cost-row"><span>Delivery Charge</span><span>${shippingLabel}</span></div>
-        ${discount > 0 ? `<div class="cost-row" style="color:#276749;"><span>Diwali discount</span><span>−${formatCheckoutMoney(discount)}</span></div>` : ''}
         ${giftWrapCost > 0 ? `<div class="cost-row"><span>Gift wrap</span><span>${formatCheckoutMoney(giftWrapCost)}</span></div>` : ''}
         <hr class="divider" style="margin:10px 0;">
         <div class="cost-row total"><span>Total</span><span>${totalLabel}</span></div>
@@ -4413,124 +4169,6 @@ function computeOrderPayableTotal({ subtotal = 0, shipping = 0, discount = 0, gi
 function formatCheckoutMoney(value){
   return `₹${roundCheckoutMoney(value).toLocaleString('en-IN', {maximumFractionDigits:2})}`;
 }
-function currentIndiaDateKey(){
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone:'Asia/Kolkata', year:'numeric', month:'2-digit', day:'2-digit',
-  }).formatToParts(new Date());
-  const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
-  return `${values.year}-${values.month}-${values.day}`;
-}
-function mehendiBookingState(){
-  if(!state.mehendiBooking || typeof state.mehendiBooking !== 'object'){
-    state.mehendiBooking = {enabled:false,address:'',pincode:'',date:'',timeSlot:''};
-  }
-  state.mehendiBooking = Object.assign(
-    {enabled:false,address:'',pincode:'',date:'',timeSlot:''},
-    state.mehendiBooking
-  );
-  state.mehendiBooking.enabled = state.mehendiBooking.enabled === true;
-  ['address','pincode','date','timeSlot'].forEach(field => {
-    if(typeof state.mehendiBooking[field] !== 'string') state.mehendiBooking[field] = '';
-  });
-  return state.mehendiBooking;
-}
-function mehendiDateRange(){
-  const today = currentIndiaDateKey();
-  return {
-    min: today > MEHENDI_BOOKING_START_DATE ? today : MEHENDI_BOOKING_START_DATE,
-    max: MEHENDI_BOOKING_END_DATE,
-  };
-}
-function mehendiBookingError(){
-  const booking = mehendiBookingState();
-  if(!booking.enabled) return '';
-  if(!booking.address.trim()) return 'Enter the mehendi service address.';
-  const pin = String(booking.pincode || '').trim();
-  if(!/^\d{6}$/.test(pin)) return 'Enter a valid 6-digit mehendi service PIN code.';
-  if(!MEHENDI_SERVICE_PINS.includes(pin)) return 'Mehendi service is not available for this location.';
-  const dateRange = mehendiDateRange();
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(booking.date) || booking.date < dateRange.min || booking.date > dateRange.max){
-    return 'Select an available mehendi booking date.';
-  }
-  if(!MEHENDI_TIME_SLOTS.includes(booking.timeSlot)) return 'Select a mehendi time slot.';
-  return '';
-}
-function updateMehendiBookingField(field, value){
-  const booking = mehendiBookingState();
-  if(!['address','pincode','date','timeSlot'].includes(field)) return;
-  booking[field] = value;
-  saveState();
-  if(field === 'pincode'){
-    const feedback = document.getElementById('mehendiPinFeedback');
-    if(feedback){
-      const pin = String(value || '').trim();
-      const city = MEHENDI_SERVICE_PINS.includes(pin) ? MEHENDI_SERVICE_CITIES[pin] : '';
-      feedback.textContent = city
-        ? `Mehendi service available in ${city}.`
-        : pin.length === 6
-          ? 'Mehendi service is not available for this location.'
-          : 'Service available only in Hanamkonda, Warangal and Kazipet.';
-      feedback.classList.toggle('unavailable', pin.length === 6 && !city);
-    }
-  }
-}
-function toggleMehendiBooking(enabled){
-  mehendiBookingState().enabled = !!enabled;
-  saveState();
-  renderCheckout();
-}
-function renderMehendiBooking(){
-  const container = document.getElementById('mehendiBookingOption');
-  if(!container) return;
-  const booking = mehendiBookingState();
-  const dateRange = mehendiDateRange();
-  const bookingPin = String(booking.pincode || '').trim();
-  const city = MEHENDI_SERVICE_PINS.includes(bookingPin) ? MEHENDI_SERVICE_CITIES[bookingPin] : '';
-  const slotOptionsHtml = MEHENDI_TIME_SLOTS.map(slot =>
-    `<option value="${escHtmlFrontend(slot)}" ${booking.timeSlot === slot ? 'selected' : ''}>${escHtmlFrontend(slot)}</option>`
-  ).join('');
-  const pinFeedback = city
-    ? `Mehendi service available in ${city}.`
-    : String(booking.pincode || '').trim().length === 6
-      ? 'Mehendi service is not available for this location.'
-      : 'Service available only in Hanamkonda, Warangal and Kazipet.';
-
-  container.innerHTML = `
-    <div class="checkout-section-heading">Free Mehendi Service</div>
-    <div class="checkout-gift-card mehendi-booking-card">
-      <div class="mehendi-booking-head">
-        <input id="mehendiBookingEnabled" type="checkbox" ${booking.enabled ? 'checked' : ''} onchange="toggleMehendiBooking(this.checked)">
-        <div>
-          <div class="mehendi-booking-title">Book free mehendi service at your doorstep</div>
-          <div class="mehendi-booking-copy">Available with every purchase. Please enter the service address, PIN, date and time.</div>
-        </div>
-      </div>
-      ${booking.enabled ? `
-        <div class="mehendi-booking-fields">
-          <div class="full">
-            <label for="mehendiServiceAddress">Mehendi service address</label>
-            <input id="mehendiServiceAddress" type="text" maxlength="300" autocomplete="street-address" placeholder="House No, Area, Landmark" value="${escHtmlFrontend(booking.address)}" oninput="updateMehendiBookingField('address',this.value)">
-          </div>
-          <div class="full">
-            <label for="mehendiServicePincode">Service PIN code</label>
-            <input id="mehendiServicePincode" type="text" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" placeholder="506001" value="${escHtmlFrontend(booking.pincode)}" oninput="updateMehendiBookingField('pincode',this.value)">
-            <div id="mehendiPinFeedback" class="mehendi-booking-availability ${booking.pincode && booking.pincode.length === 6 && !city ? 'unavailable' : ''}">${escHtmlFrontend(pinFeedback)}</div>
-          </div>
-          <div>
-            <label for="mehendiServiceDate">Select date</label>
-            <input id="mehendiServiceDate" type="date" min="${dateRange.min}" max="${dateRange.max}" value="${escHtmlFrontend(booking.date)}" onchange="updateMehendiBookingField('date',this.value)" ${dateRange.min > dateRange.max ? 'disabled' : ''}>
-          </div>
-          <div>
-            <label for="mehendiServiceTime">Select time slot</label>
-            <select id="mehendiServiceTime" onchange="updateMehendiBookingField('timeSlot',this.value)">
-              <option value="">Select a time</option>${slotOptionsHtml}
-            </select>
-          </div>
-        </div>
-        <div class="mehendi-booking-hint">${dateRange.min <= dateRange.max ? 'Bookings available October 6–20, 2026. Our team will contact you to confirm the service address and slot.' : 'Mehendi booking dates have ended for this offer.'}</div>
-      ` : ''}
-    </div>`;
-}
 function renderCheckout(){
   const el = document.getElementById('addrList');
   if(!el) return;
@@ -4549,7 +4187,6 @@ function renderCheckout(){
   requestCheckoutQuote(items, selectedAddr);
   const quote = t.quote;
   const pricing = quote || t;
-  const discount = t.discount;
   const payableTotal = t.total;
   const quotePending = usingLiveBackend && !!selectedAddr && !quote && checkoutQuotePendingKey === checkoutQuoteKey(items, selectedAddr);
   const quoteErrorKey = checkoutQuoteKey(items, selectedAddr);
@@ -4627,7 +4264,6 @@ function renderCheckout(){
     }).join('');
   }
   document.getElementById('addrForm').style.display='none';
-  renderMehendiBooking();
   const productRows = items.map(p => {
     const productImage = p.images && p.images[0] && String(p.images[0]).trim();
     return `
@@ -4646,12 +4282,10 @@ function renderCheckout(){
     orderHeading.textContent = `Order Summary (${checkoutItemCount} ${checkoutItemCount === 1 ? 'item' : 'items'})`;
   }
   document.getElementById('checkoutProducts').innerHTML = productRows || '<div class="checkout-items-empty">Your cart is empty.</div>';
-  renderCheckoutCoupon(items);
   document.getElementById('checkoutPriceSummary').innerHTML = `
     <div class="cost-row"><span>Subtotal</span><span>${formatCheckoutMoney(pricing.subtotal)}</span></div>
     ${selectedAddr ? `<div class="cost-row"><span>Delivery to</span><span>${escHtmlFrontend(deliveryDestinationLabel(selectedAddr))}</span></div>` : ''}
     <div class="cost-row"><span>Shipping</span><span>${formatCheckoutMoney(pricing.shipping)}</span></div>
-    ${discount > 0 ? `<div class="cost-row discount-row"><span>Discount · ${escHtmlFrontend(state.appliedCoupon.code)}</span><span>−${formatCheckoutMoney(discount)}</span></div>` : ''}
     ${giftEnabled ? `<div class="cost-row"><span>Gift wrap</span><span>${formatCheckoutMoney(quote ? pricing.giftWrapCost : t.giftWrapCost)}</span></div>` : ''}
     <hr class="divider">
     <div class="cost-row total"><span>Total</span><span>${formatCheckoutMoney(payableTotal)}</span></div>
@@ -4732,99 +4366,10 @@ function removeGiftWrap(){
   giftWrapEditing = false;
   saveState(); renderCheckout();
 }
-async function applyDussehraCoupon(selectedCode){
-  const couponCode = String(selectedCode || '').trim();
-  if(!couponCode){
-    couponNotice = {type:'error', message:'Enter a coupon code.'};
-    renderCheckoutCoupon(checkoutItems());
-    return;
-  }
-  if(!usingLiveBackend){
-    couponNotice = {type:'error', message:'Coupons require a connection to the store backend.'};
-    renderCheckoutCoupon(checkoutItems());
-    return;
-  }
-  if(!state.token){
-    couponNotice = {type:'error', message:'Please sign in to validate this coupon.'};
-    renderCheckoutCoupon(checkoutItems());
-    return;
-  }
-  const items = checkoutItems();
-  if(!items.length){
-    couponNotice = {type:'error', message:'Your cart is empty.'};
-    renderCheckoutCoupon(items);
-    return;
-  }
-  const requestedSignature = couponItemsSignature(items);
-  couponSubmitting = couponCode.toUpperCase();
-  couponNotice = {type:'loading', message:`Checking ${couponCode.toUpperCase()} with the store…`};
-  renderCheckoutCoupon(items);
-  try{
-    const data = await apiFetch('/orders/coupons/validate', {
-      method:'POST',
-      body:JSON.stringify({
-        couponCode,
-        items:orderItemsPayload(items),
-      }),
-    });
-    if(requestedSignature !== couponItemsSignature(checkoutItems())){
-      throw new Error('Your cart changed while the coupon was checking. Please try again.');
-    }
-    state.appliedCoupon = {
-      code:data.coupon.code,
-      discount:roundCheckoutMoney(data.coupon.discount),
-      subtotal:Number(data.subtotal),
-    };
-    state.couponInput = data.coupon.code;
-    couponNotice = {type:'success', message:`${data.coupon.code} applied. You save ${formatCheckoutMoney(data.coupon.discount)}.`};
-    await saveState();
-    renderCheckout();
-    renderPayment();
-  }catch(err){
-    couponNotice = {type:'error', message:err.message || 'Could not validate coupon.'};
-    if(Number(err.status) === 400){
-      const rejectedCode = couponCode.toUpperCase();
-      couponEligibility = {
-        ...couponEligibility,
-        loading:false,
-        offers:couponEligibility.offers.map(offer => offer.code === rejectedCode
-          ? {...offer, status:'ineligible', message:err.message || 'This coupon is not available for your cart.'}
-          : offer),
-      };
-      if(state.appliedCoupon?.code === rejectedCode){
-        state.appliedCoupon = null;
-        saveState();
-        renderCheckout();
-        renderPayment();
-      } else {
-        renderCheckoutCoupon(checkoutItems());
-      }
-    } else {
-      renderCheckoutCoupon(checkoutItems());
-    }
-  }finally{
-    couponSubmitting = '';
-    renderCheckoutCoupon(checkoutItems());
-  }
-}
-function toggleCouponList(){
-  couponExpanded = !couponExpanded;
-  renderCheckoutCoupon(checkoutItems());
-}
-function removeDussehraCoupon(){
-  state.appliedCoupon = null;
-  state.couponInput = '';
-  couponNotice = null;
-  saveState();
-  renderCheckout();
-  renderPayment();
-}
 async function goToPayment(){
   const items = checkoutItems();
   if(items.length===0){ toast('Your cart is empty'); return; }
   if(!state.selectedAddrId){ toast('Please select an address'); return; }
-  const mehendiError = mehendiBookingError();
-  if(mehendiError){ toast(mehendiError); return; }
   const addr = state.addresses.find(a=>a.id===state.selectedAddrId);
   if(usingLiveBackend){
     try{
@@ -4903,7 +4448,6 @@ function renderPayment(){
   const t = getCheckoutPricing(items, selectedAddr);
   const quote = t.quote;
   const pricing = quote || t;
-  const discount = t.discount;
   const payableTotal = t.total;
   const quotePending = usingLiveBackend && !!selectedAddr && !quote && checkoutQuotePendingKey === checkoutQuoteKey(items, selectedAddr);
   const quoteKey = checkoutQuoteKey(items, selectedAddr);
@@ -4911,7 +4455,6 @@ function renderPayment(){
   document.getElementById('paymentSummary').innerHTML = `
     <div class="cost-row"><span>Items (${(items && items.length>0) ? items.reduce((sum,p)=>sum+p.qty,0) : (Object.values(state.cart||{}).reduce((s,n)=>s+(n||0),0))})</span><span>${formatCheckoutMoney(pricing.subtotal)}</span></div>
     ${selectedAddr ? `<div class="cost-row"><span>Delivery to</span><span>${escHtmlFrontend(deliveryDestinationLabel(selectedAddr))}</span></div>` : ''}
-    ${discount > 0 ? `<div class="cost-row" style="color:#276749;"><span>Diwali discount (${escHtmlFrontend(state.appliedCoupon.code)})</span><span>−${formatCheckoutMoney(discount)}</span></div>` : ''}
     <div class="cost-row"><span>Shipping</span><span>${formatCheckoutMoney(pricing.shipping)}</span></div>
     ${state.giftWrap.enabled ? `<div class="cost-row"><span>Gift wrap</span><span>${formatCheckoutMoney(quote ? pricing.giftWrapCost : t.giftWrapCost)}</span></div>` : ''}
     <hr class="divider">
@@ -5047,15 +4590,6 @@ async function submitOrder(){
   if(items.length===0){ toast('No items to order'); return; }
   const addr = state.addresses.find(a=>a.id===state.selectedAddrId);
   if(!addr){ toast('Please select an address'); return; }
-  const mehendiError = mehendiBookingError();
-  if(mehendiError){ toast(mehendiError); nav('checkout'); return; }
-  const bookingState = mehendiBookingState();
-  const mehendiBooking = bookingState.enabled ? {
-    address: bookingState.address.trim(),
-    pincode: String(bookingState.pincode || '').trim(),
-    date: bookingState.date,
-    timeSlot: bookingState.timeSlot,
-  } : null;
   let quote = null;
   if(usingLiveBackend){
     try{
@@ -5068,7 +4602,7 @@ async function submitOrder(){
     }
   }
   const t = cartTotals(items, addr, state.giftWrap);
-  const discount = quote ? Number(quote.discount) || 0 : appliedCouponDiscount(t.subtotal);
+  const discount = 0;
   const checkoutTotal = quote
     ? Number(quote.total)
     : computeOrderPayableTotal({ subtotal: t.subtotal, shipping: t.shipping, discount, giftWrapCost: t.giftWrapCost });
@@ -5083,8 +4617,6 @@ async function submitOrder(){
         paymentMethod,
         giftWrap: !!state.giftWrap?.enabled,
         giftMessage: state.giftWrap?.message || '',
-        mehendiBooking,
-        couponCode: state.appliedCoupon?.code || '',
         expectedTotal: checkoutTotal,
         expectedQuote: quote,
       };
@@ -5100,7 +4632,6 @@ async function submitOrder(){
         total: Number(ord.total),
         subtotal: Number(ord.subtotal || 0),
         shipping: Number(ord.shipping || 0),
-        couponCode: ord.couponCode || null,
         discount: Number(ord.discount || 0),
         address: ord.address,
         payment: ord.paymentMethod,
@@ -5110,13 +4641,11 @@ async function submitOrder(){
         giftWrap: ord.giftWrap || false,
         giftMessage: ord.giftMessage || '',
         giftWrapCost: ord.giftWrap ? Number(ord.giftWrapCost || 30) : 0,
-        mehendiBooking: ord.mehendiBooking || null,
       };
 
       state.orders.unshift(order);
       // clear local gift wrap state after placing an order so it doesn't persist for next user
       state.giftWrap = { enabled:false, message: '' };
-      state.mehendiBooking = {enabled:false,address:'',pincode:'',date:'',timeSlot:''};
       saveState(); updateBadges(); renderCheckout();
       lastOrderId = order.id;
 
@@ -5127,9 +4656,6 @@ async function submitOrder(){
           order.paymentStatus = 'paid';
           order.status = 'confirmed';
           if(buyNowMode){ buyNowMode=false; buyNowItem=null; } else { state.cart = {}; }
-          state.appliedCoupon = null;
-          state.couponInput = '';
-          couponNotice = null;
           saveState(); updateBadges();
         } catch(err){
           order.paymentStatus = 'failed';
@@ -5139,9 +4665,6 @@ async function submitOrder(){
         }
       } else {
         if(buyNowMode){ buyNowMode=false; buyNowItem=null; } else { state.cart = {}; }
-        state.appliedCoupon = null;
-        state.couponInput = '';
-        couponNotice = null;
         saveState(); updateBadges();
       }
 
@@ -5165,14 +4688,6 @@ async function submitOrder(){
           : 'The price changed. Review the updated breakdown and place your order again.');
         return;
       }
-      if(Number(err.status) === 400 && state.appliedCoupon && /coupon|dussehra|diwali/i.test(err.message || '')){
-        const message = err.message || 'The applied coupon is no longer valid.';
-        state.appliedCoupon = null;
-        couponNotice = {type:'error', message};
-        saveState();
-        renderCheckout();
-        renderPayment();
-      }
       toast(err.message || 'Could not place order');
       return;
     }
@@ -5181,21 +4696,16 @@ async function submitOrder(){
   const orderId = 'AIIZ' + Math.floor(100000+Math.random()*899999);
   const order = {
     id: orderId, items, total: checkoutTotal, subtotal:t.subtotal, shipping:t.shipping,
-    discount, couponCode:state.appliedCoupon?.code || null, address: addr, payment: paymentMethod,
+    discount, address: addr, payment: paymentMethod,
     date: new Date().toISOString(), status: 'confirmed',
     giftWrap: !!state.giftWrap?.enabled,
     giftMessage: state.giftWrap?.message || '',
     giftWrapCost: state.giftWrap?.enabled ? 30 : 0,
-    mehendiBooking,
   };
   state.orders.unshift(order);
   // clear local gift wrap state after placing an order in demo mode
   state.giftWrap = { enabled:false, message: '' };
-  state.mehendiBooking = {enabled:false,address:'',pincode:'',date:'',timeSlot:''};
   if(buyNowMode){ buyNowMode=false; buyNowItem=null; } else { state.cart = {}; }
-  state.appliedCoupon = null;
-  state.couponInput = '';
-  couponNotice = null;
   saveState(); updateBadges(); renderCheckout();
   lastOrderId = orderId;
   nav('home', {}, {replace:true});
@@ -5254,7 +4764,6 @@ async function loadMyOrders(){
       subtotal: o.subtotal,
       shipping: o.shipping,
       discount: o.discount,
-      couponCode: o.couponCode || null,
       giftWrapCost: o.giftWrapCost,
       date: o.createdAt || o.date || new Date().toISOString(),
       status: o.status || 'confirmed',
@@ -5407,7 +4916,7 @@ function renderTracking(orderId){
       ${o.items.map(p=>`<div class="summary-row"><span>${p.name} × ${p.qty}</span><span>${formatCheckoutMoney((Number(p.price)||0)*(Number(p.qty)||1))}</span></div>`).join('')}
       <div class="summary-row"><span>Subtotal</span><span>${formatCheckoutMoney(subtotal)}</span></div>
       <div class="summary-row"><span>Shipping</span><span>${formatCheckoutMoney(shipping)}</span></div>
-      ${discount > 0 ? `<div class="summary-row" style="color:#276749;"><span>Discount${o.couponCode ? ` · ${escHtmlFrontend(o.couponCode)}` : ''}</span><span>−${formatCheckoutMoney(discount)}</span></div>` : ''}
+      ${discount > 0 ? `<div class="summary-row" style="color:#276749;"><span>Discount</span><span>−${formatCheckoutMoney(discount)}</span></div>` : ''}
       ${giftWrapCost > 0 ? `<div class="summary-row"><span>Gift wrap</span><span>${formatCheckoutMoney(giftWrapCost)}</span></div>` : ''}
       <div class="summary-row total"><span>Total Paid</span><span>${formatCheckoutMoney(total)}</span></div>
     </div>

@@ -4,7 +4,7 @@ const Payment = require('../models/Payment');
 const WebhookEvent = require('../models/WebhookEvent');
 const razorpayService = require('../services/razorpayService');
 const logger = require('../utils/logger');
-const { validateStoredOrderTotals } = require('../services/dussehraCoupons');
+const { validateStoredOrderTotals } = require('../services/orderTotals');
 
 async function createPaymentOrder(req, res, next) {
   try {

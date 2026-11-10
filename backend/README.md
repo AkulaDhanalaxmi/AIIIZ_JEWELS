@@ -91,20 +91,14 @@ All request/response bodies are JSON. Protected routes need:
 ### Orders
 | Method | Route | Auth | Body |
 |---|---|---|---|
-| POST | /api/orders/coupons/validate | user | `{ couponCode, items: [{ productId, qty }] }` — validates a Diwali offer using current product prices |
-| POST | /api/orders/quote | user | `{ items, address, giftWrap?, couponCode? }` — returns the server-calculated checkout subtotal, shipping, discount, and total |
-| POST | /api/orders | user | `{ address, paymentMethod, items?, mehendiBooking? }` — omit `items` to checkout from the cart; optional free mehendi booking accepts `{ address, pincode, date, timeSlot }` |
+| POST | /api/orders/quote | user | `{ items, address, giftWrap? }` — returns the server-calculated checkout subtotal, shipping, and total |
+| POST | /api/orders | user | `{ address, paymentMethod, items? }` — omit `items` to checkout from the cart |
 | GET | /api/orders | user | your order history |
 | GET | /api/orders/:id | user/admin | single order (for tracking) |
 | GET | /api/orders/admin/all | admin | every order |
 | PUT | /api/orders/:id/status | admin | `{ status }` — confirmed → packed → shipped → delivered |
 
-Diwali coupons are available from October 5 through November 8, 2026 (India time):
-`DIWALI10` gives 10% off on every valid order; `DIWALI15` gives 15% off when the eligible subtotal is ₹499 or more; `DIWALI20` gives 20% off when the eligible subtotal is ₹999 or more. The order endpoint recalculates the discount from the server-priced order items. Submitted discount and total fields are not used. Verify locally with `node --test test/dussehraCoupons.test.js`.
-
-Optional free mehendi bookings are available from October 6 through October 20, 2026, in Hanamkonda (506001), Warangal (506002), and Kazipet (506003). The order endpoint validates the service PIN, address, date, and selected time slot and saves the booking with the order for the admin panel.
-
-For local testing with a different start date, set `DUSSEHRA_COUPON_START_DATE=2026-10-02` in `backend/.env` and restart the backend. Remove this override when no longer needed; without it (including production by default), coupons start on October 5. The October 20 end date remains enforced.
+Coupons are no longer available. Existing orders retain their recorded discount amounts so historical totals and pending payments remain accurate. Verify with `node --test test/orderTotals.test.js` and `node --test test/orderFlow.test.js`.
 
 ## Example: full checkout flow
 

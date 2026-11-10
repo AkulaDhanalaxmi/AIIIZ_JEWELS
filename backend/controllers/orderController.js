@@ -2,8 +2,7 @@ const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 const Setting = require('../models/Setting');
-const { calculatePayableTotal, roundMoney, validateDussehraCoupon } = require('../services/dussehraCoupons');
-const { validateMehendiBooking } = require('../services/mehendiBooking');
+const { calculatePayableTotal, roundMoney } = require('../services/orderTotals');
 
 function generateOrderNumber() {
   return 'AIIZ' + Math.floor(100000 + Math.random() * 899999);
@@ -117,7 +116,7 @@ function getShippingInfo(address, subtotal, settings) {
   return { group, shipping, range, text, blocked: false };
 }
 
-function orderPricingBreakdown(items, totals, discount, couponCode) {
+function orderPricingBreakdown(items, totals) {
   return {
     items: items.map((item) => ({
       productId: String(item.product),
@@ -126,8 +125,6 @@ function orderPricingBreakdown(items, totals, discount, couponCode) {
     })),
     subtotal: totals.subtotal,
     shipping: totals.shipping,
-    discount,
-    couponCode: couponCode || null,
     giftWrapCost: totals.giftWrapCost,
     total: totals.total,
   };
@@ -136,18 +133,13 @@ function orderPricingBreakdown(items, totals, discount, couponCode) {
 function compareOrderPricing(expected, actual) {
   if (!expected || typeof expected !== 'object') return [];
   const mismatches = [];
-  ['subtotal', 'shipping', 'discount', 'giftWrapCost', 'total'].forEach((field) => {
+  ['subtotal', 'shipping', 'giftWrapCost', 'total'].forEach((field) => {
     const expectedValue = Number(expected[field]);
     const actualValue = Number(actual[field]);
     if (!Number.isFinite(expectedValue) || Math.abs(expectedValue - actualValue) >= 0.01) {
       mismatches.push({ field, expected: expected[field] ?? null, actual: actualValue });
     }
   });
-
-  if (String(expected.couponCode || '').trim().toUpperCase() !==
-      String(actual.couponCode || '').trim().toUpperCase()) {
-    mismatches.push({ field: 'couponCode', expected: expected.couponCode || null, actual: actual.couponCode });
-  }
 
   const itemSignature = (items) => (Array.isArray(items) ? items : [])
     .map((item) => `${String(item.productId || '').toLowerCase()}:${Number(item.price)}:${Number(item.qty)}`)
@@ -209,51 +201,21 @@ async function resolveOrderItems(requestItems) {
   return { items };
 }
 
-exports.validateCoupon = async (req, res, next) => {
-  try {
-    const { couponCode, items } = req.body;
-    const resolved = await resolveOrderItems(items);
-    if (resolved.error) return res.status(400).json({ valid: false, message: resolved.error });
-
-    const result = validateDussehraCoupon(couponCode, resolved.items);
-    if (!result.valid) return res.status(400).json({ valid: false, message: result.message });
-    return res.json({
-      valid: true,
-      coupon: { code: result.code, percent: result.percent, discount: result.discount },
-      subtotal: result.subtotal,
-      quantity: result.quantity,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 exports.quoteOrder = async (req, res, next) => {
   try {
     const { items: requestedItems, address, giftWrap, couponCode } = req.body;
+    if (couponCode != null && String(couponCode).trim()) {
+      return res.status(410).json({ message: 'Coupons are no longer available.' });
+    }
     if (!address) return res.status(400).json({ message: 'Delivery address is required.' });
 
     const resolved = await resolveOrderItems(requestedItems);
     if (resolved.error) return res.status(400).json({ message: resolved.error });
 
-    let coupon = null;
-    if (couponCode) {
-      coupon = validateDussehraCoupon(couponCode, resolved.items);
-      if (!coupon.valid) return res.status(400).json({ message: coupon.message });
-    }
-
     const totals = await calcTotals(resolved.items, address, !!giftWrap);
     if (totals.deliveryBlocked) {
       return res.status(400).json({ message: 'Delivery is not available for this address.' });
     }
-    const discount = coupon ? coupon.discount : 0;
-    const total = calculatePayableTotal({
-      subtotal: totals.subtotal,
-      discount,
-      shipping: totals.shipping,
-      giftWrapCost: totals.giftWrapCost,
-    });
-
     return res.json({
       items: resolved.items.map((item) => ({
         productId: String(item.product),
@@ -262,10 +224,8 @@ exports.quoteOrder = async (req, res, next) => {
       })),
       subtotal: totals.subtotal,
       shipping: totals.shipping,
-      discount,
-      couponCode: coupon ? coupon.code : null,
       giftWrapCost: totals.giftWrapCost,
-      total,
+      total: totals.total,
       deliveryInfo: totals.deliveryInfo,
     });
   } catch (error) {
@@ -285,10 +245,12 @@ exports.placeOrder = async (req, res, next) => {
       giftWrap,
       giftMessage,
       couponCode,
-      mehendiBooking: requestedMehendiBooking,
       expectedTotal,
       expectedQuote,
     } = req.body;
+    if (couponCode != null && String(couponCode).trim()) {
+      return res.status(410).json({ message: 'Coupons are no longer available.' });
+    }
     if (!address || !paymentMethod) {
       return res.status(400).json({ message: 'Address and payment method are required' });
     }
@@ -306,36 +268,19 @@ exports.placeOrder = async (req, res, next) => {
     if (resolved.error) return res.status(400).json({ message: resolved.error });
     const orderItems = resolved.items;
 
-    const mehendiResult = validateMehendiBooking(requestedMehendiBooking);
-    if (!mehendiResult.valid) {
-      return res.status(400).json({ message: mehendiResult.message });
-    }
-
-    let coupon = null;
-    if (couponCode != null && couponCode !== '') {
-      coupon = validateDussehraCoupon(couponCode, orderItems);
-      if (!coupon.valid) return res.status(400).json({ message: coupon.message });
-    }
-
     console.time('placeOrder:calc-totals');
     const totals = await calcTotals(orderItems, address, !!giftWrap);
     console.timeEnd('placeOrder:calc-totals');
     if (totals.deliveryBlocked) {
       return res.status(400).json({ message: 'Delivery is not available for this address' });
     }
-    const discount = coupon ? coupon.discount : 0;
     totals.total = calculatePayableTotal({
       subtotal: totals.subtotal,
-      discount,
+      discount: 0,
       shipping: totals.shipping,
       giftWrapCost: totals.giftWrapCost,
     });
-    const actualQuote = orderPricingBreakdown(
-      orderItems,
-      totals,
-      discount,
-      coupon ? coupon.code : null
-    );
+    const actualQuote = orderPricingBreakdown(orderItems, totals);
     const quoteMismatches = compareOrderPricing(expectedQuote, actualQuote);
     const expectedTotalMismatch = expectedTotal !== undefined &&
       (!Number.isFinite(Number(expectedTotal)) ||
@@ -372,9 +317,7 @@ exports.placeOrder = async (req, res, next) => {
       giftWrap: !!giftWrap,
       giftMessage: giftMessage ? String(giftMessage).trim() : '',
       giftWrapCost: totals.giftWrapCost,
-      mehendiBooking: mehendiResult.booking,
-      couponCode: coupon ? coupon.code : null,
-      discount,
+      discount: 0,
       ...totals,
       status: 'confirmed',
       statusHistory: [{ status: 'confirmed' }],
