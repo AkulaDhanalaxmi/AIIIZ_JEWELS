@@ -2240,28 +2240,8 @@
 
 <script>
 /* ===================== "DATABASE" ===================== */
-const DEMO_CATEGORIES = [
-  {id:'artifinish', name:'Artifinish', icon:'ring'},
-  {id:'bangles', name:'Bangles', icon:'bangle'},
-  {id:'bracelets', name:'Bracelets', icon:'bracelet'},
-  {id:'earrings', name:'Earrings', icon:'earring'},
-  {id:'necklaces', name:'Necklaces', icon:'necklace'},
-  {id:'pendants', name:'Pendants', icon:'necklace'},
-];
-const DEMO_PRODUCTS = [
-  {id:'p1', name:'AIIZ Royal Lakshmi Temple Pearl Earrings', category:'earrings', price:850, mrp:950, off:11, rating:5.0, numReviews:0, desc:'Temple-inspired pearl chandbali earrings with intricate gold-tone detailing, finished with hanging pearl drops for a regal festive look.', material:'Gold-tone Alloy, Pearl', occasion:'Festive', weight:'—', images:[], stock:15},
-  {id:'p2', name:'AIIZ Royal Amethyst Pearl Chandbali Earrings', category:'earrings', price:899, mrp:1199, off:25, rating:5.0, numReviews:0, desc:'Statement chandbali earrings in a rich amethyst hue, layered with pearls and antique gold work for weddings and celebrations.', material:'Gold-tone Alloy, Pearl', occasion:'Wedding', weight:'—', images:[], stock:8},
-  {id:'p3', name:'AIIZ Royal Lakshmi Pearl Temple Earrings', category:'earrings', price:1099, mrp:1499, off:27, rating:5.0, numReviews:0, desc:'Elegant temple earrings framed with pearls, designed for a graceful traditional finish that pairs beautifully with sarees.', material:'Gold-tone Alloy, Pearl', occasion:'Festive', weight:'—', images:[], stock:18},
-  {id:'p4', name:'AIIZ Royal Emerald Pearl Hoop Chandbali Earrings', category:'earrings', price:999, mrp:1399, off:28, rating:5.0, numReviews:0, desc:'Emerald-accented hoop chandbali earrings with delicate pearl drops, a versatile piece for festive and party wear alike.', material:'Gold-tone Alloy, Pearl', occasion:'Party', weight:'—', images:[], stock:9},
-  {id:'p5', name:'Heritage Gold Bangle Set', category:'bangles', price:41990, mrp:47990, off:12, rating:4.7, numReviews:12, desc:'A set of two intricately engraved bangles rooted in heritage craftsmanship, finished with a high-polish glow.', material:'22K Gold', occasion:'Festive', weight:'18g', images:[], stock:15},
-  {id:'p6', name:'Antique Temple Bangles', category:'bangles', price:47990, mrp:54990, off:13, rating:4.8, numReviews:6, desc:'Temple-motif bangles handcrafted with traditional detailing, a statement piece for grand celebrations.', material:'22K Gold', occasion:'Wedding', weight:'22g', images:[], stock:8},
-  {id:'p7', name:'Floral Diamond Pendant', category:'pendants', price:28990, mrp:34990, off:17, rating:4.7, numReviews:9, desc:'A delicate floral-inspired pendant set with brilliant-cut diamonds in 18K gold, designed to catch light from every angle.', material:'18K Gold, Diamond', occasion:'Daily Wear', weight:'3.2g', images:[], stock:18},
-  {id:'p8', name:'Pearl Drop Necklace', category:'necklaces', price:22990, mrp:26990, off:15, rating:4.5, numReviews:5, desc:'Freshwater pearls suspended from a fine gold chain, a graceful piece that layers beautifully with any neckline.', material:'18K Gold, Pearl', occasion:'Daily Wear', weight:'4g', images:[], stock:14},
-  {id:'p9', name:'Diamond Cuff Bracelet', category:'bracelets', price:52990, mrp:61990, off:14, rating:4.9, numReviews:4, desc:'A bold cuff bracelet lined with pave diamonds, designed to sit elegantly on the wrist for any occasion.', material:'18K Gold, Diamond', occasion:'Party', weight:'12g', images:[], stock:6},
-  {id:'p10', name:'Twin Charm Bracelet', category:'bracelets', price:15990, mrp:18990, off:16, rating:4.4, numReviews:3, desc:'A delicate chain bracelet finished with two signature charms, light enough for everyday wear.', material:'18K Gold', occasion:'Daily Wear', weight:'2.4g', images:[], stock:17},
-];
-let CATEGORIES = DEMO_CATEGORIES;
-let PRODUCTS = DEMO_PRODUCTS;
+let CATEGORIES = [];
+let PRODUCTS = [];
 let usingLiveBackend = false;
 let DELIVERY_SETTINGS = null;
 let checkoutServerQuote = null;
@@ -2338,10 +2318,12 @@ let buyNowMode = false, buyNowItem = null;
 let pendingAction = null;
 let giftWrapEditing = false;
 const HOME_PRODUCT_LIMIT = 14;
+const CATALOG_FETCH_TIMEOUT_MS = 60000;
 const CATALOG_CACHE_KEY = `aiiz-catalog-v1:${API_BASE}`;
 const CATALOG_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 let catalogLoadPromise = null;
 let catalogLoading = false;
+let catalogError = '';
 let fullCatalogPromise = null;
 let fullCatalogLoaded = false;
 
@@ -2408,32 +2390,80 @@ function cacheLiveCatalog(){
   }
 }
 async function fetchCatalog(){
+  catalogError = '';
   try{
-    const [catRes, prodRes] = await Promise.all([
-      fetch(`${API_BASE}/categories`).then(r=>r.json()),
-      fetch(`${API_BASE}/products?limit=${HOME_PRODUCT_LIMIT}`).then(r=>r.json()),
+    const [prodRes, categoryResult] = await Promise.all([
+      fetchCatalogJson(`/products?limit=${HOME_PRODUCT_LIMIT}`),
+      fetchCatalogJson('/categories').then(data=>({data})).catch(error=>({error})),
     ]);
-    if(!catRes.categories || !prodRes.products) throw new Error('Unexpected response');
-    CATEGORIES = catRes.categories.map(c=>({
-      id:c._id,
-      name:c.name,
-      icon:c.icon||'ring',
-      slug:c.slug,
-      image: c.image || '',
-      parent: c.parent ? (typeof c.parent === 'object' ? c.parent._id : c.parent) : null,
-    }));
+    if(!prodRes || !Array.isArray(prodRes.products)) throw new Error('Unexpected products response');
+    if(categoryResult.error){
+      console.warn('Could not load product categories.', categoryResult.error);
+    }else if(Array.isArray(categoryResult.data && categoryResult.data.categories)){
+      CATEGORIES = categoryResult.data.categories.map(c=>({
+        id:c._id,
+        name:c.name,
+        icon:c.icon||'ring',
+        slug:c.slug,
+        image: c.image || '',
+        parent: c.parent ? (typeof c.parent === 'object' ? c.parent._id : c.parent) : null,
+      }));
+    }else{
+      console.warn('Could not load product categories: unexpected response.');
+    }
     PRODUCTS = prodRes.products.map(normalizeProduct);
     usingLiveBackend = true;
     cacheLiveCatalog();
     return true;
-  }catch(e){
-    if(!usingLiveBackend){
-      CATEGORIES = DEMO_CATEGORIES;
-      PRODUCTS = DEMO_PRODUCTS;
-    }
-    console.warn('Could not load the live catalogue; keeping the cached catalogue when available.', e);
+  }catch(error){
+    catalogError = 'Unable to load products right now. Please check your connection and try again.';
+    console.warn('Could not load the live catalogue; keeping the cached catalogue when available.', error);
     return false;
   }
+}
+async function fetchCatalogJson(path){
+  const controller = new AbortController();
+  const timeout = setTimeout(()=>controller.abort(), CATALOG_FETCH_TIMEOUT_MS);
+  try{
+    const response = await fetch(`${API_BASE}${path}`, {signal:controller.signal});
+    if(!response.ok) throw new Error(`Catalog request failed (${response.status}).`);
+    return await response.json();
+  }catch(error){
+    if(error.name === 'AbortError') throw new Error('Catalog request timed out.');
+    throw error;
+  }finally{
+    clearTimeout(timeout);
+  }
+}
+function catalogStatusHtml(message, canRetry){
+  return `<div role="alert" style="grid-column:1/-1;padding:32px 12px;text-align:center;color:var(--muted);">
+    <p>${escHtml(message)}</p>
+    ${canRetry?'<button class="btn btn-solid" onclick="retryCatalog()">Retry</button>':''}
+  </div>`;
+}
+function retryCatalog(){
+  if(catalogLoadPromise) return;
+  catalogError = '';
+  catalogLoading = PRODUCTS.length === 0;
+  catalogLoadPromise = fetchCatalog();
+  const request = catalogLoadPromise;
+  renderAll();
+  request.then(() => {
+    catalogLoading = false;
+    renderAll();
+    const currentScreen = parseRoute(location.hash).screen;
+    if(currentScreen === 'productlist') renderProductList();
+    if(currentScreen === 'categories') renderAllCategories();
+  }).catch(error => {
+    catalogError = 'Unable to load products right now. Please check your connection and try again.';
+    console.error('Could not retry the live catalogue.', error);
+  }).finally(() => {
+    catalogLoading = false;
+    if(catalogLoadPromise === request) catalogLoadPromise = null;
+    renderAll();
+    const currentScreen = parseRoute(location.hash).screen;
+    if(currentScreen === 'productlist') renderProductList();
+  });
 }
 async function loadFullCatalog(){
   if(fullCatalogLoaded) return true;
@@ -2441,9 +2471,7 @@ async function loadFullCatalog(){
   fullCatalogPromise = (async () => {
     if(catalogLoadPromise) await catalogLoadPromise;
     if(!usingLiveBackend) return false;
-    const response = await fetch(`${API_BASE}/products?limit=200`);
-    if(!response.ok) throw new Error(`Could not load the full catalogue (${response.status}).`);
-    const data = await response.json();
+    const data = await fetchCatalogJson('/products?limit=200');
     if(!Array.isArray(data.products)) throw new Error('Unexpected catalogue response.');
     PRODUCTS = data.products.map(normalizeProduct);
     fullCatalogLoaded = data.products.length >= Number(data.total || 0);
@@ -2642,6 +2670,8 @@ async function loadState(){
       if(!ok){ state.token=null; state.user=null; }
       await saveState();
     }
+  }).finally(() => {
+    catalogLoadPromise = null;
   });
 }
 async function saveState(){
@@ -3314,14 +3344,20 @@ function setHomeSort(val){ homeSort = val || 'default'; renderNewArrivals(); }
 function renderNewArrivals(){
   const el = document.getElementById('newArrivals');
   if(catalogLoading && !usingLiveBackend){
-    el.innerHTML = `<div role="status" style="grid-column:1/-1;padding:32px 12px;text-align:center;color:var(--muted);">Loading products and images...</div>`;
+    el.innerHTML = `<div role="status" aria-live="polite" style="grid-column:1/-1;padding:32px 12px;text-align:center;color:var(--muted);">Loading products and images...</div>`;
     return;
   }
   let items = PRODUCTS.slice();
   if(homeSort==='price_asc') items.sort((a,b)=>a.price - b.price);
   else if(homeSort==='price_desc') items.sort((a,b)=>b.price - a.price);
   items = items.slice(0,14);
-  el.innerHTML = items.map(p=>productCardHtml(p)).join('');
+  if(!items.length){
+    el.innerHTML = catalogError
+      ? catalogStatusHtml(catalogError, true)
+      : `<div style="grid-column:1/-1;">${emptyStateHtml('No new arrivals yet','New products will appear here as soon as they are available.')}</div>`;
+  }else{
+    el.innerHTML = `${catalogError?catalogStatusHtml(catalogError, true):''}${items.map(p=>productCardHtml(p)).join('')}`;
+  }
   const sel = document.getElementById('homeSortSelect'); if(sel) sel.value = homeSort;
 }
 
@@ -3411,7 +3447,7 @@ function onPlSearchInput(val){ currentSearch = val; searchPromptActive = false; 
 function renderPlGrid(skipHeader){
   if(catalogLoading && !usingLiveBackend){
     document.getElementById('plResultCount').textContent = '';
-    document.getElementById('plGrid').innerHTML = `<div role="status" style="grid-column:1/-1;padding:32px 12px;text-align:center;color:var(--muted);">Loading products and images...</div>`;
+    document.getElementById('plGrid').innerHTML = `<div role="status" aria-live="polite" style="grid-column:1/-1;padding:32px 12px;text-align:center;color:var(--muted);">Loading products and images...</div>`;
     return;
   }
   if(searchPromptActive && !currentSearch.trim()){
@@ -3427,8 +3463,11 @@ function renderPlGrid(skipHeader){
   if(currentSort==='lowhigh') list.sort((a,b)=>a.price-b.price);
   else if(currentSort==='highlow') list.sort((a,b)=>b.price-a.price);
   document.getElementById('plResultCount').textContent = `${list.length} item${list.length!==1?'s':''} found`;
-  document.getElementById('plGrid').innerHTML = list.length ? list.map(p=>productCardHtml(p)).join('') :
-    `<div style="grid-column:1/-1;">${emptyStateHtml('No products found','Try a different search term or category.')}</div>`;
+  document.getElementById('plGrid').innerHTML = list.length
+    ? `${catalogError?catalogStatusHtml(catalogError, true):''}${list.map(p=>productCardHtml(p)).join('')}`
+    : !PRODUCTS.length && catalogError
+      ? catalogStatusHtml(catalogError, true)
+      : `<div style="grid-column:1/-1;">${emptyStateHtml('No products found','Try a different search term or category.')}</div>`;
 }
 
 function renderCategoryGrid(categories){
@@ -3831,11 +3870,7 @@ function removeFromCart(id){ delete state.cart[id]; saveState(); updateBadges();
 function findProductById(id){
   if(id==null) return null;
   const normalizedId = String(id);
-  for(const source of [PRODUCTS, DEMO_PRODUCTS]){
-    const match = source.find(p => p && (String(p.id || p._id || '') === normalizedId || String(p.slug || '') === normalizedId));
-    if(match) return match;
-  }
-  return null;
+  return PRODUCTS.find(p => p && (String(p.id || p._id || '') === normalizedId || String(p.slug || '') === normalizedId)) || null;
 }
 function cartItemsDetailed(){
   return Object.entries(state.cart || {}).map(([id, qty])=>{

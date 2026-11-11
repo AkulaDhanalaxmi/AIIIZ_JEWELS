@@ -51,7 +51,7 @@ The storefront now opens on a **landing page** (no login required). From there:
 - Sign-in/sign-up call the real backend (`POST /api/auth/login`, `POST /api/auth/register`) and store the returned JWT; the session is re-validated against `GET /api/auth/me` on reload.
 - **Logout** (in Profile) clears the session and returns to the landing page.
 
-By default the frontend calls the backend at `http://localhost:5000/api`. To point it at a different backend (e.g. a deployed API), open `frontend/index.html` and set `window.AIIZ_API_BASE = 'https://your-api.example.com/api';` in a small `<script>` tag before the main app script, or edit the `API_BASE` constant directly near the top of the `<script>` block.
+The static storefront uses `http://localhost:5000/api` on localhost and `https://aiiiz-jewels.onrender.com/api` on deployed hosts. To use a different backend, set `window.AIIZ_API_BASE = 'https://your-api.example.com/api';` in a `<script>` tag before the main app script in `frontend/index.html`. The frontend is served as static HTML, so Vite environment variables such as `VITE_API_URL` are not read by it.
 
 The "Continue with Google" button is present in the UI but is a placeholder — wiring it up requires configuring Google OAuth client credentials in the backend, which isn't included yet.
 
